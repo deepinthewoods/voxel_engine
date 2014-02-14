@@ -74,9 +74,24 @@ public class VoxelWorld implements RenderableProvider {
 	private static final int AREA_MESH_COUNT = 0;
 	//private OrthographicCamera camera;
 	public Buckets buckets;
+	private final boolean left, right, back, front, bottom, top;
 	
-	
-	public VoxelWorld(int chunksX, int chunksY, int chunksZ) {
+	public VoxelWorld(int chunksX, int chunksY, int chunksZ, boolean left, boolean right, boolean back, boolean front
+			, boolean bottom, boolean top) {
+		this.left = left;
+		this.right = right;
+		this.back = back;
+		this.front = front;
+		this.bottom = bottom;
+		this.top = top;
+		int faceCount = 0;
+		if (left) faceCount++;
+		if (right) faceCount++;
+		if (back) faceCount++;
+		if (front) faceCount++;
+		if (bottom) faceCount++;
+		if (top) faceCount++;
+		
 		//this.camera = camera2;
 		//this.meshCountXZ = meshCountXZ;
 		//this.meshCountY = meshCountY;
@@ -101,7 +116,7 @@ public class VoxelWorld implements RenderableProvider {
 				}
 			}
 		}
-		int len = CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 6;
+		int len = CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * faceCount;
 		short[] indices = new short[len];
 		short j = 0;
 		for (i = 0; i < len; i += 6, j += 4) {
@@ -115,8 +130,8 @@ public class VoxelWorld implements RenderableProvider {
 		//this.meshes = new Mesh[meshCountXZ*meshCountXZ*meshCountY*10];
 		for(i = 0; i < chunksX*chunksY*chunksZ + AREA_MESH_COUNT; i++) {
 			Mesh mesh = new Mesh(true, 
-										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 2 * 4, 
-										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 6,
+										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * faceCount * 4, 
+										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * faceCount,
 										VertexAttribute.Position()//, VertexAttribute.Normal()
 										, VertexAttribute.Color(), VertexAttribute.TexCoords(0)
 			);
@@ -279,81 +294,19 @@ public class VoxelWorld implements RenderableProvider {
 			y1 += viewSizeY+1;
 			z0 -= viewSizeZ;
 			z1 += viewSizeZ+1;
+			x0 = Math.max(x0,  0);
+			z0 = Math.max(0, z0);
+			x1 = Math.max(x1,  0);
+			z1 = Math.max(0, z1);
+			x0 = Math.min(x0,  chunksX);
+			z0 = Math.min(chunksZ, z0);
+			x1 = Math.min(x1,  chunksX);
+			z1 = Math.min(chunksZ, z1);
 			getRenderables(x0, x1, y0, y1, z0, z1, renderables, pool);
 	}
-	Vector3 cornerPt0Near = new Vector3(), cornerPt1Near = new Vector3(), cornerPt0Far = new Vector3()
-	, cornerPt1Far = new Vector3(), cornerTmp = new Vector3();
-	private void getRenderablesForTopDown(Array<Renderable> renderables,
-			Pool<Renderable> pool, Camera camera) {
-		//Gdx.app.log(TAG, "corner11 "+ "  dir "+camera.direction);
-
-		//camera.direction.set(0,-1,0);
-		//camera.update();
-		//Gdx.app.log(TAG, "corner12 "+ "  dir "+camera.direction);
-
-		//Gdx.app.log(TAG, "camera"+camera.direction);
-		//Gdx.app.log(TAG,  "camera dir"+camera.direction + "     "+camera.viewportHeight);
-		renderedChunks = 0;
-		int x0, x1, z0, z1;
-		cornerPt0Far.set(0,0,1);
-		cornerPt1Far.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 1);
-		cornerPt0Near.set(0,0,0);
-		cornerPt1Near.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0);
-		camera.unproject(cornerPt0Far);
-		camera.unproject(cornerPt1Far);
-		camera.unproject(cornerPt0Near);
-		camera.unproject(cornerPt1Near);
-		
-		//Gdx.app.log(TAG, "unproj  "+cornerPt1Near +"  "+camera.viewportHeight+ "  "+cornerPt1Far);
-		viewRayOrigin.set(cornerPt0Near);
-		viewRayDirection.set(cornerPt0Far.sub(cornerPt0Near)).nor();
-		viewPlanePoint.set(0, 1, 0);
-		viewRay.set(viewRayOrigin, viewRayDirection);
-		viewPlane.set(viewPlanePoint, viewPlaneNormal);
-		Intersector.intersectRayPlane(viewRay, viewPlane, cornerTmp);
-		x0 = (int) cornerTmp.x;
-		z0 = (int) cornerTmp.z;
-		//Gdx.app.log(TAG, "corner1 "+x0+","+z0+"  ,  "+cornerTmp + "  dir "+camera.direction);
-		
-		viewRayOrigin.set(cornerPt1Near);
-		viewRayDirection.set(cornerPt1Far.sub(cornerPt1Near)).nor();
-		viewPlanePoint.set(0, 1, 0);
-		viewRay.set(viewRayOrigin, viewRayDirection);
-		viewPlane.set(viewPlanePoint, viewPlaneNormal);
-		Intersector.intersectRayPlane(viewRay, viewPlane, cornerTmp);
-		x1 = (int) cornerTmp.x;
-		z1 = (int) cornerTmp.z;
-
-		
-		x0 /= CHUNK_SIZE_X;
-		x1 /= CHUNK_SIZE_X;
-		z0 /= CHUNK_SIZE_Z;
-		z1 /= CHUNK_SIZE_Z;
-		x1++;
-		z1++;
-		//z1++;
-		//x0++;
-		//z1--;
-		if (x0 > x1){
-			int tmp = x0;
-			x0 = x1;
-			x1 = tmp;
-		}
-		if (z0 > z1){
-			int tmp = z0;
-			z0 = z1;
-			z1 = tmp;
-		}
-		x0 = Math.max(x0,  0);
-		z0 = Math.max(0, z0);
-		x1 = Math.max(x1,  0);
-		z1 = Math.max(0, z1);
-		x0 = Math.min(x0,  chunksX+3);
-		z0 = Math.min(chunksZ+3, z0);
-		x1 = Math.min(x1,  chunksX+3);
-		z1 = Math.min(chunksZ+3, z1);
-		getRenderables(x0, x1, 0, 0, z0, z1, renderables, pool);
-	}
+	
+	
+	
 	
 	public void getRenderables(int x0, int x1, int y0, int y1, int z0, int z1, 
 			Array<Renderable> renderables,
@@ -378,7 +331,7 @@ public class VoxelWorld implements RenderableProvider {
 					if(dirty[i]) {
 						//if (meshedCount > MESH_PER_FRAME) continue;
 						//Gdx.app.log(TAG, "dirty");
-						int numVerts = chunk.calculateVertices(vertices, this);
+						int numVerts = chunk.calculateVertices(vertices, this, left, right, back, front, bottom, top);
 						numVertices[i] = numVerts / 4 * 6;
 						mesh.setVertices(vertices, 0, numVerts * VoxelChunk.VERTEX_SIZE);
 						meshedCount++;
@@ -722,12 +675,9 @@ public class VoxelWorld implements RenderableProvider {
 		}
 		return false;
 	}
-	private Vector3 viewPlaneNormal = new Vector3(0,1,0), viewPlanePoint = new Vector3()
-	, viewRayOrigin = new Vector3(),  viewRayDirection = new Vector3();
-	public Vector3 viewCentrePoint = new Vector3();
+	
 	private int viewSizeX = 2, viewSizeY = 2, viewSizeZ = 0;
-	private Plane viewPlane = new Plane(viewPlaneNormal, viewPlanePoint);
-	private Ray viewRay = new Ray(viewRayOrigin, viewRayDirection);
+	public Vector3 viewCentrePoint = new Vector3();
 	//private Intersector intersector = new Intersector();
 	//public int viewYLevelMax, viewYLevelMin, topDownYLevel;
 	
@@ -741,7 +691,7 @@ public class VoxelWorld implements RenderableProvider {
 		return get(pos.x, pos.y, pos.z);
 	}
 
-	public void calculateViewCentreForTopDownCamera(OrthographicCamera camera2){
+	/*public void calculateViewCentreForTopDownCamera(OrthographicCamera camera2){
 		viewRayOrigin.set(camera2.position);
 		viewRayDirection.set(camera2.direction);
 		viewPlanePoint.set(0, 2, 0);
@@ -762,19 +712,11 @@ public class VoxelWorld implements RenderableProvider {
 		viewRay.set(viewRayOrigin, viewRayDirection);
 		Intersector.intersectRayPlane(viewRay, viewPlane, res);
 		//Gdx.app.log(TAG, "ground point"+res);
-	}
+	}*/
 
-	int areaMeshesCompleted;
-	IntMap<Array<Area>> areas = new IntMap<Array<Area>>();
-	public void moveTopDownLevelUp(){
-		//topDownYLevel ++;
-		areaMeshesCompleted = 0;
-	}
+	//int areaMeshesCompleted;
+	//IntMap<Array<Area>> areas = new IntMap<Array<Area>>();
 	
-	public void moveTopDownLevelDown(){
-		//topDownYLevel --;
-		areaMeshesCompleted = 0;
-	}
 	
 	public void calculateViewCentreForFirstPersonCamera(PerspectiveCamera cam){
 		viewCentrePoint.set(cam.position);

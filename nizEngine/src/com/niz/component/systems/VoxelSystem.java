@@ -19,9 +19,10 @@ public class VoxelSystem extends DrawSystem {
 	public VoxelWorld voxelWorld;
 	
 	Engine engine;
-	public VoxelSystem(int x, int y, int z) {
+	public VoxelSystem(int x, int y, int z, boolean left, boolean right, boolean back, boolean front
+			, boolean bottom, boolean top) {
 		super(Aspect.getEmpty());
-		voxelWorld = new VoxelWorld(x, y, z);
+		voxelWorld = new VoxelWorld(x, y, z, left, right, back, front, bottom, top);
 	}
 	
 	Vector3 tmp = new Vector3();

@@ -5,8 +5,8 @@ import voxel.BlockDefinition;
 import com.artemis.World;
 import com.artemis.systems.DrawSystem;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -28,13 +28,28 @@ import com.niz.component.systems.VoxelRenderingSystem;
 import com.niz.component.systems.VoxelSystem;
 
 public class PlatformerFactory extends GameFactory{
+	public static final float VIEWPORT_SIZE = 20;
+	
 	VoxelSystem voxelSys;
 	@Override
-	public void init(World world, float timeStep, AssetManager assets, OrthographicCamera worldCamera, ModelBatch modelBatch) {
+	public void init(World world, float timeStep, AssetManager assets, Camera worldCamera
+			, ModelBatch modelBatch) {
+		
 		world.setDelta(timeStep);
 		
+		worldCamera.viewportHeight *= VIEWPORT_SIZE;
+		worldCamera.viewportWidth *= VIEWPORT_SIZE;
+		worldCamera.update();
+		
 		world.setSystem(new PhysicsSystem(1, 100, timeStep));
-		voxelSys = new VoxelSystem(4,4,1);
+		voxelSys = new VoxelSystem(4,4,1
+				, false//left
+				, false//right
+				, false//back
+				, true//front
+				, false//bottom
+				, false//top
+				);
 		world.setSystem(voxelSys);
 		world.setSystem(new MovementSystem());
 		world.setSystem(new AABBBodySystem());
@@ -42,7 +57,6 @@ public class PlatformerFactory extends GameFactory{
 		
 		Environment env = new Environment();
 		env.set( new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f) );	
-		
 		
 		VoxelRenderingSystem voxelR = new VoxelRenderingSystem(voxelSys.voxelWorld);	
 		voxelR.set(modelBatch, worldCamera, env);

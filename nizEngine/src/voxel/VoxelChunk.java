@@ -113,7 +113,8 @@ public class VoxelChunk {
 	 * @return the number of vertices produced
 	 */
 	
-	public int calculateVertices(float[] vertices, VoxelWorld world) {
+	public int calculateVertices(float[] vertices, VoxelWorld world, boolean left, boolean right, boolean back, boolean front
+			, boolean bottom, boolean top) {
 		int i = 0;
 		int vertexOffset = 0;
 		for(int y = 0; y < height; y++) {
@@ -158,36 +159,50 @@ public class VoxelChunk {
 									if (lightAverages[idx] >= TOP_FACE_BRIGHTNESS_BONUS)lightAverages[idx] -= TOP_FACE_BRIGHTNESS_BONUS;
 									else lightAverages[idx] = 0;
 							}
-								
-					if(y < height - 1) {
-						if(id(voxels[i+topOffset]) == 0) vertexOffset = createTop(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					} else {
-						vertexOffset = createTop(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+					if (top){			
+						if(y < height - 1) {
+							if(id(voxels[i+topOffset]) == 0) vertexOffset = createTop(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						} else {
+							vertexOffset = createTop(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						}
 					}
-					/*if(y > 0) {
-						if(id(voxels[i+bottomOffset]) == 0) vertexOffset = createBottom(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					} else {
-						vertexOffset = createBottom(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+					if (bottom){
+						if(y > 0) {
+							if(id(voxels[i+bottomOffset]) == 0) vertexOffset = createBottom(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						} else {
+							vertexOffset = createBottom(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						}
 					}
-					if(x > 0) {
-						if(id(voxels[i+leftOffset]) == 0) vertexOffset = createLeft(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					} else {
-						vertexOffset = createLeft(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+					if (left){
+						if(x > 0) {
+							if(id(voxels[i+leftOffset]) == 0) vertexOffset = createLeft(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						} else {
+							vertexOffset = createLeft(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						}
 					}
-					if(x < width - 1) {
-						if(id(voxels[i+rightOffset]) == 0) vertexOffset = createRight(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					} else {
-						vertexOffset = createRight(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					}*/
-					/*if(z > 0) {
-						if(id(voxels[i+frontOffset]) == 0) vertexOffset = createFront(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					} else {
-						vertexOffset = createFront(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					}*/
-					if(z < depth - 1) {
-						if(id(voxels[i+backOffset]) == 0) vertexOffset = createBack(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
-					} else {
-						vertexOffset = createBack(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+					
+					if (right){
+						if(x < width - 1) {
+							if(id(voxels[i+rightOffset]) == 0) vertexOffset = createRight(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						} else {
+							vertexOffset = createRight(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						}
+					}
+					
+					
+					if (front){
+						if(z > 0) {
+							if(id(voxels[i+frontOffset]) == 0) vertexOffset = createFront(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						} else {
+							vertexOffset = createFront(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						}
+					}
+					if (back){
+						if(z < depth - 1) {
+							if(id(voxels[i+backOffset]) == 0) vertexOffset = createBack(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						} else {
+							vertexOffset = createBack(offset, x, y, z, lightAverages, def, vertices, vertexOffset);
+						}
 					}
 				}
 			}

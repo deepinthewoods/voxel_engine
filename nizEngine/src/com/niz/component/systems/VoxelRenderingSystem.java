@@ -21,9 +21,9 @@ public class VoxelRenderingSystem extends DrawSystem {
 		// TODO Auto-generated constructor stub
 	}
 	ModelBatch batch;
-	OrthographicCamera cam;
+	Camera cam;
 	Environment env;
-	public void set(ModelBatch batch, OrthographicCamera cam, Environment env){
+	public void set(ModelBatch batch, Camera cam, Environment env){
 		//this.world = world;
 		this.batch = batch;
 		this.cam = cam;

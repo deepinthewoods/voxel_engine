@@ -7,15 +7,18 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.niz.factories.GameFactory;
 import com.niz.factories.PlatformerFactory;
 
 public class nizEngine implements ApplicationListener {
 	private static final String TAG = "main engine";
-	private OrthographicCamera uiCamera, gameCamera;
+	private OrthographicCamera uiCamera, worldCamera;
+	//private PerspectiveCamer
 	private SpriteBatch spriteBatch;
 	private World world;
 	private ShapeBatch shapeBatch;
+	private ModelBatch modelBatch;
 	public float accumulator, timeStep = 1f/128f, minTimeStep = 1f/15f;
 	protected GameFactory factory;
 	protected AssetManager assets;
@@ -26,16 +29,17 @@ public class nizEngine implements ApplicationListener {
 		float h = Gdx.graphics.getHeight();
 		
 		uiCamera = new OrthographicCamera(w/h, 1);
-		gameCamera = new OrthographicCamera(w/h, 1);
+		worldCamera = new OrthographicCamera(w/h, 1);
 		spriteBatch = new SpriteBatch();
 		shapeBatch = new ShapeBatch();
+		modelBatch = new ModelBatch();
 		world = new World();
 		assets = new AssetManager();
 		assetsLoaded = false;
 		
 		factory = new PlatformerFactory();
 		
-		factory.init(world, timeStep, assets, null, null);
+		factory.init(world, timeStep, assets, worldCamera, modelBatch);
 	}
 
 	@Override
@@ -67,7 +71,6 @@ public class nizEngine implements ApplicationListener {
 		}
 		//DRAW
 		world.draw(delta);
-		
 		
 		spriteBatch.setProjectionMatrix(uiCamera.combined);
 		spriteBatch.begin();
