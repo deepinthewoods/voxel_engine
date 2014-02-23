@@ -3,6 +3,7 @@ package com.niz.blocks;
 import voxel.BlockDefinition;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 
 public class TopBottomBlock extends BlockDefinition {
 	float[] su = new float[6], sv = new float[6], su2 = new float[6], sv2 = new float[6];
@@ -46,6 +47,10 @@ public class TopBottomBlock extends BlockDefinition {
 		uvs[2] = su2[side];
 		uvs[3] = sv2[side];
 		return uvs;
+	}
+
+	@Override
+	public void onUpdate(int x, int y, int z, VoxelWorld world) {
 	}
 
 	

@@ -1,7 +1,6 @@
 package com.niz.factories;
 
 import voxel.BlockDefinition;
-import voxel.VoxelWorld;
 
 import com.artemis.Entity;
 import com.artemis.World;
@@ -9,7 +8,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -23,6 +21,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.niz.blocks.TopBottomBlock;
 import com.niz.component.ModelInfo;
 import com.niz.component.Position;
@@ -45,19 +44,21 @@ public class PlatformerFactory extends GameFactory{
 	
 	@Override
 	public void init(World world, float timeStep, AssetManager assets, Camera worldCamera
-			, ModelBatch modelBatch) {
+			, ModelBatch modelBatch, VoxelWorld voxelWorld) {
 		
 		world.setDelta(timeStep);
 		//PerspectiveCamera cam = (PerspectiveCamera) worldCamera;
-		OrthographicCamera cam = (OrthographicCamera) worldCamera;
-		cam.position.set(0,0,28);
-		cam.near = 0.1f;
-		cam.far = 1000;
+		//OrthographicCamera cam = (OrthographicCamera) worldCamera;
+		//cam.position.set(0,0,28);
+		//cam.near = 0.1f;
+		//cam.far = 1000;
 		//cam.setToOrtho(false, worldCamera.viewportHeight * VIEWPORT_SIZE,	worldCamera.viewportWidth * VIEWPORT_SIZE);
 		//cam.update();
 		//cam.update();
-		cam.lookAt(0,0,0);
-		cam.update();
+		//cam.lookAt(0,0,0);
+		//cam.update();
+		
+		
 		//worldCamera.update();
 		
 		world.setSystem(new PhysicsSystem(1, 100, timeStep));
@@ -79,7 +80,7 @@ public class PlatformerFactory extends GameFactory{
 		env.set( new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f) );	
 		
 		VoxelRenderingSystem voxelR = new VoxelRenderingSystem();	
-		voxelR.set(voxelSys.voxelWorld, modelBatch, worldCamera, env);
+		//voxelR.set(voxelSys.voxelWorld, modelBatch, (OrthographicCamera) worldCamera, env);
 		world.setDrawSystem(voxelR);
 		
 		ModelRenderingSystem modelR = new ModelRenderingSystem();
@@ -87,7 +88,7 @@ public class PlatformerFactory extends GameFactory{
 		//world.setDrawSystem(modelR );
 		
 		
-		inputSys = new PlatformerInputSystem(worldCamera);
+		inputSys = new PlatformerInputSystem(worldCamera, voxelWorld);
 		world.setInputSystem(inputSys);
 		
 		world.initialize();
@@ -97,15 +98,15 @@ public class PlatformerFactory extends GameFactory{
 	}
 
 	@Override
-	public void doneLoading(AssetManager assets, World world) {
+	public void doneLoading(AssetManager assets, World world, Camera camera) {
 		TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
 		
 		BlockDefinition[] blockDefs = getBlockDefs(tiles);
 		Pixmap fades = assets.get("data/fades.png", Pixmap.class);
 		
-		voxelSys.set(tiles, blockDefs, fades);
+		voxelSys.set(tiles, blockDefs, fades, camera);
 		
-		setDefaultMap(voxelSys.voxelWorld);
+		//setDefaultMap(voxelSys.voxelWorld);
 		
 		
 		Entity e;
@@ -236,7 +237,14 @@ public class PlatformerFactory extends GameFactory{
 	
 	private BlockDefinition[] getBlockDefs(TextureRegion[][] tiles) {
 		BlockDefinition[] defs = new BlockDefinition[32];
-		defs[0] = new BlockDefinition(tiles, 0);
+		defs[0] = new BlockDefinition(tiles, 0)
+		{
+
+			@Override
+			public void onUpdate(int x, int y, int z, VoxelWorld world) {
+			}
+			
+		};
 		defs[0].dayLightLoss = 0;
 		defs[0].isSolid = false;
 		//for (int i = 1; i < 32; i++){
@@ -244,7 +252,13 @@ public class PlatformerFactory extends GameFactory{
 			//BlockDefinition.add(i, defs[i]);
 		//}
 		
-		defs[1] = new BlockDefinition(tiles, 1);
+		defs[1] = new BlockDefinition(tiles, 1){
+
+			@Override
+			public void onUpdate(int x, int y, int z, VoxelWorld world) {
+			}
+			
+		};
 		
 		defs[10] = new TopBottomBlock(tiles, 8, 1, 10);
 		

@@ -17,5 +17,5 @@ public abstract class InputSystem extends EntitySystem implements InputProcessor
 		// TODO Auto-generated method stub
 
 	}
-
+	protected abstract void onTick();
 }

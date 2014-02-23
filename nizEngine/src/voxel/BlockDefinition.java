@@ -1,10 +1,10 @@
 package voxel;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 
-public class BlockDefinition {
+public abstract class BlockDefinition {
 	protected float[] uvs = new float[4];
 	public static float tile_size_px = 16;
 	//protected static int tile_side_length = 8;
@@ -31,9 +31,9 @@ public class BlockDefinition {
 		
 	}
 	
-	public void update(int x, int y, int z, VoxelWorld world){
+	public abstract void onUpdate(int x, int y, int z, VoxelWorld world);
 		
-	}
+	
 		
 	
 	public String toString(){

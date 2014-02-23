@@ -4,17 +4,32 @@ import com.artemis.Entity;
 import com.artemis.systems.InputSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 
 public class PlatformerInputSystem extends InputSystem{
 
 	private static final long TAP_TIME_LIMIT = 200;
-	Camera camera;
+	OrthographicCamera camera;
 	Entity player;
 	long touchTime;
 	Vector3 tmp = new Vector3(), tmp2 = new Vector3();
-	public PlatformerInputSystem(Camera cam) {
-		camera = cam;
+	public PlatformerInputSystem(Camera cam, VoxelWorld vw) {
+		float aspectRatio = Gdx.graphics.getWidth()/(float)Gdx.graphics.getHeight();
+		float height = 40;
+		//camera = (OrthographicCamera) cam;
+		//camera.setToOrtho(false, height*aspectRatio, height);
+		//camera.rotate(-70, 1, 0,0);
+		//camera.position.set(50, 100, 50);
+		
+		//centreOnPlayer();
+		//camera.far = 1750;
+		//camera.near = 0.5f;
+		//camera.fieldOfView = 4.5f;
+		//camera.setToOrtho(false, 20, 30);
+		//camera.zoom = .0752f;
+		//camera.update();
 	}
 	
 	@Override
@@ -74,6 +89,10 @@ public class PlatformerInputSystem extends InputSystem{
 	public void setPlayer(Entity playerE) {
 		player = playerE;
 		
+	}
+
+	@Override
+	protected void onTick() {
 	}
 
 }

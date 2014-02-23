@@ -1,8 +1,6 @@
 package com.niz.component.systems;
 
 import voxel.BlockDefinition;
-import voxel.VoxelChunk;
-import voxel.VoxelWorld;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
@@ -10,6 +8,8 @@ import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.niz.component.AABBBody;
 import com.niz.component.Body;
 import com.niz.component.Physics;
