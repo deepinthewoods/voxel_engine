@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pools;
 import com.niz.component.ModelInfo;
 import com.niz.component.Physics;
 import com.niz.component.Position;
+import com.niz.component.Target;
 
 public class ARun extends Action {
 	private static final float MIN_RUN_DIST = 0.02f;

@@ -5,6 +5,7 @@ import com.artemis.World;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.component.Position;
+import com.niz.component.Target;
 
 public class AStand extends Action {
 	private static final float MIN_RUN_DIST = 0.02f;

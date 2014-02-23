@@ -4,9 +4,9 @@ import com.artemis.Entity;
 import com.artemis.systems.InputSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
+import com.niz.component.Target;
 
 public class PlatformerInputSystem extends InputSystem{
 
@@ -75,16 +75,17 @@ public class PlatformerInputSystem extends InputSystem{
 		//tmp.y = 0;
 		tmp.set(0,0,.5f);
 		tmp2.set(Gdx.input.getDeltaX(), Gdx.input.getDeltaY(), .5f);
-		//camera.unproject(tmp);
-		//camera.unproject(tmp2);
-		
+		camera.unproject(tmp);
+		camera.unproject(tmp2);
+		//camera.un
 		tmp2.sub(tmp);
 		tmp2.z = 0;
 		//move by tmp2
-		tmp2.scl(.1f);
-		camera.position.sub(tmp2.x, -tmp2.y, tmp2.z);
+		//tmp2.scl(.085f);
+		camera.position.sub(tmp2.x, tmp2.y, tmp2.z);
 		camera.update(true);
 		//Gdx.app.log(TAG,  "dragged"+tmp2);
+		player.get(Target.class).v.x = camera.position.x;;
 		return false;
 	}
 

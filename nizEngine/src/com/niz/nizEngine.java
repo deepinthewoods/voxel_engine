@@ -5,13 +5,10 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.niz.component.systems.VoxelRenderingSystem;
 import com.niz.factories.GameFactory;
 import com.niz.factories.PlatformerFactory;
 
@@ -29,7 +26,7 @@ public class nizEngine implements ApplicationListener {
 	protected AssetManager assets;
 	private boolean assetsLoaded;
 	private ModelBatch modelBatch;
-	private PerspectiveCamera camera;
+	private Camera camera;
 	@Override
 	public void create() {		
 		float w = Gdx.graphics.getWidth();
@@ -54,8 +51,9 @@ public class nizEngine implements ApplicationListener {
 		//worldTest = new VoxelRenderingSystem();
 		modelBatch = new ModelBatch();
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		//camera = new OrthographicCamera(20f,15f);
 		camera.near = 0.5f;
-		camera.far = 40f;
+		camera.far = 1000f;
 		camera.update();
 		factory.init(world, timeStep, assets, camera, modelBatch);
 		//worldTest.create(camera);

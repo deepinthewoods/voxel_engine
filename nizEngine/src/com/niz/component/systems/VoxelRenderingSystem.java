@@ -57,9 +57,12 @@ public class VoxelRenderingSystem extends DrawSystem{
 	private ModelBatch modelBatch;
 	private Camera camera;
 	private BlockDefinition[] defs;
-	public void set(ModelBatch modelBatch, Camera camera){
+	private TextureRegion[] tiles;
+	public void set(ModelBatch modelBatch, Camera camera, TextureRegion[] tiles){
 		this.modelBatch = modelBatch;
 		this.camera = camera;
+		this.tiles = tiles;
+		
 	}
 
 	public void create (Camera camera) {
@@ -79,15 +82,15 @@ public class VoxelRenderingSystem extends DrawSystem{
 		
 		
 		
-		Texture texture = new Texture(Gdx.files.internal("data/g3d/tiles.png"));
-		TextureRegion[][] tiles = TextureRegion.split(texture, 16, 16);
+		//Texture texture = new Texture(Gdx.files.internal("data/g3d/tiles.png"));
+		//TextureRegion[][] tiles = TextureRegion.split(texture, 16, 16);
 		
 		MathUtils.random.setSeed(0);
 		
 		
 		
 		
-		voxelWorld = new VoxelWorld(defs, tiles[0], 1, 1, 1);
+		voxelWorld = new VoxelWorld(defs, tiles, 1, 1, 1);
 		PerlinNoiseGenerator.generateVoxels(voxelWorld, 0, 63, 10);
 		float camX = voxelWorld.voxelsX / 2f;
 		float camZ = voxelWorld.voxelsZ / 2f;

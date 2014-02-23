@@ -33,8 +33,8 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Pool;
 
 public class VoxelWorld implements RenderableProvider {
-	public static final int CHUNK_SIZE_X = 16;
-	public static final int CHUNK_SIZE_Y = 16;
+	public static final int CHUNK_SIZE_X = 32;
+	public static final int CHUNK_SIZE_Y = 32;
 	public static final int CHUNK_SIZE_Z = 2;
 
 	public final VoxelChunk[] chunks;

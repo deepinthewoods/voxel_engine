@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -47,20 +48,18 @@ public class PlatformerFactory extends GameFactory{
 		
 		world.setDelta(timeStep);
 		//PerspectiveCamera cam = (PerspectiveCamera) worldCamera;
-		//OrthographicCamera cam = (OrthographicCamera) worldCamera;
-		//cam.position.set(0,0,28);
-		//cam.near = 0.1f;
-		//cam.far = 1000;
-		//cam.setToOrtho(false, worldCamera.viewportHeight * VIEWPORT_SIZE,	worldCamera.viewportWidth * VIEWPORT_SIZE);
-		//cam.update();
-		//cam.update();
-		//cam.lookAt(0,0,0);
-		//cam.update();
+	
 		
-		worldCamera.position.set(10, 0, 20);
-		//worldCamera.lookAt(0,0,0);
-		//worldCamera.translate(0,0, 220);
+		worldCamera.position.set(0, 0, 22);
+		worldCamera.far =52;
+		worldCamera.near = 8;
+		worldCamera.rotate(25, -1, 0, 0);
+		//OrthographicCamera cam = (OrthographicCamera) worldCamera; 
+		//cam.zoom = .050f;
+		
 		worldCamera.update();
+		
+		
 		Gdx.app.log(TAG,  "campos"+worldCamera.position);
 		world.setSystem(new PhysicsSystem(1, 100, timeStep));
 		
@@ -108,7 +107,8 @@ public class PlatformerFactory extends GameFactory{
 		
 		BlockDefinition[] defs = getBlockDefs(tiles);
 		VoxelRenderingSystem voxelR = new VoxelRenderingSystem(defs);	
-		voxelR.set(modelBatch, camera);
+		voxelR.set(modelBatch, camera, tiles[0]);
+		
 		world.setDrawSystem(voxelR);
 		
 		ModelRenderingSystem modelR = new ModelRenderingSystem();
