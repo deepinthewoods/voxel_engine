@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 
 public abstract class DrawSystem extends EntitySystem {
 	
+	
 
 	public DrawSystem(Aspect aspect) {
 		super(aspect);

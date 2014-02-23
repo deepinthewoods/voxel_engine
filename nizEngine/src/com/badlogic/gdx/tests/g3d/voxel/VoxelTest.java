@@ -19,9 +19,12 @@ package com.badlogic.gdx.tests.g3d.voxel;
 import voxel.BlockDefinition;
 import voxel.PerlinNoiseGenerator;
 
+import com.artemis.Aspect;
+import com.artemis.Entity;
+import com.artemis.systems.DrawSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -29,32 +32,37 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.shaders.GLES10Shader;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
 import com.niz.blocks.TopBottomBlock;
 
-public class VoxelTest {
+public class VoxelTest extends DrawSystem{
+	public VoxelTest() {
+		super(Aspect.getEmpty());
+		
+	}
+
 	SpriteBatch spriteBatch;
 	BitmapFont font;
-	public ModelBatch modelBatch;
-	PerspectiveCamera camera;
+	//PerspectiveCamera camera;
 	Environment lights;
 	FirstPersonCameraController controller;
 	public VoxelWorld voxelWorld;
+	private ModelBatch modelBatch;
+	private Camera camera;
+	
 
-	public void create () {
+	public void create (Camera camera) {
 		spriteBatch = new SpriteBatch();
 		font = new BitmapFont();
-		modelBatch = new ModelBatch();
+		
 		DefaultShader.defaultCullFace = GL20.GL_FRONT;
 		GLES10Shader.defaultCullFace = GL20.GL_FRONT;
-		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.near = 0.5f;
-		camera.far = 1000;
+		
 		controller = new FirstPersonCameraController(camera);
 		Gdx.input.setInputProcessor(controller);
 		
@@ -112,12 +120,10 @@ public class VoxelTest {
 	
 	}
 
-	public void render () {
-		Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 1f);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		modelBatch.begin(camera);
+	public void render (ModelBatch modelBatch) {
+		
 		modelBatch.render(voxelWorld, lights);
-		modelBatch.end();
+
 		controller.update();
 		
 		spriteBatch.begin();
@@ -127,12 +133,22 @@ public class VoxelTest {
 	
 	public void resize (int width, int height) {
 		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
-		camera.viewportWidth = width;
-		camera.viewportHeight = height;
-		camera.update();
+		
 	}
 
 	public boolean needsGL20 () {
 		return false;
 	}
+
+	@Override
+	protected void processEntities(Array<Entity> entities) {
+		render(modelBatch);
+		
+	}
+	
+	@Override
+	public void initialize() {
+		create(camera);
+		
+	};
 }

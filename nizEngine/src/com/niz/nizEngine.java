@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -28,6 +29,8 @@ public class nizEngine implements ApplicationListener {
 	protected AssetManager assets;
 	private boolean assetsLoaded;
 	private VoxelTest worldTest;
+	private ModelBatch modelBatch;
+	private PerspectiveCamera camera;
 	@Override
 	public void create() {		
 		float w = Gdx.graphics.getWidth();
@@ -50,9 +53,12 @@ public class nizEngine implements ApplicationListener {
 		
 		factory = new PlatformerFactory();
 		worldTest = new VoxelTest();
-		worldTest.create();
-		//factory.init(world, timeStep, assets, worldTest.camera, worldTest.modelBatch, worldTest.voxelWorld);
-		
+		factory.init(world, timeStep, assets, camera, modelBatch, worldTest.voxelWorld);
+		modelBatch = new ModelBatch();
+		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera.near = 0.5f;
+		camera.far = 1000;
+		worldTest.create(camera);
 		
 	}
 
@@ -67,7 +73,7 @@ public class nizEngine implements ApplicationListener {
 	@Override
 	public void render() {		
 		if(!assetsLoaded && assets.update()) {
-			//factory.doneLoading(assets, world, worldTest.camera);
+			factory.doneLoading(assets, world, camera);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){
@@ -84,12 +90,21 @@ public class nizEngine implements ApplicationListener {
 			world.process();
 		}
 		//DRAW
-		worldTest.render();
+		
+		Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 1f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		modelBatch.begin(camera);
+		worldTest.render(modelBatch);
+		modelBatch.end();
 		
 	}
 
 	@Override
 	public void resize(int width, int height) {
+		camera.viewportWidth = width;
+		camera.viewportHeight = height;
+		camera.update();
+	
 	}
 
 	@Override
