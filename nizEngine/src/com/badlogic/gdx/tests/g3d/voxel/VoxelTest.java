@@ -16,6 +16,7 @@
 
 package com.badlogic.gdx.tests.g3d.voxel;
 
+import voxel.BlockDefinition;
 import voxel.PerlinNoiseGenerator;
 
 import com.badlogic.gdx.Gdx;
@@ -28,11 +29,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.shaders.GLES10Shader;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.math.MathUtils;
+import com.niz.blocks.TopBottomBlock;
 
 public class VoxelTest {
 	SpriteBatch spriteBatch;
@@ -59,16 +62,54 @@ public class VoxelTest {
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
 		lights.add(new DirectionalLight().set(1, 1, 1, 0, -1, 0));
 		
+		
+		
+		
 		Texture texture = new Texture(Gdx.files.internal("data/g3d/tiles.png"));
-		TextureRegion[][] tiles = TextureRegion.split(texture, 32, 32);
+		TextureRegion[][] tiles = TextureRegion.split(texture, 16, 16);
 		
 		MathUtils.random.setSeed(0);
-		voxelWorld = new VoxelWorld(tiles[0], 20, 4, 20);
+		
+		BlockDefinition[] defs = getDefaultBlockDefinitions(tiles);
+		
+		voxelWorld = new VoxelWorld(defs, tiles[0], 1, 1, 1);
 		PerlinNoiseGenerator.generateVoxels(voxelWorld, 0, 63, 10);
 		float camX = voxelWorld.voxelsX / 2f;
 		float camZ = voxelWorld.voxelsZ / 2f;
 		float camY = voxelWorld.getHighest(camX, camZ) + 1.5f;
 		camera.position.set(camX, camY, camZ);
+	}
+
+	private BlockDefinition[] getDefaultBlockDefinitions(TextureRegion[][] tiles) {
+		BlockDefinition[] defs = new BlockDefinition[32];
+		defs[0] = new BlockDefinition(tiles, 0)
+		{
+
+			@Override
+			public void onUpdate(int x, int y, int z, VoxelWorld world) {
+			}
+			
+		};
+		defs[0].dayLightLoss = 0;
+		defs[0].isSolid = false;
+		//for (int i = 1; i < 32; i++){
+		//	defs[i] = new BlockDefinition(tiles, i);
+			//BlockDefinition.add(i, defs[i]);
+		//}
+		
+		defs[1] = new BlockDefinition(tiles, 1){
+
+			@Override
+			public void onUpdate(int x, int y, int z, VoxelWorld world) {
+			}
+			
+		};
+		
+		defs[10] = new TopBottomBlock(tiles, 8, 1, 10);
+		
+		
+		return defs;
+	
 	}
 
 	public void render () {

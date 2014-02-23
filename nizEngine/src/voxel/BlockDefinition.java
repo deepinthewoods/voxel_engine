@@ -1,5 +1,6 @@
 package voxel;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
@@ -43,6 +44,7 @@ public abstract class BlockDefinition {
 	
 
 	public float[] getUVs(int side) {
+		//Gdx.app.log("Block def", "UVs"+u+v+u2+v2);
 		uvs[0] = u;
 		uvs[1] = v;
 		uvs[2] = u2;

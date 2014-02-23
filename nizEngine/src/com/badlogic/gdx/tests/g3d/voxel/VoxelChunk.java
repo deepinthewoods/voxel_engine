@@ -16,23 +16,28 @@
 
 package com.badlogic.gdx.tests.g3d.voxel;
 
+import voxel.BlockDefinition;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 
 public class VoxelChunk {
-	public static final int VERTEX_SIZE = 6;
+	public static final int VERTEX_SIZE = 9;
 	public final byte[] voxels;
 	public final int width;
 	public final int height;
 	public final int depth;
 	public final Vector3 offset = new Vector3();
-	private final int widthTimesHeight;
+	private final int widthTimesDepth;
 	private final int topOffset;
 	private final int bottomOffset;
 	private final int leftOffset;
 	private final int rightOffset;
 	private final int frontOffset;
 	private final int backOffset;
-
+	public static BlockDefinition[] defs;
+	
 	public VoxelChunk(int width, int height, int depth) {
 		this.voxels = new byte[width * height * depth];
 		this.width = width;
@@ -44,7 +49,7 @@ public class VoxelChunk {
 		this.rightOffset = 1;
 		this.frontOffset = - width;
 		this.backOffset = width;
-		this.widthTimesHeight = width * height;
+		this.widthTimesDepth = width * depth;
 	}
 
 	public byte get(int x, int y, int z) {
@@ -55,7 +60,7 @@ public class VoxelChunk {
 	}
 
 	public byte getFast(int x, int y, int z) {
-		return voxels[x + z * width + y * widthTimesHeight];
+		return voxels[x + z * width + y * widthTimesDepth];
 	}
 
 	public void set(int x, int y, int z, byte voxel) {
@@ -66,7 +71,7 @@ public class VoxelChunk {
 	}
 
 	public void setFast(int x, int y, int z, byte voxel) {
-		voxels[x + z * width + y * widthTimesHeight] = voxel;
+		voxels[x + z * width + y * widthTimesDepth] = voxel;
 	}
 
 	/**
@@ -82,36 +87,44 @@ public class VoxelChunk {
 				for(int x = 0; x < width; x++, i++) {
 					byte voxel = voxels[i];
 					if(voxel == 0) continue;
-
+					BlockDefinition def = defs[voxel];
+					
+					//Gdx.app.log("voxelChunk", "def"+voxel);
 					if(y < height - 1) {
-						if(voxels[i+topOffset] == 0) vertexOffset = createTop(offset, x, y, z, vertices, vertexOffset);
+						if(voxels[i+topOffset] == 0) vertexOffset = createTop(offset, x, y, z, def, vertices, vertexOffset);
 					} else {
-						vertexOffset = createTop(offset, x, y, z, vertices, vertexOffset);
+						vertexOffset = createTop(offset, x, y, z, def, vertices, vertexOffset);
 					}
 					if(y > 0) {
-						if(voxels[i+bottomOffset] == 0) vertexOffset = createBottom(offset, x, y, z, vertices, vertexOffset);
+						
+						if(voxels[i+bottomOffset] == 0) vertexOffset = createBottom(offset, x, y, z, def, vertices, vertexOffset);
 					} else {
-						vertexOffset = createBottom(offset, x, y, z, vertices, vertexOffset);
+						vertexOffset = createBottom(offset, x, y, z, def, vertices, vertexOffset);
 					}
 					if(x > 0) {
-						if(voxels[i+leftOffset] == 0) vertexOffset = createLeft(offset, x, y, z, vertices, vertexOffset);
+						
+						//Gdx.app.log("voxelChunk", "def"+voxel);
+						if(voxels[i+leftOffset] == 0) vertexOffset = createLeft(offset, x, y, z, def, vertices, vertexOffset);
 					} else {
-						vertexOffset = createLeft(offset, x, y, z, vertices, vertexOffset);
+						vertexOffset = createLeft(offset, x, y, z, def, vertices, vertexOffset);
 					}
 					if(x < width - 1) {
-						if(voxels[i+rightOffset] == 0) vertexOffset = createRight(offset, x, y, z, vertices, vertexOffset);
+						//Gdx.app.log("voxelChunk", "def"+voxel);
+						if(voxels[i+rightOffset] == 0) vertexOffset = createRight(offset, x, y, z, def, vertices, vertexOffset);
 					} else {
-						vertexOffset = createRight(offset, x, y, z, vertices, vertexOffset);
+						vertexOffset = createRight(offset, x, y, z, def, vertices, vertexOffset);
 					}
 					if(z > 0) {
-						if(voxels[i+frontOffset] == 0) vertexOffset = createFront(offset, x, y, z, vertices, vertexOffset);
+						//Gdx.app.log("voxelChunk", "def"+voxel);
+						if(voxels[i+frontOffset] == 0) vertexOffset = createFront(offset, x, y, z, def, vertices, vertexOffset);
 					} else {
-						vertexOffset = createFront(offset, x, y, z, vertices, vertexOffset);
+						vertexOffset = createFront(offset, x, y, z, def, vertices, vertexOffset);
 					}
 					if(z < depth - 1) {
-						if(voxels[i+backOffset] == 0) vertexOffset = createBack(offset, x, y, z, vertices, vertexOffset);
+						//Gdx.app.log("voxelChunk", "def"+voxel);
+						if(voxels[i+backOffset] == 0) vertexOffset = createBack(offset, x, y, z, def, vertices, vertexOffset);
 					} else {
-						vertexOffset = createBack(offset, x, y, z, vertices, vertexOffset);
+						vertexOffset = createBack(offset, x, y, z, def, vertices, vertexOffset);
 					}
 				}
 			}
@@ -119,189 +132,306 @@ public class VoxelChunk {
 		return vertexOffset / VERTEX_SIZE;
 	}
 
-	public static int createTop(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset) {
+	public static int createTop(Vector3 offset, int x, int y, int z, BlockDefinition def, float[] vertices, int vertexOffset) {
+		int  side =  BlockDefinition.TOP;
+		float[] uvs = def.getUVs(side);
+		float u = uvs[0], v = uvs[1], 
+				u2 = uvs[2], v2 = uvs[3];
+		float c = Color.WHITE.toFloatBits();
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;//lightColors[lightAverages[yp]+TOP_FACE_BRIGHTNESS_BONUS];//(light(c[BlockDefinition.TOP])+light(c[BlockDefinition.LEFT])+light(c[BlockDefinition.BACK]))/3];//lightColors[(light(c[BlockDefinition.TOP]))];//
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;//lightColors[lightAverages[xp+yp]+TOP_FACE_BRIGHTNESS_BONUS];//(light(c[BlockDefinition.TOP])+light(block)/2];//lightColors[(light(c[BlockDefinition.TOP]))];//
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v;
+		//Gdx.app.log("chunk", ""+(c[BlockDefinition.TOP]+c[BlockDefinition.RIGHT]+c[BlockDefinition.BACK])/3);
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v2;
+		//Gdx.app.log("chunk", ""+(c[BlockDefinition.TOP]+c[BlockDefinition.RIGHT]+c[BlockDefinition.FRONT])/3);
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v2;
+		//Gdx.app.log("chunk", ""+(c[BlockDefinition.TOP]+c[BlockDefinition.LEFT]+c[BlockDefinition.FRONT])/3);
+		//flipVertices(yp, xp+yp, xp+yp+zp, yp+zp, vertices, vertexOffset, lightAverages);
 		return vertexOffset;
 	}
+	
+	public static int createBottom(Vector3 offset, int x, int y, int z, BlockDefinition def, float[] vertices, int vertexOffset) {
+		int  side =  BlockDefinition.BOTTOM;
+		float[] uvs = def.getUVs(side);
+		float u = uvs[0], v = uvs[1], 
+				u2 = uvs[2], v2 = uvs[3];
+		float c = Color.WHITE.toFloatBits();
 
-	public static int createBottom(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset) {
 		vertices[vertexOffset++] = offset.x + x;
-		vertices[vertexOffset++] = offset.y + y;
+		vertices[vertexOffset++] = offset.y + y;//d
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v2;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v2;
+		//flipVertices(0, zp, xp+zp, xp, vertices, vertexOffset, lightAverages);
 		return vertexOffset;
 	}
+	
+	public static int createLeft(Vector3 offset, int x, int y, int z, BlockDefinition def, float[] vertices, int vertexOffset) {
+		int  side =  BlockDefinition.LEFT;
+		float[] uvs = def.getUVs(side);
+		float u = uvs[0], v = uvs[1], 
+				u2 = uvs[2], v2 = uvs[3];
+		float c = Color.WHITE.toFloatBits();
 
-	public static int createLeft(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset) {
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v2;
+		
+		
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = -1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v2;
+		//flipVertices(0, yp, yp+zp, zp, vertices, vertexOffset, lightAverages);
 		return vertexOffset;
 	}
+	
+	public static int createRight(Vector3 offset, int x, int y, int z, BlockDefinition def, float[] vertices, int vertexOffset) {
+		int  side =  BlockDefinition.RIGHT;
+		float[] uvs = def.getUVs(side);
+		float u = uvs[0], v = uvs[1], 
+				u2 = uvs[2], v2 = uvs[3];
+		float c = Color.WHITE.toFloatBits();
 
-	public static int createRight(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset) {
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v2;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v2;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 1;
 		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v;
+		//flipVertices(xp, xp+zp, xp+yp+zp, xp+yp, vertices, vertexOffset, lightAverages);
+		return vertexOffset;
+		
+	}
+	
+	//n
+	public static int createFront(Vector3 offset, int x, int y, int z, BlockDefinition def, float[] vertices, int vertexOffset) {
+		int  side =  BlockDefinition.FRONT;
+		float[] uvs = def.getUVs(side);
+		float u = uvs[0], v = uvs[1], 
+				u2 = uvs[2], v2 = uvs[3];
+		float c = Color.WHITE.toFloatBits();
+
+		vertices[vertexOffset++] = offset.x + x;
+		vertices[vertexOffset++] = offset.y + y;
+		vertices[vertexOffset++] = offset.z + z;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 1;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v2;
+		//wus
+		vertices[vertexOffset++] = offset.x + x + 1;
+		vertices[vertexOffset++] = offset.y + y;
+		vertices[vertexOffset++] = offset.z + z;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 1;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v2;
+		
+		vertices[vertexOffset++] = offset.x + x + 1;
+		vertices[vertexOffset++] = offset.y + y + 1;
+		vertices[vertexOffset++] = offset.z + z;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 1;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v;
+		
+		vertices[vertexOffset++] = offset.x + x;
+		vertices[vertexOffset++] = offset.y + y + 1;
+		vertices[vertexOffset++] = offset.z + z;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 0;
+		vertices[vertexOffset++] = 1;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v;
+		//flipVertices(0, xp, xp+yp, yp, vertices, vertexOffset, lightAverages);
 		return vertexOffset;
 	}
+	
+	public static int createBack(Vector3 offset, int x, int y, int z, BlockDefinition def, float[] vertices, int vertexOffset) {
+		int  side =  BlockDefinition.BACK;
+		float[] uvs = def.getUVs(side);
+		float u = uvs[0], v = uvs[1], 
+				u2 = uvs[2], v2 = uvs[3];
+		float c = Color.WHITE.toFloatBits();
 
-	public static int createFront(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset) {
-		vertices[vertexOffset++] = offset.x + x;
-		vertices[vertexOffset++] = offset.y + y;
-		vertices[vertexOffset++] = offset.z + z;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 1;
-
-		vertices[vertexOffset++] = offset.x + x + 1;
-		vertices[vertexOffset++] = offset.y + y;
-		vertices[vertexOffset++] = offset.z + z;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 1;
-
-		vertices[vertexOffset++] = offset.x + x + 1;
-		vertices[vertexOffset++] = offset.y + y + 1;
-		vertices[vertexOffset++] = offset.z + z;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 1;
-
-		vertices[vertexOffset++] = offset.x + x;
-		vertices[vertexOffset++] = offset.y + y + 1;
-		vertices[vertexOffset++] = offset.z + z;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 0;
-		vertices[vertexOffset++] = 1;
-		return vertexOffset;
-	}
-
-	public static int createBack(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset) {
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v2;
+		
 		vertices[vertexOffset++] = offset.x + x;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y + 1;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
-
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v;
+		
 		vertices[vertexOffset++] = offset.x + x + 1;
 		vertices[vertexOffset++] = offset.y + y;
 		vertices[vertexOffset++] = offset.z + z + 1;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = 0;
 		vertices[vertexOffset++] = -1;
+		vertices[vertexOffset++] = c;
+		vertices[vertexOffset++] = u2;
+		vertices[vertexOffset++] = v2;
+		//flipVertices(zp, yp+zp, xp+yp+zp, xp+zp, vertices, vertexOffset, lightAverages);
 		return vertexOffset;
 	}
 }

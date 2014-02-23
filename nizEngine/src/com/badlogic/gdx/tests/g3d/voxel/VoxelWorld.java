@@ -16,8 +16,8 @@
 
 package com.badlogic.gdx.tests.g3d.voxel;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
+import voxel.BlockDefinition;
+
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -26,6 +26,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -34,7 +35,7 @@ import com.badlogic.gdx.utils.Pool;
 public class VoxelWorld implements RenderableProvider {
 	public static final int CHUNK_SIZE_X = 16;
 	public static final int CHUNK_SIZE_Y = 16;
-	public static final int CHUNK_SIZE_Z = 16;
+	public static final int CHUNK_SIZE_Z = 2;
 
 	public final VoxelChunk[] chunks;
 	public final Mesh[] meshes;
@@ -52,7 +53,8 @@ public class VoxelWorld implements RenderableProvider {
 	public int numChunks;
 	private final TextureRegion[] tiles;
 
-	public VoxelWorld(TextureRegion[] tiles, int chunksX, int chunksY, int chunksZ) {
+	public VoxelWorld(BlockDefinition[] blockDefs, TextureRegion[] tiles, int chunksX, int chunksY, int chunksZ) {
+		VoxelChunk.defs = blockDefs;
 		this.tiles = tiles;
 		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
 		this.chunksX = chunksX;
@@ -88,7 +90,8 @@ public class VoxelWorld implements RenderableProvider {
 			meshes[i] = new Mesh(true, 
 										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 6 * 4, 
 										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 36 / 3,
-										VertexAttribute.Position(), VertexAttribute.Normal());
+										VertexAttribute.Position(), VertexAttribute.Normal()
+										, VertexAttribute.Color(), VertexAttribute.TexCoords(0));
 			meshes[i].setIndices(indices);
 		}
 		this.dirty = new boolean[chunksX * chunksY * chunksZ];
@@ -97,14 +100,16 @@ public class VoxelWorld implements RenderableProvider {
 		this.numVertices = new int[chunksX * chunksY * chunksZ];
 		for(i = 0; i < numVertices.length; i++) numVertices[i] = 0;
 
-		this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z];
+		this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z*2];
 		this.materials = new Material[chunksX * chunksY * chunksZ];
 		for(i = 0; i < materials.length; i++) {
-			materials[i] = new Material(new ColorAttribute(ColorAttribute.Diffuse, MathUtils.random(0.5f, 1f), MathUtils.random(0.5f, 1f), MathUtils.random(0.5f, 1f), 1));
+			materials[i] = new Material(new ColorAttribute(ColorAttribute.Diffuse,  1f, 1f, 1f, 1)
+			, new TextureAttribute(TextureAttribute.Diffuse, tiles[0].getTexture()) 
+			);
 		}
 	}
 
-	public void set(float x, float y, float z, byte voxel) {
+	public void set(int x, int y, int z, byte voxel) {
 		int ix = (int)x;
 		int iy = (int)y;
 		int iz = (int)z;
@@ -117,7 +122,7 @@ public class VoxelWorld implements RenderableProvider {
 		chunks[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ].set(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z, voxel);
 	}
 
-	public byte get(float x, float y, float z) {
+	public byte get(int x, int y, int z) {
 		int ix = (int)x;
 		int iy = (int)y;
 		int iz = (int)z;

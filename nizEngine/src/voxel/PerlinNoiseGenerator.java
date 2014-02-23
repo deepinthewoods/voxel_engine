@@ -134,11 +134,15 @@ public class PerlinNoiseGenerator {
 		byte[] heightMap = PerlinNoiseGenerator.generateHeightMap(voxelWorld.voxelsX, voxelWorld.voxelsZ, min, max, octaveCount);
 		int idx = 0;
 		for(int z = 0; z < voxelWorld.voxelsZ; z++) {
-			for(int x = 0; x < voxelWorld.voxelsX; x++) {
-				voxelWorld.setColumn(x, 
-						1
-						//10
-								, z, (byte) 10);//heightMap[idx++], z, (byte)1);
+			for(int x = 0; x < voxelWorld.voxelsX; x++) 
+				for (int y = 0; y < voxelWorld.voxelsY; y++){
+				//voxelWorld.setColumn(x, 
+						//1
+						//x
+								//, z, (byte) 10);
+						//heightMap[idx++]
+								//, z, (byte)1);
+					voxelWorld.set(x, y, z, (byte) 10);
 				//byte litVoxel = (byte) (7<<VoxelChunk.BLOCK_BITS);
 				//int y = voxelWorld.voxelsY-1;
 				//voxelWorld.setLight(x, y, z, 15);
