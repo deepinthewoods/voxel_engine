@@ -109,7 +109,7 @@ public class VoxelWorld implements RenderableProvider {
 		}
 	}
 
-	public void set(int x, int y, int z, byte voxel) {
+	public void set(float x, float y, float z, byte voxel) {
 		int ix = (int)x;
 		int iy = (int)y;
 		int iz = (int)z;
@@ -122,7 +122,7 @@ public class VoxelWorld implements RenderableProvider {
 		chunks[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ].set(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z, voxel);
 	}
 
-	public byte get(int x, int y, int z) {
+	public byte get(float x, float y, float z) {
 		int ix = (int)x;
 		int iy = (int)y;
 		int iz = (int)z;
