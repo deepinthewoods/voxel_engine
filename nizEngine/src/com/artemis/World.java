@@ -9,6 +9,7 @@ import com.artemis.systems.InputSystem;
 import com.artemis.systems.event.EventSystem;
 import com.artemis.systems.event.SystemEvent;
 import com.artemis.utils.SafeArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -356,6 +357,7 @@ public class World implements Disposable {
 		setSystem(sys);
 		inputSystem = sys;
 		inputMux.addProcessor(sys);
+		Gdx.input.setInputProcessor(inputMux);
 		return sys;
 	}
 

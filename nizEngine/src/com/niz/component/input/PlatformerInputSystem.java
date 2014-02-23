@@ -11,7 +11,8 @@ import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 public class PlatformerInputSystem extends InputSystem{
 
 	private static final long TAP_TIME_LIMIT = 200;
-	OrthographicCamera camera;
+	private static final String TAG = "platformerInput";
+	Camera camera;
 	Entity player;
 	long touchTime;
 	Vector3 tmp = new Vector3(), tmp2 = new Vector3();
@@ -29,7 +30,8 @@ public class PlatformerInputSystem extends InputSystem{
 		//camera.fieldOfView = 4.5f;
 		//camera.setToOrtho(false, 20, 30);
 		//camera.zoom = .0752f;
-		//camera.update();
+		
+		camera =  cam;
 	}
 	
 	@Override
@@ -67,12 +69,22 @@ public class PlatformerInputSystem extends InputSystem{
 		//if time < limit or drag amount small maybe cancel
 		//move
 		tmp.set(0,0,0);
-		tmp2.set(Gdx.input.getDeltaX(), Gdx.input.getDeltaY(), 0);
-		camera.unproject(tmp);
-		camera.unproject(tmp2);
+		camera.project(tmp);
+		
+		//tmp.x = 0;
+		//tmp.y = 0;
+		tmp.set(0,0,.5f);
+		tmp2.set(Gdx.input.getDeltaX(), Gdx.input.getDeltaY(), .5f);
+		//camera.unproject(tmp);
+		//camera.unproject(tmp2);
+		
 		tmp2.sub(tmp);
+		tmp2.z = 0;
 		//move by tmp2
-		camera.position.add(tmp2);
+		tmp2.scl(.1f);
+		camera.position.sub(tmp2.x, -tmp2.y, tmp2.z);
+		camera.update(true);
+		//Gdx.app.log(TAG,  "dragged"+tmp2);
 		return false;
 	}
 

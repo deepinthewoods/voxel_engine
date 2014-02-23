@@ -18,7 +18,6 @@ package com.badlogic.gdx.tests.g3d.voxel;
 
 import voxel.BlockDefinition;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 
@@ -433,5 +432,9 @@ public class VoxelChunk {
 		vertices[vertexOffset++] = v2;
 		//flipVertices(zp, yp+zp, xp+yp+zp, xp+zp, vertices, vertexOffset, lightAverages);
 		return vertexOffset;
+	}
+
+	public static BlockDefinition blockDef(int i) {
+		return defs[i];
 	}
 }

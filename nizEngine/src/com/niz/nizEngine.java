@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.tests.g3d.voxel.VoxelTest;
+import com.niz.component.systems.VoxelRenderingSystem;
 import com.niz.factories.GameFactory;
 import com.niz.factories.PlatformerFactory;
 
@@ -28,7 +28,6 @@ public class nizEngine implements ApplicationListener {
 	protected GameFactory factory;
 	protected AssetManager assets;
 	private boolean assetsLoaded;
-	private VoxelTest worldTest;
 	private ModelBatch modelBatch;
 	private PerspectiveCamera camera;
 	@Override
@@ -52,13 +51,14 @@ public class nizEngine implements ApplicationListener {
 		assetsLoaded = false;
 		
 		factory = new PlatformerFactory();
-		worldTest = new VoxelTest();
-		factory.init(world, timeStep, assets, camera, modelBatch, worldTest.voxelWorld);
+		//worldTest = new VoxelRenderingSystem();
 		modelBatch = new ModelBatch();
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.5f;
-		camera.far = 1000;
-		worldTest.create(camera);
+		camera.far = 40f;
+		camera.update();
+		factory.init(world, timeStep, assets, camera, modelBatch);
+		//worldTest.create(camera);
 		
 	}
 
@@ -73,7 +73,7 @@ public class nizEngine implements ApplicationListener {
 	@Override
 	public void render() {		
 		if(!assetsLoaded && assets.update()) {
-			factory.doneLoading(assets, world, camera);
+			factory.doneLoading(assets, world, camera, modelBatch);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){
@@ -81,7 +81,8 @@ public class nizEngine implements ApplicationListener {
 			return;
 		}
 		
-		
+		//camera.update();
+		//Gdx.app.log(TAG,  "camera"+camera.position);
 		float delta = Gdx.graphics.getDeltaTime();
 		delta = Math.min(delta, minTimeStep);
 		accumulator += delta;
@@ -90,11 +91,12 @@ public class nizEngine implements ApplicationListener {
 			world.process();
 		}
 		//DRAW
-		
+		//camera.
 		Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		modelBatch.begin(camera);
-		worldTest.render(modelBatch);
+		//worldTest.render(modelBatch);
+		world.draw(delta);
 		modelBatch.end();
 		
 	}

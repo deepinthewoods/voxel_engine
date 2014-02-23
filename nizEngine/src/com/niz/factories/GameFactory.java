@@ -12,9 +12,9 @@ import com.badlogic.gdx.utils.Array;
 public abstract class GameFactory {
 
 public abstract void init(World world, float timeStep, AssetManager assets,
-		Camera worldCamera, ModelBatch modelBatch, VoxelWorld voxelWorld) ;
+		Camera worldCamera, ModelBatch modelBatch) ;
 
-public abstract void doneLoading(AssetManager assets, World world, Camera camera);
+public abstract void doneLoading(AssetManager assets, World world, Camera camera, ModelBatch modelBatch);
 
 public abstract void newGame(World world);
 

@@ -224,7 +224,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		Physics phys = physMap.get(e);
 		Position pos = posMap.get(e);
 		AABBBody body = bodyMap.get(e);
-		VoxelWorld voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
+		VoxelWorld voxelWorld = world.getSystem(VoxelRenderingSystem.class).voxelWorld;
 		onTick(pos.pos, phys.oldPosition, body, voxelWorld);
 		
 	}

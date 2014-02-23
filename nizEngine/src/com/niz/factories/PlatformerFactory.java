@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -39,12 +38,12 @@ public class PlatformerFactory extends GameFactory{
 
 	private static final String TAG = "Platformer Factory";
 	
-	VoxelSystem voxelSys;
+	//VoxelSystem voxelSys;
 	PlatformerInputSystem inputSys;
 	
 	@Override
 	public void init(World world, float timeStep, AssetManager assets, Camera worldCamera
-			, ModelBatch modelBatch, VoxelWorld voxelWorld) {
+			, ModelBatch modelBatch) {
 		
 		world.setDelta(timeStep);
 		//PerspectiveCamera cam = (PerspectiveCamera) worldCamera;
@@ -58,53 +57,37 @@ public class PlatformerFactory extends GameFactory{
 		//cam.lookAt(0,0,0);
 		//cam.update();
 		
-		
-		//worldCamera.update();
-		
+		worldCamera.position.set(10, 0, 20);
+		//worldCamera.lookAt(0,0,0);
+		//worldCamera.translate(0,0, 220);
+		worldCamera.update();
+		Gdx.app.log(TAG,  "campos"+worldCamera.position);
 		world.setSystem(new PhysicsSystem(1, 100, timeStep));
-		voxelSys = new VoxelSystem(4,4,1
-				, true//false//left
-				, true//false//right
-				, true//false//back
-				, true//front
-				, true//false//bottom
-				, true//false//top
-				);
-		world.setSystem(voxelSys);
+		
+		//world.setSystem(voxelSys);
 		world.setSystem(new MovementSystem());
 		world.setSystem(new AABBBodySystem());
 		world.setSystem(new BucketedSystem());
 		
 		
-		Environment env = new Environment();
-		env.set( new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f) );	
-		
-		VoxelRenderingSystem voxelR = new VoxelRenderingSystem();	
-		//voxelR.set(voxelSys.voxelWorld, modelBatch, (OrthographicCamera) worldCamera, env);
-		world.setDrawSystem(voxelR);
-		
-		ModelRenderingSystem modelR = new ModelRenderingSystem();
-		modelR.set(modelBatch, worldCamera, env);
-		//world.setDrawSystem(modelR );
+	//	Environment env = new Environment();
+		//env.set( new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f) );	
 		
 		
-		inputSys = new PlatformerInputSystem(worldCamera, voxelWorld);
-		world.setInputSystem(inputSys);
 		
-		world.initialize();
 		
 		assets.load("data/tiles.png", Texture.class);
 		assets.load("data/fades.png", Pixmap.class);
 	}
 
 	@Override
-	public void doneLoading(AssetManager assets, World world, Camera camera) {
+	public void doneLoading(AssetManager assets, World world, Camera camera, ModelBatch modelBatch) {
 		TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
 		
 		BlockDefinition[] blockDefs = getBlockDefs(tiles);
 		Pixmap fades = assets.get("data/fades.png", Pixmap.class);
 		
-		voxelSys.set(tiles, blockDefs, fades, camera);
+		//voxelSys.set(tiles, blockDefs, fades, camera);
 		
 		//setDefaultMap(voxelSys.voxelWorld);
 		
@@ -118,6 +101,24 @@ public class PlatformerFactory extends GameFactory{
 		AnimationController animController = new AnimationController(playerModel);
 		mod.set(playerModel, animController );
 		world.addEntity(e);
+		
+	
+		
+		
+		
+		BlockDefinition[] defs = getBlockDefs(tiles);
+		VoxelRenderingSystem voxelR = new VoxelRenderingSystem(defs);	
+		voxelR.set(modelBatch, camera);
+		world.setDrawSystem(voxelR);
+		
+		ModelRenderingSystem modelR = new ModelRenderingSystem();
+		modelR.set(modelBatch, camera, voxelR.lights);
+		world.setDrawSystem(modelR );
+		
+		inputSys = new PlatformerInputSystem(camera, voxelR.voxelWorld);
+		world.setInputSystem(inputSys);
+		
+		world.initialize();
 	}
 
 	

@@ -27,9 +27,9 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Pool;
 
 public class VoxelWorld implements RenderableProvider {
@@ -55,6 +55,7 @@ public class VoxelWorld implements RenderableProvider {
 
 	public VoxelWorld(BlockDefinition[] blockDefs, TextureRegion[] tiles, int chunksX, int chunksY, int chunksZ) {
 		VoxelChunk.defs = blockDefs;
+		if (blockDefs == null) throw new GdxRuntimeException("nill init");
 		this.tiles = tiles;
 		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
 		this.chunksX = chunksX;
@@ -207,7 +208,7 @@ public class VoxelWorld implements RenderableProvider {
 		}
 	}
 
-	public Object get(Vector3 p) {
+	public int get(Vector3 p) {
 		return get(p.x, p.y, p.z);
 	}
 }

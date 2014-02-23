@@ -1,6 +1,6 @@
 package voxel;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.BinaryHeap;
 import com.badlogic.gdx.utils.BinaryHeap.Node;
 import com.badlogic.gdx.utils.GdxRuntimeException;
