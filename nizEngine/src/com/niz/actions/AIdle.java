@@ -1,5 +1,6 @@
 package com.niz.actions;
 
+import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.niz.component.Body;
@@ -42,6 +43,11 @@ public class AIdle extends Action {
 
 	@Override
 	public void onEnd() {
+		
+	}
+	@Override
+	public void onAddToWorld(World world) {
+		// TODO Auto-generated method stub
 		
 	}
 

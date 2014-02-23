@@ -17,10 +17,7 @@ public class MovementSystem extends EntityProcessingSystem {
 	//TODO abbbbody/body
 	public MovementSystem() {
 		super(Aspect.getAspectForAll(Position.class, Physics.class, Move.class, AABBBody.class));
-		posMap = world.getMapper(Position.class);
-		physMap = world.getMapper(Physics.class);
-		moveMap = world.getMapper(Move.class);
-		bodyMap = world.getMapper(AABBBody.class);
+		
 		
 	}
 	private static final String TAG = "movement sys";
@@ -30,7 +27,14 @@ public class MovementSystem extends EntityProcessingSystem {
 	private ComponentMapper<Move> moveMap;
 	private ComponentMapper<AABBBody> bodyMap;
 	
-	
+	@Override
+	public void initialize(){
+		posMap = world.getMapper(Position.class);
+		physMap = world.getMapper(Physics.class);
+		moveMap = world.getMapper(Move.class);
+		bodyMap = world.getMapper(AABBBody.class);
+		
+	}
 	
 	
 	static Vector3 tmp = new Vector3();
@@ -44,6 +48,7 @@ public class MovementSystem extends EntityProcessingSystem {
 		
 		//Gdx.app.log(TAG, "move"+move.speed);
 	}
+	
 	@Override
 	protected void process(Entity e) {
 		Vector3 position = posMap.get(e).pos;

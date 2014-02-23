@@ -1,5 +1,7 @@
 package com.niz.actions;
 
+import com.artemis.World;
+
 public class ASync extends Action {
 
 	@Override
@@ -19,6 +21,12 @@ public class ASync extends Action {
 	public void onEnd() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void onAddToWorld(World world) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

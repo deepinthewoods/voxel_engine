@@ -1,5 +1,6 @@
 package com.niz.component.input;
 
+import com.artemis.Entity;
 import com.artemis.systems.InputSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -9,6 +10,7 @@ public class PlatformerInputSystem extends InputSystem{
 
 	private static final long TAP_TIME_LIMIT = 200;
 	Camera camera;
+	Entity player;
 	long touchTime;
 	Vector3 tmp = new Vector3(), tmp2 = new Vector3();
 	public PlatformerInputSystem(Camera cam) {
@@ -67,6 +69,11 @@ public class PlatformerInputSystem extends InputSystem{
 	@Override
 	public boolean scrolled(int amount) {
 		return false;
+	}
+
+	public void setPlayer(Entity playerE) {
+		player = playerE;
+		
 	}
 
 }

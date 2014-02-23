@@ -43,9 +43,9 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
-import com.buckets.Buckets;
 import com.niz.RayCaster;
 import com.niz.Vec3i;
+import com.niz.buckets.Buckets;
 
 public class VoxelWorld implements RenderableProvider {
 	public static final int CHUNK_SIZE_X = 16;
@@ -116,10 +116,10 @@ public class VoxelWorld implements RenderableProvider {
 				}
 			}
 		}
-		int len = CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * faceCount;
+		int len = CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z *  6 * 6;
 		short[] indices = new short[len];
 		short j = 0;
-		for (i = 0; i < len; i += 6, j += 4) {
+		for (i = 0; i < len-6; i += 6, j += 4) {
 			indices[i + 0] = (short)(j + 0);
 			indices[i + 1] = (short)(j + 1);
 			indices[i + 2] = (short)(j + 2);
@@ -130,8 +130,8 @@ public class VoxelWorld implements RenderableProvider {
 		//this.meshes = new Mesh[meshCountXZ*meshCountXZ*meshCountY*10];
 		for(i = 0; i < chunksX*chunksY*chunksZ + AREA_MESH_COUNT; i++) {
 			Mesh mesh = new Mesh(true, 
-										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * faceCount * 4, 
-										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * faceCount,
+										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 4 *6, 
+										CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 6*6,
 										VertexAttribute.Position()//, VertexAttribute.Normal()
 										, VertexAttribute.Color(), VertexAttribute.TexCoords(0)
 			);
@@ -283,6 +283,7 @@ public class VoxelWorld implements RenderableProvider {
 	private Array<VoxelChunk> meshedChunks = new Array<VoxelChunk>();
 	@Override
 	public void getRenderables (Array<Renderable> renderables, Pool<Renderable> pool) {
+		
 		//if (FPSMode) getRenderablesForFPS(renderables, pool);
 	//	else 
 			particleIndex = 3;
@@ -312,11 +313,13 @@ public class VoxelWorld implements RenderableProvider {
 			Array<Renderable> renderables,
 			Pool<Renderable> pool){
 		int meshedCount = 0;
+		Gdx.app.log(TAG, "sdjsksdlfj"+x0+","+y0+","+z0+","+x1+","+y1+","+z1);
 
 		for (int x = x0; x <= x1; x++)
 			for (int y = y0; y <= y1; y++)
 				for (int z = z0; z <= z1; z++){
-					//Gdx.app.log(TAG, "chunk  x"+x+",  z"+z);
+					
+					
 					VoxelChunk chunk = getChunk(x, y, z);
 					if (chunk == null) continue;
 					Mesh mesh = chunk.mesh;
@@ -327,6 +330,7 @@ public class VoxelWorld implements RenderableProvider {
 						meshedChunks.add(chunk);
 						mesh = chunk.mesh;
 						dirty[chunk.index]= true; 
+						Gdx.app.log(TAG, "chunk  x"+x+",  z"+z);
 					}
 					if(dirty[i]) {
 						//if (meshedCount > MESH_PER_FRAME) continue;

@@ -181,4 +181,8 @@ public class EntityManager extends Manager {
         deleted = 0;
         identifierPool.dispose();
     }
+    
+    public Array<Entity> getEntities(){
+    	return entities;
+    }
 }

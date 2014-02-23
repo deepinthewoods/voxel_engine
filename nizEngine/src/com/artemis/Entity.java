@@ -7,6 +7,9 @@ import com.artemis.managers.ComponentManager;
 import com.artemis.managers.EntityManager;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool.Poolable;
+import com.badlogic.gdx.utils.Pools;
+import com.niz.component.ModelInfo;
+import com.niz.component.Position;
 
 /**
  * The entity class. Cannot be instantiated outside the framework, you must
@@ -239,4 +242,12 @@ public final class Entity implements Poolable {
     public int hashCode() {
         return id;
     }
+
+	public<T extends Component> T add(Class<T> class1) {
+		T c = Pools.obtain(class1);
+		addComponent(c);
+		return c;
+	}
+
+	
 }

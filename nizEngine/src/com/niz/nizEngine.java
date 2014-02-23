@@ -4,8 +4,10 @@ import com.artemis.World;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.niz.factories.GameFactory;
@@ -13,7 +15,8 @@ import com.niz.factories.PlatformerFactory;
 
 public class nizEngine implements ApplicationListener {
 	private static final String TAG = "main engine";
-	private OrthographicCamera uiCamera, worldCamera;
+	private OrthographicCamera uiCamera;
+	private Camera  worldCamera;
 	//private PerspectiveCamer
 	private SpriteBatch spriteBatch;
 	private World world;
@@ -29,7 +32,7 @@ public class nizEngine implements ApplicationListener {
 		float h = Gdx.graphics.getHeight();
 		
 		uiCamera = new OrthographicCamera(w/h, 1);
-		worldCamera = new OrthographicCamera(w/h, 1);
+		worldCamera = new OrthographicCamera(w/h, 1);//= new PerspectiveCamera(60, w/h, 1);
 		spriteBatch = new SpriteBatch();
 		shapeBatch = new ShapeBatch();
 		modelBatch = new ModelBatch();
@@ -52,7 +55,7 @@ public class nizEngine implements ApplicationListener {
 	@Override
 	public void render() {		
 		if(!assetsLoaded && assets.update()) {
-			factory.doneLoading(assets);
+			factory.doneLoading(assets, world);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){
@@ -70,7 +73,10 @@ public class nizEngine implements ApplicationListener {
 			world.process();
 		}
 		//DRAW
+		modelBatch.begin(worldCamera);
 		world.draw(delta);
+		modelBatch.end();
+		
 		
 		spriteBatch.setProjectionMatrix(uiCamera.combined);
 		spriteBatch.begin();

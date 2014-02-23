@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.math.Vector3;
-import com.buckets.Buckets;
+import com.niz.buckets.Buckets;
 import com.niz.component.Bucketed;
 import com.niz.component.Position;
 
@@ -27,6 +27,7 @@ public class BucketedSystem extends EntityProcessingSystem {
 	 }
 	//IntMap<Entity> entities;
 	private static final int bits = 1, largeBits = 4;
+	
 	
 	
 		//entities = engine.getEntitiesFor(Family.getFamilyFor(Position.class, Bucketed.class));

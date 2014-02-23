@@ -25,6 +25,10 @@ public class ModelRenderingSystem extends DrawSystem{
 	Environment env;
 	public ModelRenderingSystem(){
 		super(Aspect.getAspectForAll(ModelInfo.class, Position.class, Move.class));
+		
+	}
+	@Override
+	public void initialize(){
 		miMap = world.getMapper(ModelInfo.class);
 		posMap =  world.getMapper(Position.class);
 		moveMap = world.getMapper(Move.class);

@@ -45,12 +45,15 @@ public class AABBBodySystem extends EntityProcessingSystem {
 	
 	public AABBBodySystem(){
 		super(Aspect.getAspectForAll(Position.class, Physics.class, AABBBody.class));
+		
+		
+	}
+	@Override
+	public void initialize(){
 		posMap = world.getMapper(Position.class);
 		physMap = world.getMapper(Physics.class);
 		bodyMap = world.getMapper(AABBBody.class);
-		
 	}
-	
 	
 	public boolean onTick(Vector3 position, Vector3 oldPosition, Body c, VoxelWorld voxelWorld) {
 		//if (oldPosition.dst2(position) > .25f)

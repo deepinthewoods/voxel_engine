@@ -2,7 +2,9 @@ package com.niz.actions;
 
 import voxel.VoxelWorld;
 
+import com.artemis.World;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BinaryHeap;
 import com.badlogic.gdx.utils.BinaryHeap.Node;
 import com.niz.physics.JPhysicsEngine;
@@ -12,6 +14,8 @@ public abstract class Action extends Node{
 		super(0);
 		
 	}
+	public static final float ANIM_TRANSITION_TIME = .5f;
+
 	public static final int LEGS = 1, RIGHT_ARM = 2, LEFT_ARM = 4, HEAD = 8;
 	public  static final int LANE_MOVING = 16;
 	private static final String TAG = "Action";
@@ -96,4 +100,7 @@ public abstract class Action extends Node{
 		while (prog.getClass() != clas && prog != null)prog = prog.next;
 		return prog;
 	}
+	public abstract void onAddToWorld(World world);
+		
+	
 }

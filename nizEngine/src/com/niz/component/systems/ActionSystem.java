@@ -12,9 +12,12 @@ public class ActionSystem extends EntityProcessingSystem {
 	
 	public ActionSystem(Aspect aspect) {
 		super(Aspect.getAspectForOne(ActionComponent.class));
-		actionMap = world.getMapper(ActionComponent.class);
 	}
+	@Override
+	public void initialize(){
+		actionMap = world.getMapper(ActionComponent.class);
 
+	}
 
 	
 	

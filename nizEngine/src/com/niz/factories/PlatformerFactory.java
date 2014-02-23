@@ -1,13 +1,17 @@
 package com.niz.factories;
 
 import voxel.BlockDefinition;
+import voxel.VoxelWorld;
 
+import com.artemis.Entity;
 import com.artemis.World;
-import com.artemis.systems.DrawSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -18,7 +22,11 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.math.MathUtils;
 import com.niz.blocks.TopBottomBlock;
+import com.niz.component.ModelInfo;
+import com.niz.component.Position;
+import com.niz.component.input.PlatformerInputSystem;
 import com.niz.component.systems.AABBBodySystem;
 import com.niz.component.systems.BucketedSystem;
 import com.niz.component.systems.ModelRenderingSystem;
@@ -29,58 +37,115 @@ import com.niz.component.systems.VoxelSystem;
 
 public class PlatformerFactory extends GameFactory{
 	public static final float VIEWPORT_SIZE = 20;
+
+	private static final String TAG = "Platformer Factory";
 	
 	VoxelSystem voxelSys;
+	PlatformerInputSystem inputSys;
+	
 	@Override
 	public void init(World world, float timeStep, AssetManager assets, Camera worldCamera
 			, ModelBatch modelBatch) {
 		
 		world.setDelta(timeStep);
-		
-		worldCamera.viewportHeight *= VIEWPORT_SIZE;
-		worldCamera.viewportWidth *= VIEWPORT_SIZE;
-		worldCamera.update();
+		//PerspectiveCamera cam = (PerspectiveCamera) worldCamera;
+		OrthographicCamera cam = (OrthographicCamera) worldCamera;
+		cam.position.set(0,0,28);
+		cam.near = 0.1f;
+		cam.far = 1000;
+		//cam.setToOrtho(false, worldCamera.viewportHeight * VIEWPORT_SIZE,	worldCamera.viewportWidth * VIEWPORT_SIZE);
+		//cam.update();
+		//cam.update();
+		cam.lookAt(0,0,0);
+		cam.update();
+		//worldCamera.update();
 		
 		world.setSystem(new PhysicsSystem(1, 100, timeStep));
 		voxelSys = new VoxelSystem(4,4,1
-				, false//left
-				, false//right
-				, false//back
+				, true//false//left
+				, true//false//right
+				, true//false//back
 				, true//front
-				, false//bottom
-				, false//top
+				, true//false//bottom
+				, true//false//top
 				);
 		world.setSystem(voxelSys);
 		world.setSystem(new MovementSystem());
 		world.setSystem(new AABBBodySystem());
 		world.setSystem(new BucketedSystem());
 		
+		
 		Environment env = new Environment();
 		env.set( new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f) );	
 		
-		VoxelRenderingSystem voxelR = new VoxelRenderingSystem(voxelSys.voxelWorld);	
-		voxelR.set(modelBatch, worldCamera, env);
+		VoxelRenderingSystem voxelR = new VoxelRenderingSystem();	
+		voxelR.set(voxelSys.voxelWorld, modelBatch, worldCamera, env);
 		world.setDrawSystem(voxelR);
 		
 		ModelRenderingSystem modelR = new ModelRenderingSystem();
 		modelR.set(modelBatch, worldCamera, env);
-		world.setDrawSystem(modelR );
+		//world.setDrawSystem(modelR );
 		
-		world.setInputSystem(new PlatformerInputSystem(worldCamera));
+		
+		inputSys = new PlatformerInputSystem(worldCamera);
+		world.setInputSystem(inputSys);
+		
+		world.initialize();
+		
+		assets.load("data/tiles.png", Texture.class);
+		assets.load("data/fades.png", Pixmap.class);
 	}
 
 	@Override
-	public void doneLoading(AssetManager assets) {
-		TextureRegion[][] tiles = assets.get("tiles.png", TextureRegion.class).split(16, 16);
+	public void doneLoading(AssetManager assets, World world) {
+		TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
 		
 		BlockDefinition[] blockDefs = getBlockDefs(tiles);
 		Pixmap fades = assets.get("data/fades.png", Pixmap.class);
 		
 		voxelSys.set(tiles, blockDefs, fades);
 		
+		setDefaultMap(voxelSys.voxelWorld);
+		
+		
+		Entity e;
+		e = world.createEntity();
+		
+		e.add(Position.class);
+		ModelInfo mod = e.add(ModelInfo.class);
+	
+		AnimationController animController = new AnimationController(playerModel);
+		mod.set(playerModel, animController );
+		world.addEntity(e);
+	}
+
+	
+	private void setDefaultMap(VoxelWorld voxelWorld) {
+		for (int x = 0; x < 200; x++)
+			for (int y = 0; y < 300; y++)
+				for (int z = 0; z < 2; z++)
+					if (MathUtils.randomBoolean()) {
+						Gdx.app.log(TAG, "ww"+x+","+y+","+z);
+						voxelWorld.set(x, y, z, (byte) 10);
+					}
+	}
+
+	@Override
+	public void newGame(World world) {
+		Entity playerE = world.createEntity();
+		world.addEntity(playerE);
+		inputSys.setPlayer(playerE);
 		
 	}
 
+
+	@Override
+	public void load(World world) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
 	
 	ModelInstance playerModel;
 	private void playerModel(AssetManager assets){

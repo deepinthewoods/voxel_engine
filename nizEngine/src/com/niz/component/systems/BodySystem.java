@@ -25,6 +25,11 @@ public class BodySystem extends EntityProcessingSystem {
 	public BodySystem(){
 		super(Aspect.getAspectForAll(Body.class, Physics.class, Position.class));
 		ray = new RayCaster();
+		
+
+	}
+	@Override
+	public void initialize(){
 		posMap = world.getMapper(Position.class);
 		physMap = world.getMapper(Physics.class);
 		//moveMap = world.getMapper(Move.class);
@@ -32,7 +37,6 @@ public class BodySystem extends EntityProcessingSystem {
 		voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
 
 	}
-	
 	
 	
 

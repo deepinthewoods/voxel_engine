@@ -2,6 +2,7 @@ package com.niz.actions;
 
 import voxel.VoxelWorld;
 
+import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.MathUtils;
@@ -37,7 +38,7 @@ public class AInactive extends Action{
 			
 			if (withinRangeOfEnemy || onScreen){
 				isBlocking = false;
-				
+				 
 				//parent.e.add(Physics.class).set(parent.e, parent.e.get(Position.class));
 				//removeSelf();
 				//Pools.free(this);
@@ -60,6 +61,11 @@ public class AInactive extends Action{
 
 	@Override
 	public void onEnd() {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onAddToWorld(World world) {
 		// TODO Auto-generated method stub
 		
 	}

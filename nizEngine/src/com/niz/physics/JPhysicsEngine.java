@@ -198,4 +198,9 @@ public class JPhysicsEngine{
 	public void setParticleTotal(int tot){
 		particleTotal = tot;
 	}
+
+	public void applyForce(int id, float x, float y, float z) {
+		particles[id*4].add(x,y,z);		
+		
+	}
 }
