@@ -82,7 +82,7 @@ public class PlatformerInputSystem extends InputSystem{
 		tmp2.z = 0;
 		//move by tmp2
 		//tmp2.scl(.085f);
-		camera.position.sub(tmp2.x, tmp2.y, tmp2.z);
+		camera.position.sub(tmp2.x, 0, 0);
 		camera.update(true);
 		//Gdx.app.log(TAG,  "dragged"+tmp2);
 		player.get(Target.class).v.x = camera.position.x;;

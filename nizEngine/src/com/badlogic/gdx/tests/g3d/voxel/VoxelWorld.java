@@ -27,6 +27,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -203,11 +204,12 @@ public class VoxelWorld implements RenderableProvider {
 			renderable.meshPartOffset = 0;
 			renderable.meshPartSize = numVertices[i];
 			renderable.primitiveType = GL20.GL_TRIANGLES;
+			renderable.worldTransform.set(idMatrix);
 			renderables.add(renderable);
 			renderedChunks++;
 		}
 	}
-
+	private Matrix4 idMatrix = new Matrix4().idt();
 	public int get(Vector3 p) {
 		return get(p.x, p.y, p.z);
 	}

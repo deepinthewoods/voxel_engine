@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 
 public class Target implements Component {
 
-	public Vector3 v;
+	public Vector3 v = new Vector3();
 
 	@Override
 	public void reset() {

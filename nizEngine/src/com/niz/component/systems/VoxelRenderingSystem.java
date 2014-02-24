@@ -62,7 +62,7 @@ public class VoxelRenderingSystem extends DrawSystem{
 		this.modelBatch = modelBatch;
 		this.camera = camera;
 		this.tiles = tiles;
-		
+		create(camera);
 	}
 
 	public void create (Camera camera) {
@@ -71,76 +71,20 @@ public class VoxelRenderingSystem extends DrawSystem{
 		
 		DefaultShader.defaultCullFace = GL20.GL_FRONT;
 		GLES10Shader.defaultCullFace = GL20.GL_FRONT;
-		
-		//controller = new FirstPersonCameraController(camera);
-		//Gdx.input.setInputProcessor(controller);
-		
+
 		lights = new Environment();
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
 		lights.add(new DirectionalLight().set(1, 1, 1, 0, -1, 0));
-		
-		
-		
-		
-		//Texture texture = new Texture(Gdx.files.internal("data/g3d/tiles.png"));
-		//TextureRegion[][] tiles = TextureRegion.split(texture, 16, 16);
-		
+
 		MathUtils.random.setSeed(0);
-		
-		
-		
-		
+
 		voxelWorld = new VoxelWorld(defs, tiles, 1, 1, 1);
-		PerlinNoiseGenerator.generateVoxels(voxelWorld, 0, 63, 10);
-		float camX = voxelWorld.voxelsX / 2f;
-		float camZ = voxelWorld.voxelsZ / 2f;
-		float camY = voxelWorld.getHighest(camX, camZ) + 1.5f;
-		//camera.position.set(camX, camY, camZ);
+		//PerlinNoiseGenerator.generateVoxels(voxelWorld, 0, 63, 10);
+
 	}
 
-	private BlockDefinition[] getDefaultBlockDefinitions(TextureRegion[][] tiles) {
-		BlockDefinition[] defs = new BlockDefinition[32];
-		defs[0] = new BlockDefinition(tiles, 0)
-		{
-
-			@Override
-			public void onUpdate(int x, int y, int z, VoxelWorld world) {
-			}
-			
-		};
-		defs[0].dayLightLoss = 0;
-		defs[0].isSolid = false;
-		//for (int i = 1; i < 32; i++){
-		//	defs[i] = new BlockDefinition(tiles, i);
-			//BlockDefinition.add(i, defs[i]);
-		//}
-		
-		defs[1] = new BlockDefinition(tiles, 1){
-
-			@Override
-			public void onUpdate(int x, int y, int z, VoxelWorld world) {
-			}
-			
-		};
-		
-		defs[10] = new TopBottomBlock(tiles, 8, 1, 10);
-		
-		
-		return defs;
 	
-	}
 
-	public void render (ModelBatch modelBatch) {
-		
-		//camera.update();
-		modelBatch.render(voxelWorld, lights);
-
-		//controller.update();
-		
-		spriteBatch.begin();
-		font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond() + ", #visible chunks: " + voxelWorld.renderedChunks + "/" + voxelWorld.numChunks, 0, 20);
-		spriteBatch.end();
-	}
 	
 	public void resize (int width, int height) {
 		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
@@ -153,13 +97,15 @@ public class VoxelRenderingSystem extends DrawSystem{
 
 	@Override
 	protected void processEntities(Array<Entity> entities) {
-		render(modelBatch);
+		modelBatch.render(voxelWorld, lights);
+		spriteBatch.begin();
+		font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond() + ", #visible chunks: " + voxelWorld.renderedChunks + "/" + voxelWorld.numChunks, 0, 20);
+		spriteBatch.end();
 		
 	}
 	
 	@Override
 	public void initialize() {
-		create(camera);
 		
 	};
 }

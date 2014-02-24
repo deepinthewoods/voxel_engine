@@ -1,10 +1,7 @@
 package com.niz.actions;
 
-import voxel.VoxelWorld;
-
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.BinaryHeap;
 import com.badlogic.gdx.utils.BinaryHeap.Node;
 import com.niz.physics.JPhysicsEngine;

@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.DrawSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -46,14 +47,12 @@ public class ModelRenderingSystem extends DrawSystem{
 	protected void process(com.artemis.Entity e, float dt) {
 		ModelInfo mod = miMap.get(e);
 		Vector3 pos = posMap.get(e).pos;
-		Move move = moveMap.get(e);
-		//Gdx.app.log("cont", "modelrender"+(pos));
+		Move move = moveMap.get(e);		
 		
 		positionTransform.setToTranslation(pos.x, pos.y, pos.z);
 		positionTransform.rotate(0, 1, 0, -move.rotation+90);
 		
 		mod.anim.update(dt);
-		
 		mod.model.transform.set(positionTransform);
 		
 		batch.render(mod.model, env);		

@@ -4,11 +4,11 @@ import voxel.BlockDefinition;
 
 import com.artemis.Entity;
 import com.artemis.World;
+import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -22,9 +22,15 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
+import com.niz.actions.AStand;
+import com.niz.actions.ActionList;
 import com.niz.blocks.TopBottomBlock;
+import com.niz.component.ActionComponent;
 import com.niz.component.ModelInfo;
+import com.niz.component.Move;
+import com.niz.component.Physics;
 import com.niz.component.Position;
+import com.niz.component.Target;
 import com.niz.component.input.PlatformerInputSystem;
 import com.niz.component.systems.AABBBodySystem;
 import com.niz.component.systems.BucketedSystem;
@@ -32,7 +38,6 @@ import com.niz.component.systems.ModelRenderingSystem;
 import com.niz.component.systems.MovementSystem;
 import com.niz.component.systems.PhysicsSystem;
 import com.niz.component.systems.VoxelRenderingSystem;
-import com.niz.component.systems.VoxelSystem;
 
 public class PlatformerFactory extends GameFactory{
 	public static final float VIEWPORT_SIZE = 20;
@@ -43,79 +48,51 @@ public class PlatformerFactory extends GameFactory{
 	PlatformerInputSystem inputSys;
 	
 	@Override
-	public void init(World world, float timeStep, AssetManager assets, Camera worldCamera
-			, ModelBatch modelBatch) {
-		
-		world.setDelta(timeStep);
-		//PerspectiveCamera cam = (PerspectiveCamera) worldCamera;
-	
-		
-		worldCamera.position.set(0, 0, 22);
-		worldCamera.far =52;
-		worldCamera.near = 8;
-		worldCamera.rotate(25, -1, 0, 0);
-		//OrthographicCamera cam = (OrthographicCamera) worldCamera; 
-		//cam.zoom = .050f;
-		
-		worldCamera.update();
-		
-		
-		Gdx.app.log(TAG,  "campos"+worldCamera.position);
-		world.setSystem(new PhysicsSystem(1, 100, timeStep));
-		
-		//world.setSystem(voxelSys);
-		world.setSystem(new MovementSystem());
-		world.setSystem(new AABBBodySystem());
-		world.setSystem(new BucketedSystem());
-		
-		
-	//	Environment env = new Environment();
-		//env.set( new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f) );	
-		
+	public void init(World world, AssetManager assets, Camera camera) {
 		
 		
 		
 		assets.load("data/tiles.png", Texture.class);
 		assets.load("data/fades.png", Pixmap.class);
+		assets.load("data/humanmodel.g3db", Model.class);
 	}
 
 	@Override
-	public void doneLoading(AssetManager assets, World world, Camera camera, ModelBatch modelBatch) {
+	public void doneLoading(float timeStep, World world, AssetManager assets, Camera camera, ModelBatch modelBatch) {
 		TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
-		
-		BlockDefinition[] blockDefs = getBlockDefs(tiles);
-		Pixmap fades = assets.get("data/fades.png", Pixmap.class);
-		
-		//voxelSys.set(tiles, blockDefs, fades, camera);
-		
-		//setDefaultMap(voxelSys.voxelWorld);
-		
-		
-		Entity e;
-		e = world.createEntity();
-		
-		e.add(Position.class);
-		ModelInfo mod = e.add(ModelInfo.class);
-	
-		AnimationController animController = new AnimationController(playerModel);
-		mod.set(playerModel, animController );
-		world.addEntity(e);
-		
-	
-		
-		
-		
 		BlockDefinition[] defs = getBlockDefs(tiles);
+		Pixmap fades = assets.get("data/fades.png", Pixmap.class);
+		playerModel(assets);
+		
+		camera.position.set(8, 8, 22);
+		camera.far =52;
+		camera.near = 8;
+		camera.rotate(25, -1, 0, 0);
+		camera.update();
+		
+		
+		world.setDelta(timeStep);
+		PhysicsSystem physics = new PhysicsSystem(1, 100, timeStep);
+		world.setSystem(physics );
+		Physics.physics = physics.engine;
+		world.setSystem(new MovementSystem());
+		world.setSystem(new AABBBodySystem());
+		world.setSystem(new BucketedSystem());
+		
 		VoxelRenderingSystem voxelR = new VoxelRenderingSystem(defs);	
 		voxelR.set(modelBatch, camera, tiles[0]);
-		
 		world.setDrawSystem(voxelR);
 		
 		ModelRenderingSystem modelR = new ModelRenderingSystem();
 		modelR.set(modelBatch, camera, voxelR.lights);
 		world.setDrawSystem(modelR );
 		
+		setDefaultMap(voxelR.voxelWorld);
+		
+		
+		
 		inputSys = new PlatformerInputSystem(camera, voxelR.voxelWorld);
+		inputSys.setPlayer(e);
 		world.setInputSystem(inputSys);
 		
 		world.initialize();
@@ -127,16 +104,31 @@ public class PlatformerFactory extends GameFactory{
 			for (int y = 0; y < 300; y++)
 				for (int z = 0; z < 2; z++)
 					if (MathUtils.randomBoolean()) {
-						Gdx.app.log(TAG, "ww"+x+","+y+","+z);
+						Gdx.app.log(TAG, "ww"+x+","+y+","+z+(voxelWorld == null));
 						voxelWorld.set(x, y, z, (byte) 10);
 					}
 	}
 
 	@Override
 	public void newGame(World world) {
-		Entity playerE = world.createEntity();
-		world.addEntity(playerE);
-		inputSys.setPlayer(playerE);
+		Entity e;
+		e = world.createEntity();
+		
+		Position pos = e.add(Position.class);
+		e.add(Physics.class).set(e, pos);
+	
+		e.add(Target.class);
+		ActionList actionList = e.add(ActionComponent.class).action;
+		actionList.actions.add(AStand.class);
+		
+		ModelInfo mod = e.add(ModelInfo.class);
+		AnimationController animController = new AnimationController(playerModel);
+		mod.set(playerModel, animController );
+		
+		e.add(Move.class);
+		
+		world.addEntity(e);
+		inputSys.setPlayer(e);
 		
 	}
 
@@ -175,7 +167,7 @@ public class PlatformerFactory extends GameFactory{
 		
 		for (int i = 0,  prog = 0; i < skin.length; i++)
 			prog = addTo(prog, all, skin[i]);
-		playerModel = new ModelInstance(assets.get("data/_voxel5.g3db", Model.class)
+		playerModel = new ModelInstance(assets.get("data/humanmodel.g3db", Model.class)
 				, all
 				);
 
@@ -183,7 +175,7 @@ public class PlatformerFactory extends GameFactory{
 		AnimationController playerAnimController = new AnimationController(playerModel);
 		
 		
-		ModelInstance zombieModel = new ModelInstance(assets.get("data/_voxel5.g3db", Model.class)
+		ModelInstance zombieModel = new ModelInstance(assets.get("data/humanmodel.g3db", Model.class)
 				, all
 				);
 		colors = new Color[]{

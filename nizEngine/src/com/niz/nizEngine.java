@@ -55,7 +55,7 @@ public class nizEngine implements ApplicationListener {
 		camera.near = 0.5f;
 		camera.far = 1000f;
 		camera.update();
-		factory.init(world, timeStep, assets, camera, modelBatch);
+		factory.init(world, assets, camera);
 		//worldTest.create(camera);
 		
 	}
@@ -71,7 +71,7 @@ public class nizEngine implements ApplicationListener {
 	@Override
 	public void render() {		
 		if(!assetsLoaded && assets.update()) {
-			factory.doneLoading(assets, world, camera, modelBatch);
+			factory.doneLoading(timeStep, world, assets, camera, modelBatch);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){
