@@ -10,7 +10,7 @@ public class RootAction extends Action {
 	}
 
 	@Override
-	public void onStart() {
+	public void onStart(World world) {
 
 	}
 
@@ -19,9 +19,7 @@ public class RootAction extends Action {
 
 	}
 
-	@Override
-	public void onAddToWorld(World world) {
-		
-	}
+	
+	
 
 }

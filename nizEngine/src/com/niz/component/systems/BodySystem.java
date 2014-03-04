@@ -69,18 +69,18 @@ public class BodySystem extends EntityProcessingSystem {
 		int xside = BlockDefinition.LEFT, yside = BlockDefinition.BOTTOM, zside = BlockDefinition.BACK;
 		tmp.set(position);
 		tmp.sub(oldPosition);
-		float xo = c.xs, yo = c.ys, zo = c.zs;
+		//float xo = c.xs, yo = c.ys, zo = c.zs;
 		if (tmp.x < 0){
-			xo = -c.xs;
+			//xo = -c.xs;
 			xside = BlockDefinition.RIGHT;
 		} 
 		if (tmp.y < 0){
-			yo = -c.ys;
+			//yo = -c.ys;
 			yside = BlockDefinition.TOP;
 		}
 			
 		if (tmp.z < 0){
-			zo = -c.zs;
+			//zo = -c.zs;
 			zside = BlockDefinition.FRONT;
 		}
 		

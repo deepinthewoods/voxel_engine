@@ -1,21 +1,14 @@
 package com.artemis.systems;
 
 import com.artemis.Aspect;
-import com.artemis.Entity;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.utils.Array;
+import com.niz.component.Player;
 
 public abstract class InputSystem extends EntitySystem implements InputProcessor{
 
-	public InputSystem() {
-		super(Aspect.getEmpty());
-		
+	public InputSystem(Aspect aspect) {
+		super(aspect);
 	}
 
-	@Override
-	protected void processEntities(Array<Entity> entities) {
-		// TODO Auto-generated method stub
-
-	}
-	protected abstract void onTick();
+	
 }

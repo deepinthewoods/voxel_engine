@@ -6,13 +6,13 @@ public class ASync extends Action {
 
 	@Override
 	public void update(float dt) {
-		if (parent.getRoot() == this)
+		if (parentList.getRoot() == this)
 			isFinished = true;
 
 	}
 
 	@Override
-	public void onStart() {
+	public void onStart(World world) {
 		// TODO Auto-generated method stub
 
 	}
@@ -23,10 +23,6 @@ public class ASync extends Action {
 
 	}
 
-	@Override
-	public void onAddToWorld(World world) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 }

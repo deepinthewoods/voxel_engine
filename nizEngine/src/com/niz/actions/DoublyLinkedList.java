@@ -1,23 +1,25 @@
 package com.niz.actions;
 
-import com.artemis.Entity;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 
 public class DoublyLinkedList {
+	private static final String TAG = "doublyLinkedList";
 	//protected Action root;
 	protected Action rootNode, lastNode;
 	private Action progress;
 	//protected Action last;
 	//private Action prevProgress;
 	//boolean hasNext;
-	public Entity e;
+	//public Entity e;
 	public ActionList parent;
-	
+	//private Array<Action> added = new Array<Action>(false, 1);
 	public DoublyLinkedList(){
 		rootNode = new RootAction();
 		lastNode = new RootAction();
 		lastNode.prev = rootNode;
-		rootNode.next = lastNode;
+		rootNode.setNext(lastNode);
 	}
 	
 	public void iter() {
@@ -26,15 +28,15 @@ public class DoublyLinkedList {
 	}
 	
 	public Action next() {
-		progress = progress.next;
+		progress = progress.getNext();
 		return  (Action) progress;
 	}
 
 	
 	
 	public void remove() {
-		progress.next.prev = progress.prev;
-		progress.prev.next = progress.next;
+		progress.getNext().prev = progress.prev;
+		progress.prev.setNext(progress.getNext());
 		//progress.onEnd();
 		
 		Pools.free(progress);
@@ -42,16 +44,19 @@ public class DoublyLinkedList {
 	}
 
 	private void add(Action node){
-		node.parent = this;
-		node.next = lastNode;
+		node.parentList = this;
+		node.setParent(parent.parent);
+		node.setNext(lastNode);
 		node.prev = lastNode.prev;
-		lastNode.prev.next = node;
+		lastNode.prev.setNext(node);
 		lastNode.prev = node;
 		node.isFinished = false;
-		//Gdx.app.log("jfdskl", "added"+ (rootNode.next == lastNode )   );
+		Gdx.app.log(TAG, "added"+ (parent.parent == null)   );
 
-		node.onStart();
+		
 	}
+	
+
 	public<M extends Action> M add(Class<M> class1){
 		M instance = Pools.obtain(class1);
 		add(instance);
@@ -69,7 +74,7 @@ public class DoublyLinkedList {
 
 	public boolean hasNext() {
 		//if (rootNode.next == lastNode) return false;
-		return progress.next != lastNode;
+		return progress.getNext() != lastNode;
 	}
 	
 
@@ -82,7 +87,7 @@ public class DoublyLinkedList {
 		Action n = rootNode;
 		while (n != null){
 			if (n.getClass() == class1) return true;
-			n = n.next;
+			n = n.getNext();
 		}
 		return false;
 	}
@@ -90,29 +95,14 @@ public class DoublyLinkedList {
 	public int size() {
 		Action prog = rootNode;
 		int tot = 0;
-		while (prog.next != lastNode){
+		while (prog.getNext() != lastNode){
 			tot++;
-			prog = prog.next;
+			prog = prog.getNext();
 		}
 		return tot;
 	}
 
-	public<M extends Action> M addFirst(Class<M> class1) {
-		M instance = Pools.obtain(class1);
-		addFirst(instance);
-		return instance;
-		
-	}
 	
-	public void addFirst(Action node){
-		node.parent = this;
-
-		rootNode.insertAfterMe(node);
-		node.isFinished = false;
-		//Gdx.app.log("jfdskl", "added"+ (rootNode.next == lastNode )   );
-
-		node.onStart();
-	}
 	
 	
 	

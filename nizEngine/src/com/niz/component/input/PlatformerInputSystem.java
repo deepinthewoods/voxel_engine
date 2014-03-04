@@ -1,11 +1,15 @@
 package com.niz.component.input;
 
+import com.artemis.Aspect;
 import com.artemis.Entity;
 import com.artemis.systems.InputSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
+import com.badlogic.gdx.utils.Array;
+import com.niz.component.Player;
+import com.niz.component.Position;
 import com.niz.component.Target;
 
 public class PlatformerInputSystem extends InputSystem{
@@ -13,10 +17,11 @@ public class PlatformerInputSystem extends InputSystem{
 	private static final long TAP_TIME_LIMIT = 200;
 	private static final String TAG = "platformerInput";
 	Camera camera;
-	Entity player;
+	
 	long touchTime;
 	Vector3 tmp = new Vector3(), tmp2 = new Vector3();
 	public PlatformerInputSystem(Camera cam, VoxelWorld vw) {
+		super(Aspect.getAspectForOne(Player.class));
 		float aspectRatio = Gdx.graphics.getWidth()/(float)Gdx.graphics.getHeight();
 		float height = 40;
 		//camera = (OrthographicCamera) cam;
@@ -66,6 +71,7 @@ public class PlatformerInputSystem extends InputSystem{
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		Entity player = getActives().get(0);
 		//if time < limit or drag amount small maybe cancel
 		//move
 		tmp.set(0,0,0);
@@ -99,13 +105,10 @@ public class PlatformerInputSystem extends InputSystem{
 		return false;
 	}
 
-	public void setPlayer(Entity playerE) {
-		player = playerE;
-		
-	}
-
+	
 	@Override
-	protected void onTick() {
+	protected void processEntities(Array<Entity> entities) {
+		//Gdx.app.log(TAG,  "pos "+entities.get(0).get(Position.class).pos);
 	}
 
 }

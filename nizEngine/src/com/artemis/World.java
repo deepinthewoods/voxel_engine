@@ -360,6 +360,10 @@ public class World implements Disposable {
 		Gdx.input.setInputProcessor(inputMux);
 		return sys;
 	}
+    
+    public InputMultiplexer getInputMux(){
+    	return inputMux;
+    }
 
 	/**
      * Will add a system to this world.

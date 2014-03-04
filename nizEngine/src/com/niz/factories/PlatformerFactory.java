@@ -4,8 +4,6 @@ import voxel.BlockDefinition;
 
 import com.artemis.Entity;
 import com.artemis.World;
-import com.artemis.systems.EntitySystem;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -20,19 +18,21 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.niz.actions.AStand;
 import com.niz.actions.ActionList;
 import com.niz.blocks.TopBottomBlock;
+import com.niz.component.AABBBody;
 import com.niz.component.ActionComponent;
 import com.niz.component.ModelInfo;
 import com.niz.component.Move;
 import com.niz.component.Physics;
+import com.niz.component.Player;
 import com.niz.component.Position;
 import com.niz.component.Target;
 import com.niz.component.input.PlatformerInputSystem;
 import com.niz.component.systems.AABBBodySystem;
+import com.niz.component.systems.ActionSystem;
 import com.niz.component.systems.BucketedSystem;
 import com.niz.component.systems.ModelRenderingSystem;
 import com.niz.component.systems.MovementSystem;
@@ -50,8 +50,6 @@ public class PlatformerFactory extends GameFactory{
 	@Override
 	public void init(World world, AssetManager assets, Camera camera) {
 		
-		
-		
 		assets.load("data/tiles.png", Texture.class);
 		assets.load("data/fades.png", Pixmap.class);
 		assets.load("data/humanmodel.g3db", Model.class);
@@ -64,7 +62,7 @@ public class PlatformerFactory extends GameFactory{
 		Pixmap fades = assets.get("data/fades.png", Pixmap.class);
 		playerModel(assets);
 		
-		camera.position.set(8, 8, 22);
+		camera.position.set(8, 14, 22);
 		camera.far =52;
 		camera.near = 8;
 		camera.rotate(25, -1, 0, 0);
@@ -78,7 +76,8 @@ public class PlatformerFactory extends GameFactory{
 		world.setSystem(new MovementSystem());
 		world.setSystem(new AABBBodySystem());
 		world.setSystem(new BucketedSystem());
-		
+		world.setSystem(new ActionSystem());
+		world.setSystem(new MovementSystem());
 		VoxelRenderingSystem voxelR = new VoxelRenderingSystem(defs);	
 		voxelR.set(modelBatch, camera, tiles[0]);
 		world.setDrawSystem(voxelR);
@@ -86,38 +85,46 @@ public class PlatformerFactory extends GameFactory{
 		ModelRenderingSystem modelR = new ModelRenderingSystem();
 		modelR.set(modelBatch, camera, voxelR.lights);
 		world.setDrawSystem(modelR );
-		
-		setDefaultMap(voxelR.voxelWorld);
+
 		
 		
 		
 		inputSys = new PlatformerInputSystem(camera, voxelR.voxelWorld);
-		inputSys.setPlayer(e);
+		//inputSys.setPlayer(e);
 		world.setInputSystem(inputSys);
 		
 		world.initialize();
+		
 	}
 
 	
 	private void setDefaultMap(VoxelWorld voxelWorld) {
 		for (int x = 0; x < 200; x++)
-			for (int y = 0; y < 300; y++)
-				for (int z = 0; z < 2; z++)
-					if (MathUtils.randomBoolean()) {
-						Gdx.app.log(TAG, "ww"+x+","+y+","+z+(voxelWorld == null));
+			for (int y = 0; y < 2; y++)
+				for (int z = 0; z < 1; z++){
+					//if (MathUtils.randomBoolean()) {
+						//Gdx.app.log(TAG, "ww"+x+","+y+","+z+(voxelWorld == null));
 						voxelWorld.set(x, y, z, (byte) 10);
 					}
 	}
 
 	@Override
 	public void newGame(World world) {
+		//Gdx.app.log(TAG, "NEW GAME");
+		
+		VoxelRenderingSystem voxelRR = world.getSystem(VoxelRenderingSystem.class);
+		setDefaultMap(voxelRR.voxelWorld );
+		
 		Entity e;
 		e = world.createEntity();
+		world.addEntity(e);
 		
 		Position pos = e.add(Position.class);
-		e.add(Physics.class).set(e, pos);
-	
+		pos.pos.set(1f, 5, .5f);
+		e.add(Physics.class);
+		e.add(AABBBody.class).ys0 = -.15f;
 		e.add(Target.class);
+		e.add(Move.class);
 		ActionList actionList = e.add(ActionComponent.class).action;
 		actionList.actions.add(AStand.class);
 		
@@ -126,10 +133,8 @@ public class PlatformerFactory extends GameFactory{
 		mod.set(playerModel, animController );
 		
 		e.add(Move.class);
-		
-		world.addEntity(e);
-		inputSys.setPlayer(e);
-		
+		e.add(Player.class);
+		//inputSys.setPlayer(e);
 	}
 
 

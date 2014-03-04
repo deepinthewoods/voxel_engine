@@ -121,7 +121,9 @@ public class VoxelWorld implements RenderableProvider {
 		if(chunkY < 0 || chunkY >= chunksY) return;
 		int chunkZ = iz / CHUNK_SIZE_Z;
 		if(chunkZ < 0 || chunkZ >= chunksZ) return;
-		chunks[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ].set(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z, voxel);
+		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ;
+		chunks[index].set(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z, voxel);
+		dirty[index] = true;
 	}
 
 	public byte get(float x, float y, float z) {

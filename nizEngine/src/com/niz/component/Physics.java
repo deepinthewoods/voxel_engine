@@ -12,7 +12,7 @@ public class Physics implements Component {
 	public Vector3 oldPosition;
 	public static JPhysicsEngine physics;
 
-	public void set(Entity e, Position pos) {
+	public void set(Position pos) {
 		
 		id = physics.addParticle(pos.pos.x, pos.pos.y, pos.pos.z, pos.pos);
 		//pos.pos = physics.getPositionVector(id);

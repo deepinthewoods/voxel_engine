@@ -1,12 +1,14 @@
 package com.niz.actions;
 
-import com.badlogic.gdx.Gdx;
+import com.artemis.Entity;
+import com.artemis.World;
 
 
 public class ActionList {
 	private static final String TAG = "action list";
 	public DoublyLinkedList actions = new DoublyLinkedList();
-	//public Entity e;
+	public Entity parent;
+	public World world;
 	
 	public ActionList(){
 		actions.parent = this;

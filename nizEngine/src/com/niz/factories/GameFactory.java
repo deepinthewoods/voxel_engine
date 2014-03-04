@@ -6,7 +6,15 @@ import com.artemis.World;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 
 public abstract class GameFactory {
@@ -28,6 +36,52 @@ public abstract void load(World world);
 			
 		}
 	}
+
+	public void initMenu(final World world, Skin skin, Stage stage) {
+		final Table table = new Table();
+		final Button newGame = new Button(new Label("New", skin), skin);
+		
+		newGame.addListener(new ClickListener(){
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				
+				table.addAction(
+						Actions.sequence(
+								Actions.fadeOut(.4f)
+								, 
+								Actions.parallel(
+										Actions.removeActor(table)
+										,
+										new Action(){
+
+											@Override
+											public boolean act(float delta) {
+												newGame(world);
+												return true;
+											}
+											
+										}
+								)
+						)
+				);
+				
+				newGame.removeListener(this);
+			}
+		});
+		
+		
+		table.add(newGame);
+		
+		table.setFillParent(true);
+		table.layout();
+		
+		stage.addActor(table);
+		
+		
+		
+	}
+
+	
 
 	
 }

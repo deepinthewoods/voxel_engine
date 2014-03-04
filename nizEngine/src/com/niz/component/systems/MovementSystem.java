@@ -57,7 +57,7 @@ public class MovementSystem extends EntityProcessingSystem {
 		AABBBody body = bodyMap.get(e);
 		if (c.moving){
 			move(c.rotation, c.speed, position, oldPosition, c);
-		} else if (!c.moving){//apply friction
+		} else if (!c.moving && body.onGround){//apply friction
 			//Gdx.app.log(TAG, "friction");
 			tmp.set(position).sub(oldPosition);
 			tmp.mul(.5f);

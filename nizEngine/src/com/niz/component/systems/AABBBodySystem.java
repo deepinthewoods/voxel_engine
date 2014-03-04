@@ -55,7 +55,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		bodyMap = world.getMapper(AABBBody.class);
 	}
 	
-	public boolean onTick(Vector3 position, Vector3 oldPosition, Body c, VoxelWorld voxelWorld) {
+	public boolean onTick(Vector3 position, Vector3 oldPosition, AABBBody c, VoxelWorld voxelWorld) {
 		//if (oldPosition.dst2(position) > .25f)
 		//	Gdx.app.log(TAG, "TUNNELLL");
 		if (!VoxelChunk.blockDef(voxelWorld.get(position)).isSolid){
@@ -71,13 +71,13 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		tmp.set(position);
 		tmp.sub(oldPosition);
 			//boolean r = false, t = false, f = false;
-		float xo = c.xs, yo = c.ys, zo = c.zs;
+		float xo = c.xs, yo = c.ys1, zo = c.zs;
 		if (tmp.x < 0){
 			xo = -c.xs;
 			xside = BlockDefinition.RIGHT;
 		} 
 		if (tmp.y < 0){
-			yo = -c.ys;
+			yo = c.ys0;
 			yside = BlockDefinition.TOP;
 		}
 			
@@ -123,7 +123,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		
 	}
 	private int getAdjustedPosition(Vector3 position, int sidea, int sideb,
-			int sidec, Vector3 v, Body body, VoxelWorld voxelWorld) {
+			int sidec, Vector3 v, AABBBody body, VoxelWorld voxelWorld) {
 		//Vector3 v = vectors[vIndex];
 		v.set(0,0,0);
 		boolean done = false;
@@ -135,7 +135,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		if (vadd != 0) done = true;
 			return done?1:0;
 	}
-	private int collideLine(Vector3 position, int side, Vector3 v, Body body, VoxelWorld voxelWorld) {
+	private int collideLine(Vector3 position, int side, Vector3 v, AABBBody body, VoxelWorld voxelWorld) {
 		
 		bounds(position, side, start, end, v, body);
 		int vectorsAdded = 0;
@@ -176,32 +176,32 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		return vectorsAdded;
 	}
 	
-	private void bounds(Vector3 position, int side, Vector3 start, Vector3 end, Vector3 offset, Body c) {
+	private void bounds(Vector3 position, int side, Vector3 start, Vector3 end, Vector3 offset, AABBBody c) {
 		switch (side){
 
 			case BlockDefinition.BOTTOM:
-				start.set(position).add(offset).add(-c.xs, c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, c.zs);
+				start.set(position).add(offset).add(-c.xs, c.ys1, -c.zs);
+				end.set(position).add(offset).add(c.xs, c.ys1, c.zs);
 				break;
 			case BlockDefinition.TOP:
-				start.set(position).add(offset).add(-c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, -c.ys, c.zs);
+				start.set(position).add(offset).add(-c.xs, c.ys0, -c.zs);
+				end.set(position).add(offset).add(c.xs, c.ys0, c.zs);
 				break;
 			case BlockDefinition.RIGHT:
-				start.set(position).add(offset).add(-c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(-c.xs, c.ys, c.zs);
+				start.set(position).add(offset).add(-c.xs, c.ys0, -c.zs);
+				end.set(position).add(offset).add(-c.xs, c.ys1, c.zs);
 				break;
 			case BlockDefinition.LEFT:
-				start.set(position).add(offset).add(c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, c.zs);
+				start.set(position).add(offset).add(c.xs, c.ys0, -c.zs);
+				end.set(position).add(offset).add(c.xs, c.ys1, c.zs);
 				break;
 			case BlockDefinition.FRONT:
-				start.set(position).add(offset).add(-c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, -c.zs);
+				start.set(position).add(offset).add(-c.xs, c.ys0, -c.zs);
+				end.set(position).add(offset).add(c.xs, c.ys1, -c.zs);
 				break;
 			case BlockDefinition.BACK:
-				start.set(position).add(offset).add(-c.xs, -c.ys, c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, c.zs);
+				start.set(position).add(offset).add(-c.xs, c.ys0, c.zs);
+				end.set(position).add(offset).add(c.xs, c.ys1, c.zs);
 				break;
 		}
 	}

@@ -1,55 +1,61 @@
 package com.niz.actions;
 
+import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.BinaryHeap;
 import com.badlogic.gdx.utils.BinaryHeap.Node;
+import com.badlogic.gdx.utils.Pool.Poolable;
 import com.niz.physics.JPhysicsEngine;
 
-public abstract class Action extends Node{
+public abstract class Action extends Node implements Poolable{
 	public Action() {
 		super(0);
 		
 	}
-	public static final float ANIM_TRANSITION_TIME = .5f;
+	public static final float ANIM_TRANSITION_TIME = .25f;
 
 	public static final int LEGS = 1, RIGHT_ARM = 2, LEFT_ARM = 4, HEAD = 8;
 	public  static final int LANE_MOVING = 16;
 	private static final String TAG = "Action";
 	public abstract void update(float dt);
-	public abstract void onStart();
+	public abstract void onStart(World world);
 	public abstract void onEnd();
 	public boolean isFinished, isBlocking;
 	public int lanes;
 	public float elapsed;
 	public float duration;
-	protected Action prev, next;
-	protected DoublyLinkedList parent;
+	protected Action prev;
+
+	private Action next;
+	protected DoublyLinkedList parentList;
+	protected Entity parent;
 	public boolean delayed = false;;
 	
 	public void insertAfterMe(Action node){
 		
-		next.prev = node;
-		node.next = next;
+		getNext().prev = node;
+		node.setNext(next);
 		node.prev = this;
-		next = node;
-		
+		setNext(node);
+		node.parent = parent;
+		node.parentList = parentList;
+
+		node.onStart(parentList.parent.world);
 		
 		
 	}
 	public void insertBeforeMe(Action node){
-		{
-			prev.next = node;
-			node.prev = prev;
-			node.next = this;
-			prev = node;
-		}
+		//Gdx.app.log(TAG, "parent"+(parentList == null));
+		prev.setNext(node);
+		node.prev = prev;
+		node.setNext(this);
+		prev = node;
+		node.parent = parent;
+		node.parentList = parentList;
+		node.onStart(parentList.parent.world);
 	}
 	
-	public void removeSelf(){
-			prev.next = next;
-			next.prev = prev;
-	}
 	
 	public static void setStaticReferences(JPhysicsEngine physics1,
 			VoxelWorld voxelWorld1) {
@@ -93,11 +99,26 @@ public abstract class Action extends Node{
 	}
 	
 	public Action getAfterMe(Class<? extends Action> clas){
-		Action prog = next;
-		while (prog.getClass() != clas && prog != null)prog = prog.next;
+		Action prog = getNext();
+		while (prog.getClass() != clas && prog != null)prog = prog.getNext();
 		return prog;
 	}
-	public abstract void onAddToWorld(World world);
-		
+	
+	public Action getNext() {
+		return next;
+	}
+	public void setNext(Action next) {
+		this.next = next;
+	}
+	public Entity getParent() {
+		return parent;
+	}
+	public void setParent(Entity parent) {
+		this.parent = parent;
+	}
+	@Override
+	public void reset(){
+		isFinished = false;
+	}
 	
 }

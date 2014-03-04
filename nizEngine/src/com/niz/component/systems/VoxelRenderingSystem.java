@@ -74,11 +74,11 @@ public class VoxelRenderingSystem extends DrawSystem{
 
 		lights = new Environment();
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
-		lights.add(new DirectionalLight().set(1, 1, 1, 0, -1, 0));
+		lights.add(new DirectionalLight().set(1, 1, 1, 0, -1, .5f));
 
 		MathUtils.random.setSeed(0);
 
-		voxelWorld = new VoxelWorld(defs, tiles, 1, 1, 1);
+		voxelWorld = new VoxelWorld(defs, tiles, 10, 10, 1);
 		//PerlinNoiseGenerator.generateVoxels(voxelWorld, 0, 63, 10);
 
 	}
