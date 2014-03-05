@@ -57,7 +57,7 @@ public class AStand extends Action {
 
 	@Override
 	public void onEnd() {
-		Gdx.app.log(TAG, "end");
+		//Gdx.app.log(TAG, "end");
 	}
 
 	

@@ -122,7 +122,7 @@ public class PlatformerFactory extends GameFactory{
 		Position pos = e.add(Position.class);
 		pos.pos.set(1f, 5, .5f);
 		e.add(Physics.class);
-		e.add(AABBBody.class).ys0 = -.15f;
+		e.add(AABBBody.class).ys = .75f;
 		e.add(Target.class);
 		e.add(Move.class);
 		ActionList actionList = e.add(ActionComponent.class).action;

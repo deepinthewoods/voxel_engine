@@ -70,7 +70,7 @@ public class ARun extends Action {
 	@Override
 	public void onEnd() {
 		// TODO Auto-generated method stub
-		Gdx.app.log(TAG, "end");
+		//Gdx.app.log(TAG, "end");
 	}
 
 }
