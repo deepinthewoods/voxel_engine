@@ -40,7 +40,7 @@ public class VoxelWorld implements RenderableProvider {
 
 	public final VoxelChunk[] chunks;
 	public final Mesh[] meshes;
-	public final Material[] materials;
+	//public final Material[] materials;
 	public final boolean[] dirty;
 	public final int[] numVertices;
 	public float[] vertices;
@@ -52,12 +52,12 @@ public class VoxelWorld implements RenderableProvider {
 	public final int voxelsZ;
 	public int renderedChunks;
 	public int numChunks;
-	private final TextureRegion[] tiles;
+	//private final TextureRegion[] tiles;
 
-	public VoxelWorld(BlockDefinition[] blockDefs, TextureRegion[] tiles, int chunksX, int chunksY, int chunksZ) {
+	public VoxelWorld(BlockDefinition[] blockDefs, int chunksX, int chunksY, int chunksZ) {
 		VoxelChunk.defs = blockDefs;
 		if (blockDefs == null) throw new GdxRuntimeException("nill init");
-		this.tiles = tiles;
+		
 		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
 		this.chunksX = chunksX;
 		this.chunksY = chunksY;
@@ -103,12 +103,7 @@ public class VoxelWorld implements RenderableProvider {
 		for(i = 0; i < numVertices.length; i++) numVertices[i] = 0;
 
 		this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z*2];
-		this.materials = new Material[chunksX * chunksY * chunksZ];
-		for(i = 0; i < materials.length; i++) {
-			materials[i] = new Material(new ColorAttribute(ColorAttribute.Diffuse,  1f, 1f, 1f, 1)
-			, new TextureAttribute(TextureAttribute.Diffuse, tiles[0].getTexture()) 
-			);
-		}
+		
 	}
 
 	public void set(float x, float y, float z, byte voxel) {
