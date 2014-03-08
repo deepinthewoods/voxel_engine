@@ -2,6 +2,7 @@ package com.niz.actions;
 
 import com.artemis.Entity;
 import com.artemis.World;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.BinaryHeap;
 import com.badlogic.gdx.utils.BinaryHeap.Node;
@@ -46,7 +47,7 @@ public abstract class Action extends Node implements Poolable{
 		
 	}
 	public void insertBeforeMe(Action node){
-		//Gdx.app.log(TAG, "parent"+(parentList == null));
+		//Gdx.app.log(TAG, "parent"+(parent == null));
 		prev.setNext(node);
 		node.prev = prev;
 		node.setNext(this);

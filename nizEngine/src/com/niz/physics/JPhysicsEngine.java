@@ -16,7 +16,7 @@ public class JPhysicsEngine{
 	public int[] ids;
 	public IntMap<Constraint> constraints;
 	protected int constraintRepetitions;
-	private Vector3 temp = new Vector3(), gravity = new Vector3(0f,-30f, 0f);;
+	private Vector3 temp = new Vector3(), gravity = new Vector3(0f,-20f, 0f);;
 	protected int particleTotal = 0;
 	private float fTimeStep, fTimeStep2;//Vector3.fixedMul(fTimeStep, fTimeStep);
 	

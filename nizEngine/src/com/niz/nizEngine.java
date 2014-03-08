@@ -1,16 +1,24 @@
 package com.niz;
 
+import com.artemis.Component;
+import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
+import com.niz.component.AABBBody;
+import com.niz.component.ActionComponent;
 import com.niz.factories.GameFactory;
 import com.niz.factories.PlatformerFactory;
 
@@ -19,7 +27,7 @@ public class NizEngine implements ApplicationListener {
 	//private OrthographicCamera uiCamera;
 	//private Camera  worldCamera;
 	//private PerspectiveCamer
-	//private SpriteBatch spriteBatch;
+	private Batch spriteBatch;
 	private World world;
 	private ShapeBatch shapeBatch;
 	//private ModelBatch modelBatch;
@@ -28,9 +36,13 @@ public class NizEngine implements ApplicationListener {
 	protected AssetManager assets;
 	private boolean assetsLoaded;
 	private ModelBatch modelBatch;
-	private Camera camera;
+	
+	private Camera camera, shapeCamera;
 	private Skin skin;
 	private Stage stage;
+	private BitmapFont font;
+	public static Entity player;
+	public static int tick;
 	@Override
 	public void create() {		
 		float w = Gdx.graphics.getWidth();
@@ -38,6 +50,7 @@ public class NizEngine implements ApplicationListener {
 		
 		skin = new Skin(Gdx.files.internal("data/skin/Holo-dark-mdpi.json"));
 		stage = new Stage();
+		spriteBatch = stage.getSpriteBatch();
 		//spriteBatch = new SpriteBatch();
 		shapeBatch = new ShapeBatch();
 		world = new World();
@@ -47,6 +60,8 @@ public class NizEngine implements ApplicationListener {
 		
 		factory = new PlatformerFactory();
 		modelBatch = new ModelBatch();
+		shapeCamera = new OrthographicCamera(Gdx.graphics.getWidth()/ Gdx.graphics.getHeight(), 1);
+		//shapeCamera.update();
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		//camera = new OrthographicCamera(20f,15f);
 		camera.near = 0.5f;
@@ -57,9 +72,9 @@ public class NizEngine implements ApplicationListener {
 		
 		factory.init(world, assets, camera);
 		
-		factory.initMenu(world, skin, stage);
+		factory.initMenu(world, skin, stage, camera);
 		//worldTest.create(camera);
-		
+		font = new BitmapFont();
 	}
 
 	@Override
@@ -74,7 +89,7 @@ public class NizEngine implements ApplicationListener {
 	@Override
 	public void render() {		
 		if(!assetsLoaded && assets.update()) {
-			factory.doneLoading(timeStep, world, assets, camera, modelBatch);
+			factory.doneLoading(timeStep, world, assets, camera, modelBatch, shapeBatch);
 			assetsLoaded = true;
 			//factory.newGame(world);
 			//assets.dispose();
@@ -93,6 +108,7 @@ public class NizEngine implements ApplicationListener {
 		while (accumulator > timeStep){
 			accumulator -= timeStep;
 			world.process();
+			tick++;
 		}
 		stage.act(delta);
 		//DRAW
@@ -107,10 +123,40 @@ public class NizEngine implements ApplicationListener {
 		world.draw(delta);
 		modelBatch.end();
 		
+		spriteBatch.begin();
+		Array<Component> array = new Array<Component>();
+		player.getComponents(array );
+		for (int i = 0; i < array.size; i++)
+		font.draw(spriteBatch, array.get(i).getClass().getSimpleName()
+				, 10, 40+i*20);
+		
+		if (player.getComponent(AABBBody.class) != null)
+		font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond() + ",   "+
+		//player.getComponentBits()
+		//.get(ActionComponent.class)
+		//.action.actions.getRoot().getNext()
+		(player.get(AABBBody.class).onGround?"onGround  ":"")
+		+(player.get(AABBBody.class).wasOnGround?"wasOnGround  ":"")
+		+(player.get(AABBBody.class).onWall?"onWall  ":"")
+		+(player.get(AABBBody.class).wasOnWall?"wasOnWall":"")
+		, 0, 20);
+		
+		if (player.getComponent(AABBBody.class) != null)
+			font.draw(spriteBatch, " "+
+			player//.getComponentBits()
+			.get(ActionComponent.class)
+			.action.actions.getRoot().getNext().getClass().getSimpleName()
+			//player.get(AABBBody.class).onWall
+			, 280, 20);
+	
+		spriteBatch.end();
+		shapeBatch.draw(shapeCamera, camera);
+		
 	}
 
 	@Override
 	public void resize(int width, int height) {
+		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
 		camera.viewportWidth = width;
 		camera.viewportHeight = height;
 		camera.update();

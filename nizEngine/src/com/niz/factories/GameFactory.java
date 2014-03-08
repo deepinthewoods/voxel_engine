@@ -3,6 +3,7 @@ package com.niz.factories;
 import com.artemis.Component;
 import com.artemis.Entity;
 import com.artemis.World;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -16,14 +17,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.niz.ShapeBatch;
 
 public abstract class GameFactory {
 
 public abstract void init(World world, AssetManager assets, Camera camera) ;
 
-public abstract void doneLoading(float timeStep, World world, AssetManager assets, Camera camera, ModelBatch modelBatch);
+public abstract void doneLoading(float timeStep, World world, AssetManager assets, Camera camera, ModelBatch modelBatch, ShapeBatch shapeBatch);
 
-public abstract void newGame(World world);
+public abstract void newGame(World world, Stage stage);
 
 public abstract void load(World world);
 
@@ -37,7 +39,9 @@ public abstract void load(World world);
 		}
 	}
 
-	public void initMenu(final World world, Skin skin, Stage stage) {
+	public void initMenu(final World world, Skin skin, final Stage stage, Camera camera) {
+		//Group group = new WidgetGroup();
+		Gdx.input.setInputProcessor(stage);
 		final Table table = new Table();
 		final Button newGame = new Button(new Label("New", skin), skin);
 		
@@ -56,9 +60,11 @@ public abstract void load(World world);
 
 											@Override
 											public boolean act(float delta) {
-												newGame(world);
+												newGame(world, stage);
 												return true;
 											}
+
+											
 											
 										}
 								)
@@ -76,6 +82,8 @@ public abstract void load(World world);
 		table.layout();
 		
 		stage.addActor(table);
+		
+		//stage.addActor(group);
 		
 		
 		

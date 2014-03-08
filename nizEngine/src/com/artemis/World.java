@@ -11,6 +11,9 @@ import com.artemis.systems.event.SystemEvent;
 import com.artemis.utils.SafeArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -121,6 +124,14 @@ public class World implements Disposable {
 
         for (int i = 0; i < systemsArray.size; i++) {
             systemsArray.get(i).initialize();
+        }
+    }
+    
+    public void initializeDraw(ModelBatch modelBatch, Camera cam, Environment env){
+    	for (int i = 0; i < drawSystemsArray.size; i++) {
+            drawSystemsArray.get(i).initialize();
+            drawSystemsArray.get(i).set(modelBatch, cam, env);
+
         }
     }
 

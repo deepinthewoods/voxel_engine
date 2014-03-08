@@ -11,7 +11,7 @@ import com.niz.component.Position;
 import com.niz.component.Target;
 
 public class ARun extends Action {
-	private static final float MIN_RUN_DIST = 0.064f;
+	protected static final float MIN_RUN_DIST = 0.1264f;
 	private static final String TAG = "ARun";
 	private ComponentMapper<Position> positionMap;
 	private ComponentMapper<Target> targetMap;

@@ -15,11 +15,16 @@ public class DoublyLinkedList {
 	//public Entity e;
 	public ActionList parent;
 	//private Array<Action> added = new Array<Action>(false, 1);
-	public DoublyLinkedList(){
+	public DoublyLinkedList(ActionList list){
+		parent = list;
 		rootNode = new RootAction();
 		lastNode = new RootAction();
 		lastNode.prev = rootNode;
 		rootNode.setNext(lastNode);
+		rootNode.parent = parent.parent;
+		rootNode.parentList = this;
+		lastNode.parent = parent.parent;
+		lastNode.parentList = this;
 	}
 	
 	public void iter() {
@@ -51,7 +56,7 @@ public class DoublyLinkedList {
 		lastNode.prev.setNext(node);
 		lastNode.prev = node;
 		node.isFinished = false;
-		Gdx.app.log(TAG, "added"+ (parent.parent == null)   );
+		//Gdx.app.log(TAG, "added"+ (parent.parent == null)   );
 
 		
 	}
@@ -100,6 +105,14 @@ public class DoublyLinkedList {
 			prog = prog.getNext();
 		}
 		return tot;
+	}
+
+	public void clear() {
+		iter();
+		while (hasNext()) {
+			next();
+			remove();
+		}
 	}
 
 	

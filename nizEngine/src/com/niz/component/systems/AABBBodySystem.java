@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
+import com.niz.NizEngine;
 import com.niz.component.AABBBody;
 import com.niz.component.Physics;
 import com.niz.component.Position;
@@ -18,6 +19,8 @@ import com.niz.component.Position;
 public class AABBBodySystem extends EntityProcessingSystem {
 	
 	private static final String TAG = "aabb body";
+
+	private static final float THRESHOLD = 0.00005f;;
 	
 	private static Vector3 tmp = new Vector3(), tmpV = new Vector3();;	
 	//private VoxelWorld voxelWorld;
@@ -65,6 +68,8 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		//	body.onGround = true;
 		//	Gdx.app.log(TAG, "on ground");
 		//}
+		body.wasOnGround = body.onGround;
+		body.wasOnWall = body.onWall;
 		body.onGround = false;
 		body.onWall = false;
 		
@@ -75,10 +80,12 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		tmp.sub(oldPosition);
 			//boolean r = false, t = false, f = false;
 		float xo = body.xs, yo = body.ys, zo = body.zs;
+		
 		if (tmp.x < 0){
 			xo = -body.xs;
 			xside = BlockDefinition.RIGHT;
 		} 
+		
 		if (tmp.y < 0){
 			yo = -body.ys;
 			yside = BlockDefinition.TOP;
@@ -89,16 +96,20 @@ public class AABBBodySystem extends EntityProcessingSystem {
 			zside = BlockDefinition.FRONT;
 		}
 		int vectorCount = 0;
-		
+	
+
 		vectorCount += getAdjustedPosition(position, yside, xside, zside,  returnVectors[vectorCount], body, voxelWorld);
 		vectorCount += getAdjustedPosition(position, yside, zside, xside,  returnVectors[vectorCount], body, voxelWorld);
-		if (vectorCount != 0) body.onGround = true;
-		int vectorProgressAfterYStep = vectorCount;
+	
+		int yCount = vectorCount;
+		//if (vectorCount != 0) body.onGround = true;
+		//int vectorProgressAfterYStep = vectorCount;
 		vectorCount += getAdjustedPosition(position, xside, yside, zside,  returnVectors[vectorCount], body, voxelWorld);
 		vectorCount += getAdjustedPosition(position, xside, zside, yside,  returnVectors[vectorCount], body, voxelWorld);
 		vectorCount += getAdjustedPosition(position, zside, yside, xside,  returnVectors[vectorCount], body, voxelWorld);
 		vectorCount += getAdjustedPosition(position, zside, xside, yside,  returnVectors[vectorCount], body, voxelWorld);
-		if (vectorProgressAfterYStep != vectorCount) body.onWall = true;
+		//if (vectorProgressAfterYStep != vectorCount) body.onWall = true;
+	
 		
 		float dist2 = 1000000000;
 		int smallestIndex = 0;
@@ -111,17 +122,25 @@ public class AABBBodySystem extends EntityProcessingSystem {
 				smallestIndex = i;//tmp.set(returnVectors[i]);
 				dist2 = returnVectors[i].len2();
 				
+				
 			}
 		}	
 		if (vectorCount > 0){
-			//Gdx.app.log(TAG, "coll "+ returnVectors[smallestIndex] +"  count"+vectorCount);
-			position.add(returnVectors[smallestIndex]);
-			//body.onGround = true;
-		} else {
-			//body.onGround = false;
+			if (smallestIndex >= yCount){
+				//Gdx.app.log(TAG, "c" +
+				//		"wall "+ returnVectors[smallestIndex] +"  count"+vectorCount+ "dist "+dist2);
+				position.add(returnVectors[smallestIndex]);
+			
+				body.onWall = true;
+			
+			} else {
+				//Gdx.app.log(TAG, "ground "+ returnVectors[smallestIndex] +"  count"+vectorCount );
+				position.add(returnVectors[smallestIndex]);
+				body.onGround = true;
+			}
 		}
 		
-		Gdx.app.log(TAG, "gr"+body.onGround+"  ,  "+body.onWall);
+		//Gdx.app.log(TAG, "gr"+body.onGround+"  ,  "+body.onWall);// + "  pos "+position + "  oldPos "+oldPosition);
 		return false;
 		
 		
@@ -134,7 +153,9 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		v.set(0,0,0);
 		boolean done = false;
 		int vadd = collideLine(position, sidea, v, body, voxelWorld);
-		if (vadd != 0)done = true;
+		if (vadd != 0){
+			done = true;
+		}
 		vadd = collideLine(position, sideb, v, body, voxelWorld);
 		if (vadd != 0) done = true;
 		vadd = collideLine(position, sidec, v, body, voxelWorld);
@@ -230,7 +251,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		Physics phys = physMap.get(e);
 		Position pos = posMap.get(e);
 		AABBBody body = bodyMap.get(e);
-		VoxelWorld voxelWorld = world.getSystem(VoxelRenderingSystem.class).voxelWorld;
+		VoxelWorld voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
 		onTick(pos.pos, phys.oldPosition, body, voxelWorld);
 		
 	}

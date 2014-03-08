@@ -7,11 +7,12 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.component.ModelInfo;
 import com.niz.component.Move;
+import com.niz.component.Physics;
 import com.niz.component.Position;
 import com.niz.component.Target;
 
 public class AStand extends Action {
-	private static final float MIN_RUN_DIST = 0.0852f;
+	//private static final float MIN_RUN_DIST = 0.0852f;
 
 	private static final String TAG = "AStand";
 
@@ -21,6 +22,9 @@ public class AStand extends Action {
 	private ComponentMapper<ModelInfo> animM;
 
 	private ComponentMapper<Move> moveMap;
+
+	private ComponentMapper<Physics> physMap;
+	
 	
 	
 
@@ -33,13 +37,14 @@ public class AStand extends Action {
 				targetPos = targetMap.get(parent).v;
 		float dist = Math.abs(targetPos.x-v.x);
 
-		if (dist > MIN_RUN_DIST){
+		if (dist > ARun.MIN_RUN_DIST){
 			Action node = Pools.obtain(ARun.class);
 			this.insertBeforeMe(node);
 			isFinished = true;
 			//Gdx.app.log(TAG, "change to run"+dist);
 
 		}
+		v.set(physMap.get(parent).oldPosition);
 		
 	}
 
@@ -50,8 +55,9 @@ public class AStand extends Action {
 		targetMap = world.getMapper(Target.class);
 		animM = world.getMapper(ModelInfo.class);
 		moveMap = world.getMapper(Move.class);
+		physMap = world.getMapper(Physics.class);
 		moveMap.get(parent).moving = false;
-		//Gdx.app.log(TAG, "stsrt");
+		Gdx.app.log(TAG, "stsrt");
 		animM.get(parent).anim.animate("Stand", -1, null,  ANIM_TRANSITION_TIME);
 	}
 

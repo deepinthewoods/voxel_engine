@@ -52,12 +52,12 @@ public class VoxelWorld implements RenderableProvider {
 	public final int voxelsZ;
 	public int renderedChunks;
 	public int numChunks;
-	//private final TextureRegion[] tiles;
-
+	private final Material material;
+	
 	public VoxelWorld(BlockDefinition[] blockDefs, Material material, int chunksX, int chunksY, int chunksZ) {
 		VoxelChunk.defs = blockDefs;
 		if (blockDefs == null) throw new GdxRuntimeException("nill init");
-		
+		this.material = material;
 		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
 		this.chunksX = chunksX;
 		this.chunksY = chunksY;
@@ -196,7 +196,7 @@ public class VoxelWorld implements RenderableProvider {
 			}
 			if(numVertices[i] == 0) continue;
 			Renderable renderable = pool.obtain();
-			renderable.material = materials[i];
+			renderable.material = material;
 			renderable.mesh = mesh;
 			renderable.meshPartOffset = 0;
 			renderable.meshPartSize = numVertices[i];

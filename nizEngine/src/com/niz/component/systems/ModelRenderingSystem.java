@@ -21,9 +21,8 @@ public class ModelRenderingSystem extends DrawSystem{
 	ComponentMapper<Position> posMap;
 	ComponentMapper<Move> moveMap;
 	
-	ModelBatch batch;
-	Camera cam;
-	Environment env;
+	
+	
 	public ModelRenderingSystem(){
 		super(Aspect.getAspectForAll(ModelInfo.class, Position.class, Move.class));
 		
@@ -35,11 +34,7 @@ public class ModelRenderingSystem extends DrawSystem{
 		moveMap = world.getMapper(Move.class);
 	}
 	
-	public void set(ModelBatch batch, Camera cam, Environment env){
-		this.batch = batch;
-		this.cam = cam;
-		this.env = env;
-	}
+	
 	
 	private Matrix4 rotationTransform = new Matrix4(), positionTransform = new Matrix4();
 
@@ -49,13 +44,13 @@ public class ModelRenderingSystem extends DrawSystem{
 		Vector3 pos = posMap.get(e).pos;
 		Move move = moveMap.get(e);		
 		
-		positionTransform.setToTranslation(pos.x, pos.y, pos.z);
+		positionTransform.setToTranslation(pos.x, pos.y-.75f, pos.z);
 		positionTransform.rotate(0, 1, 0, -move.rotation+90);
 		
 		mod.anim.update(dt);
 		mod.model.transform.set(positionTransform);
 		
-		batch.render(mod.model, env);		
+		modelBatch.render(mod.model, env);		
 		
 	}
 

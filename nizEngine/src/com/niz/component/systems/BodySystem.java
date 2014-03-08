@@ -34,7 +34,7 @@ public class BodySystem extends EntityProcessingSystem {
 		physMap = world.getMapper(Physics.class);
 		//moveMap = world.getMapper(Move.class);
 		bodyMap = world.getMapper(Body.class);
-		voxelWorld = world.getSystem(VoxelRenderingSystem.class).voxelWorld;
+		voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
 
 	}
 	

@@ -1,6 +1,7 @@
 package com.niz;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -20,15 +21,15 @@ public class ShapeBatch {
 	public Array<Color> lineCircleColorQ = new Array<Color>(), lineColorQ = new Array<Color>(), filledCircleColorQ = new Array<Color>()
 			, targetColorQ = new Array<Color>();;
 			
-	public void create() {
+	public ShapeBatch() {
 		shapes = new ShapeRenderer();
 		//circles = new Vector2[10][];
 		//circles[0] = initLineCircle(16);
 	}
 	Vector3 b = new Vector3();
-	public void draw(OrthographicCamera cam, OrthographicCamera worldCam) {
+	public void draw(Camera shapeCamera, Camera worldCam) {
 
-		shapes.setProjectionMatrix(cam.combined);
+		shapes.setProjectionMatrix(shapeCamera.combined);
 		shapes.begin(ShapeType.Line);
 		while (lineCircleQ.size > 0){
 			shapes.setColor(lineCircleColorQ.pop());
@@ -169,6 +170,26 @@ public class ShapeBatch {
 		
 		lineQ.add(0);
 		lineQ.add(-radius);
+		lineColorQ.add(c);
+	}
+	
+	public void drawCentralLine(){
+		Color c = semiWhite;
+		float radius = .5f;
+		lineQ.add(radius);
+		lineQ.add(0);
+		
+		
+		//lineQ.add(-radius);
+		//lineQ.add(0);
+		//lineColorQ.add(c);
+		
+		lineQ.add(-radius);
+		lineQ.add(0);
+		
+		
+		//lineQ.add(0);
+		//lineQ.add(-radius);
 		lineColorQ.add(c);
 	}
 	

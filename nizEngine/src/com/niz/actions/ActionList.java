@@ -6,12 +6,12 @@ import com.artemis.World;
 
 public class ActionList {
 	private static final String TAG = "action list";
-	public DoublyLinkedList actions = new DoublyLinkedList();
+	public DoublyLinkedList actions;
 	public Entity parent;
 	public World world;
 	
 	public ActionList(){
-		actions.parent = this;
+		actions = new DoublyLinkedList(this);;
 	}
 	
 	public void update(float dt){
