@@ -54,7 +54,7 @@ public class VoxelWorld implements RenderableProvider {
 	public int numChunks;
 	//private final TextureRegion[] tiles;
 
-	public VoxelWorld(BlockDefinition[] blockDefs, int chunksX, int chunksY, int chunksZ) {
+	public VoxelWorld(BlockDefinition[] blockDefs, Material material, int chunksX, int chunksY, int chunksZ) {
 		VoxelChunk.defs = blockDefs;
 		if (blockDefs == null) throw new GdxRuntimeException("nill init");
 		
