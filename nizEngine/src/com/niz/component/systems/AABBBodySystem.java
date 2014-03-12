@@ -68,10 +68,10 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		//	body.onGround = true;
 		//	Gdx.app.log(TAG, "on ground");
 		//}
-		body.wasOnGround = body.onGround;
-		body.wasOnWall = body.onWall;
+	//	body.wasOnGround = body.onGround;
+	//	body.wasOnWall = body.onWall;
 		body.onGround = false;
-		body.onWall = false;
+		//body.onWall = false;
 		
 		dir.set(position).sub(oldPosition);
 		int xside = BlockDefinition.LEFT, yside = BlockDefinition.BOTTOM, zside = BlockDefinition.BACK;
@@ -100,7 +100,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 
 		vectorCount += getAdjustedPosition(position, yside, xside, zside,  returnVectors[vectorCount], body, voxelWorld);
 		vectorCount += getAdjustedPosition(position, yside, zside, xside,  returnVectors[vectorCount], body, voxelWorld);
-	
+		//boolean hitGround = ;
 		int yCount = vectorCount;
 		//if (vectorCount != 0) body.onGround = true;
 		//int vectorProgressAfterYStep = vectorCount;
@@ -132,6 +132,10 @@ public class AABBBodySystem extends EntityProcessingSystem {
 				position.add(returnVectors[smallestIndex]);
 			
 				body.onWall = true;
+				boolean onGroundBlock = VoxelChunk.blockDef(voxelWorld.get(position.x, position.y - body.ys-.1f, position.z)).isSolid;
+				if (onGroundBlock){
+					body.onGround = true;
+				}
 			
 			} else {
 				//Gdx.app.log(TAG, "ground "+ returnVectors[smallestIndex] +"  count"+vectorCount );
@@ -155,6 +159,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		int vadd = collideLine(position, sidea, v, body, voxelWorld);
 		if (vadd != 0){
 			done = true;
+			
 		}
 		vadd = collideLine(position, sideb, v, body, voxelWorld);
 		if (vadd != 0) done = true;

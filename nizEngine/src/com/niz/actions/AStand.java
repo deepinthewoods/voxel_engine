@@ -42,6 +42,7 @@ public class AStand extends Action {
 			this.insertBeforeMe(node);
 			isFinished = true;
 			//Gdx.app.log(TAG, "change to run"+dist);
+			return;
 
 		}
 		v.set(physMap.get(parent).oldPosition);
@@ -57,7 +58,7 @@ public class AStand extends Action {
 		moveMap = world.getMapper(Move.class);
 		physMap = world.getMapper(Physics.class);
 		moveMap.get(parent).moving = false;
-		Gdx.app.log(TAG, "stsrt");
+		//Gdx.app.log(TAG, "stsrt");
 		animM.get(parent).anim.animate("Stand", -1, null,  ANIM_TRANSITION_TIME);
 	}
 

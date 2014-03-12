@@ -2,6 +2,7 @@ package com.niz.actions;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.component.AABBBody;
 import com.niz.component.Move;
@@ -17,10 +18,10 @@ public class AJump extends Action {
 		//Gdx.app.log(TAG, "body"+(bodyMap == null));
 		AABBBody body = bodyMap.get(parent);
 		if (body.onGround){
-			insertBeforeMe(Pools.obtain(AStand.class));
+			insertAfterMe(Pools.obtain(AStand.class));
 			isFinished = true;
-		} else if (body.onWall && body.wasOnWall){
-			insertBeforeMe(Pools.obtain(AWallSlide.class));
+		} else if (body.onWall){
+			insertAfterMe(Pools.obtain(AWallSlide.class));
 			isFinished = true;
 		}
 	}

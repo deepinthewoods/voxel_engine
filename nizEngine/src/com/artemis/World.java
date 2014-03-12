@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.niz.ShapeBatch;
 
 /**
  * The primary instance for the framework. It contains all the managers.
@@ -127,10 +128,10 @@ public class World implements Disposable {
         }
     }
     
-    public void initializeDraw(ModelBatch modelBatch, Camera cam, Environment env){
+    public void initializeDraw(ModelBatch modelBatch, Camera cam, Environment env, ShapeBatch shapeBatch){
     	for (int i = 0; i < drawSystemsArray.size; i++) {
             drawSystemsArray.get(i).initialize();
-            drawSystemsArray.get(i).set(modelBatch, cam, env);
+            drawSystemsArray.get(i).set(modelBatch, cam, env, shapeBatch);
 
         }
     }

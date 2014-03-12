@@ -6,6 +6,7 @@ import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -21,13 +22,22 @@ import com.niz.ShapeBatch;
 
 public abstract class GameFactory {
 
-public abstract void init(World world, AssetManager assets, Camera camera) ;
+public abstract void register(World world, AssetManager assets, Camera camera) ;
 
 public abstract void doneLoading(float timeStep, World world, AssetManager assets, Camera camera, ModelBatch modelBatch, ShapeBatch shapeBatch);
 
 public abstract void newGame(World world, Stage stage);
 
 public abstract void load(World world);
+
+public void init(float timeStep, World world, Environment env, AssetManager assets, Camera camera, ModelBatch modelBatch, ShapeBatch shapeBatch){
+	
+	
+	doneLoading(timeStep, world, assets, camera, modelBatch, shapeBatch);
+	
+	world.initialize();
+	world.initializeDraw(modelBatch, camera, env, shapeBatch);
+}
 
 	Array<Component> components = new Array<Component>();
 	public void save(World world){

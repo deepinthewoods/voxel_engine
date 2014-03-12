@@ -4,6 +4,7 @@ import voxel.BlockDefinition;
 
 import com.artemis.Entity;
 import com.artemis.World;
+import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
@@ -45,6 +46,7 @@ import com.niz.component.Target;
 import com.niz.component.systems.AABBBodySystem;
 import com.niz.component.systems.ActionSystem;
 import com.niz.component.systems.BucketedSystem;
+import com.niz.component.systems.CameraBehaviorSystem;
 import com.niz.component.systems.ModelRenderingSystem;
 import com.niz.component.systems.MovementSystem;
 import com.niz.component.systems.PhysicsSystem;
@@ -65,9 +67,11 @@ public class PlatformerFactory extends GameFactory{
 	Actor dragger, clicker;
 	
 	Vector3 tmp = new Vector3(), tmp2 = new Vector3();
+
+	private CameraBehaviorSystem cameraSystem;
 	
 	@Override
-	public void init(World world, AssetManager assets, Camera camera) {
+	public void register(World world, AssetManager assets, Camera camera) {
 		
 		assets.load("data/tiles.png", Texture.class);
 		assets.load("data/fades.png", Pixmap.class);
@@ -112,14 +116,15 @@ public class PlatformerFactory extends GameFactory{
 		//modelR.set(modelBatch, camera, voxelR.lights);
 		world.setDrawSystem(modelR );
 
-		world.setDrawSystem(new TargetLineRenderingSystem(shapeBatch));
+		world.setDrawSystem(new TargetLineRenderingSystem());
 		
+		cameraSystem = new CameraBehaviorSystem(camera);
+		world.setSystem(cameraSystem);
 		
 		//inputSys = new PlatformerInputSystem(camera, voxelR.voxelWorld);
 		//inputSys.setPlayer(e);
 		//world.setInputSystem(inputSys);
-		world.initialize();
-		world.initializeDraw(modelBatch, cam, voxelR.lights);
+		
 		
 	}
 	@Override
@@ -152,7 +157,7 @@ public class PlatformerFactory extends GameFactory{
 		e.add(Move.class);
 		e.add(Player.class);
 		//inputSys.setPlayer(e);
-		
+		cameraSystem.prevPosition.set(e.get(Position.class).pos);
 		stage.addActor(dragger);
 	}
 
@@ -182,7 +187,7 @@ public class PlatformerFactory extends GameFactory{
 		Color[] colors = {
 				Color.PINK
 				, Color.RED
-				, Color.BLUE
+				, Color.CYAN
 				, Color.BLACK
 		};
 		int tot = 0;
@@ -263,8 +268,12 @@ public class PlatformerFactory extends GameFactory{
 		for (int i = 0; i < 30; i++){
 			voxelWorld.set(60,i,0, (byte)1);
 		}
-		for (int i = 5; i < 30; i++){
-			voxelWorld.set(44,i,0, (byte)1);
+		for (int i = 5; i < 50; i++){
+			voxelWorld.set(56,i,0, (byte)1);
+		}
+		
+		for (int i = 0; i < 30; i++){
+			voxelWorld.set(i+61,30,0, (byte)1);
 		}
 	}
 
@@ -346,20 +355,20 @@ public class PlatformerFactory extends GameFactory{
 			{
 				Move move = player.get(Move.class);
 				AABBBody body = player.get(AABBBody.class);
-				if (body.wasOnGround || body.onGround){
+				if (body.onGround){
 					player.get(Move.class).jumpQueued = true;
 					ActionComponent actionC = player.get(ActionComponent.class);
 					actionC.action.actions.clear();
 					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
 				}
-				if (body.wasOnWall || body.onWall){
+				if (body.onWall){
 					player.get(Move.class).jumpQueued = true;
 					player.get(Move.class).rotation += 180;
 					player.get(Move.class).rotation %= 360;
 					ActionComponent actionC = player.get(ActionComponent.class);
 					actionC.action.actions.clear();
 					Gdx.app.log(TAG, "wjump "+actionC.action.actions.size());
-					body.wasOnWall = false;
+					//body.wasOnWall = false;
 					body.onWall = false;
 					
 					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));

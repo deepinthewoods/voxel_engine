@@ -9,7 +9,7 @@ public class Move implements Component {
 	public float rotation;
 	public float speed = .04f, speedLimit = .07f;;
 	public boolean moving, jumpQueued;
-	public float jumpStrength = 1f;
+	public float jumpStrength = 2f;
 	
 	@Override
 	public void reset() {

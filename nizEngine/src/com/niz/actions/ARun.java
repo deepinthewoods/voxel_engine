@@ -2,9 +2,9 @@ package com.niz.actions;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
+import com.niz.component.AABBBody;
 import com.niz.component.ModelInfo;
 import com.niz.component.Move;
 import com.niz.component.Position;
@@ -17,6 +17,7 @@ public class ARun extends Action {
 	private ComponentMapper<Target> targetMap;
 	private ComponentMapper<ModelInfo> animM;
 	private ComponentMapper<Move> moveMap;
+	private ComponentMapper<AABBBody> bodyMap;
 	
 	
 
@@ -27,8 +28,18 @@ public class ARun extends Action {
 		//check position and stop
 		Vector3 v = positionMap.get(parent).pos, targetPos = targetMap.get(parent).v;
 		Move move = moveMap.get(parent);
+		AABBBody body = bodyMap.get(parent);
 		float dist = Math.abs(targetPos.x-v.x);
 
+		if (!body.onGround){
+			Action node = Pools.obtain(AJump.class);
+			move.moving = false;
+			this.insertBeforeMe(node);
+			isFinished = true;
+			return;
+			//move.moving = false;
+		}
+		
 		if (dist < MIN_RUN_DIST){
 			//Gdx.app.log(TAG, "change to stand"+dist);
 			Action node = Pools.obtain(AStand.class);
@@ -45,12 +56,14 @@ public class ARun extends Action {
 		
 	}
 
+	
 	@Override
 	public void onStart(World world) {
 		positionMap = world.getMapper(Position.class);
 		targetMap = world.getMapper(Target.class);
 		animM = world.getMapper(ModelInfo.class);
 		moveMap = world.getMapper(Move.class);
+		bodyMap = world.getMapper(AABBBody.class);
 		//switch gravity
 		float speed = 0.1f;
 		//int id = parent.get(Physics.class).id;

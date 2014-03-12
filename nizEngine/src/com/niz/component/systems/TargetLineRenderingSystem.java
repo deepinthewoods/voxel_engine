@@ -12,13 +12,13 @@ import com.niz.component.Player;
 
 public class TargetLineRenderingSystem extends DrawSystem {
 
-	private ShapeBatch batch;
+	//private ShapeBatch batch;
 	private ComponentMapper<ActionComponent> actionMap;
 	
 
-	public TargetLineRenderingSystem(ShapeBatch batch) {
+	public TargetLineRenderingSystem() {
 		super(Aspect.getAspectForAll(Player.class, ActionComponent.class));
-		this.batch = batch;
+		//this.batch = batch;
 	}
 
 	
@@ -34,7 +34,7 @@ public class TargetLineRenderingSystem extends DrawSystem {
 		for (Entity e: entities){
 			ActionComponent action = actionMap.get(e);
 			if (!action.action.actions.contains(AStand.class)){
-				batch.drawCentralLine();
+				shapeBatch.drawCentralLine();
 			}
 		}
 	}

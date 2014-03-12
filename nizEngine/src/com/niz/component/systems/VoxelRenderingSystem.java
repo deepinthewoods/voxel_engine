@@ -41,9 +41,8 @@ public class VoxelRenderingSystem extends DrawSystem{
 		
 	}
 
-	SpriteBatch spriteBatch;
+	//SpriteBatch spriteBatch;
 	//PerspectiveCamera camera;
-	public Environment lights;
 	//FirstPersonCameraController controller;
 	//public VoxelWorld voxelWorld;
 	
@@ -54,15 +53,13 @@ public class VoxelRenderingSystem extends DrawSystem{
 	}
 
 	public void create (Camera camera) {
-		spriteBatch = new SpriteBatch();
+		//spriteBatch = new SpriteBatch();
 		
 		
 		DefaultShader.defaultCullFace = GL20.GL_FRONT;
 		GLES10Shader.defaultCullFace = GL20.GL_FRONT;
 
-		lights = new Environment();
-		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
-		lights.add(new DirectionalLight().set(1, 1, 1, 0, -1, .5f));
+		
 
 		MathUtils.random.setSeed(0);
 		Gdx.app.log(TAG, "new voxelworld");
@@ -78,7 +75,8 @@ public class VoxelRenderingSystem extends DrawSystem{
 	@Override
 	protected void processEntities(Array<Entity> entities) {
 		VoxelWorld voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
-		modelBatch.render(voxelWorld, lights);
+		if (env == null) throw new GdxRuntimeException("null environment");
+		modelBatch.render(voxelWorld, env);
 		
 		
 	}

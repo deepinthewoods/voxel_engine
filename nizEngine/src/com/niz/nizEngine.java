@@ -12,13 +12,16 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.niz.component.AABBBody;
 import com.niz.component.ActionComponent;
+import com.niz.component.Move;
 import com.niz.factories.GameFactory;
 import com.niz.factories.PlatformerFactory;
 
@@ -41,6 +44,7 @@ public class NizEngine implements ApplicationListener {
 	private Skin skin;
 	private Stage stage;
 	private BitmapFont font;
+	private Environment env;
 	public static Entity player;
 	public static int tick;
 	@Override
@@ -68,9 +72,13 @@ public class NizEngine implements ApplicationListener {
 		camera.far = 1000f;
 		camera.update();
 		
+		env = new Environment();
+		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
+		env.add(new DirectionalLight().set(1, 1, 1, 0, -1, .5f));
+		
 		//orthoCamera = new OrthographicCamera();
 		
-		factory.init(world, assets, camera);
+		factory.register(world, assets, camera);
 		
 		factory.initMenu(world, skin, stage, camera);
 		//worldTest.create(camera);
@@ -89,7 +97,7 @@ public class NizEngine implements ApplicationListener {
 	@Override
 	public void render() {		
 		if(!assetsLoaded && assets.update()) {
-			factory.doneLoading(timeStep, world, assets, camera, modelBatch, shapeBatch);
+			factory.init(timeStep, world, env, assets, camera, modelBatch, shapeBatch);
 			assetsLoaded = true;
 			//factory.newGame(world);
 			//assets.dispose();
@@ -135,10 +143,12 @@ public class NizEngine implements ApplicationListener {
 		//player.getComponentBits()
 		//.get(ActionComponent.class)
 		//.action.actions.getRoot().getNext()
-		(player.get(AABBBody.class).onGround?"onGround  ":"")
-		+(player.get(AABBBody.class).wasOnGround?"wasOnGround  ":"")
-		+(player.get(AABBBody.class).onWall?"onWall  ":"")
-		+(player.get(AABBBody.class).wasOnWall?"wasOnWall":"")
+		(player.get(AABBBody.class).onGround?"onGround  ":"")+
+		//+(player.get(AABBBody.class).wasOnGround?"wasOnGround  ":"")
+		(player.get(AABBBody.class).onWall?"onWall  ":"")
+		+(player.get(Move.class).moving?"moving":"")
+	//			+(player.get(AABBBody.class).wasOnWall?"wasOnWall":"")
+//
 		, 0, 20);
 		
 		if (player.getComponent(AABBBody.class) != null)
