@@ -17,9 +17,9 @@ public class ShapeBatch {
 	private ShapeRenderer shapes;
 	//private Vector2[][] circles;
 	public FloatArray lineCircleQ = new FloatArray(), lineQ = new FloatArray(), filledCircleQ = new FloatArray()
-	, targetQ = new FloatArray();;
+	, targetQ = new FloatArray(), debugQ = new FloatArray();;
 	public Array<Color> lineCircleColorQ = new Array<Color>(), lineColorQ = new Array<Color>(), filledCircleColorQ = new Array<Color>()
-			, targetColorQ = new Array<Color>();;
+			, targetColorQ = new Array<Color>(), debugColorQ = new Array<Color>();;
 			
 	public ShapeBatch() {
 		shapes = new ShapeRenderer();
@@ -55,6 +55,8 @@ public class ShapeBatch {
 			}
 		}
 		shapes.end();
+		
+		
 		
 		shapes.begin(ShapeType.Line);
 		while (lineQ.size > 0){
@@ -101,6 +103,35 @@ public class ShapeBatch {
 		}
 		shapes.end();
 		
+		shapes.begin(ShapeType.Line);
+		while (debugQ.size > 0){
+			//Gdx.app.log("shaeps", "target");
+
+			shapes.setColor(debugColorQ.pop());
+			float px = debugQ.pop(), py = debugQ.pop(), pz = debugQ.pop();
+			worldCam.project(tmp.set(px,py,pz));
+			//float invX = Gdx.graphics.getWidth(), invY = 1/Gdx.graphics;
+			float widthOverHeight = (float)Gdx.graphics.getWidth()/Gdx.graphics.getHeight();
+
+			float invX = 1f/ Gdx.graphics.getWidth();
+			float invY = 1f/ Gdx.graphics.getHeight();
+			
+			tmp.x *= invX;
+			tmp.x *= widthOverHeight;
+			tmp.y *= invY;
+			
+			tmp.sub(widthOverHeight/2f, .5f, 0);
+			
+			float x = tmp.x, y = tmp.y, size = .025f, skewFactor = 1.3f;
+			//Gdx.app.log(TAG, "draw "+x+"   ,   "+y);
+			shapes.line(x+size*skewFactor, y, x+size, y-size);
+			shapes.line(x+size, y+size, x+size*skewFactor, y);
+			
+			shapes.line(x-size*skewFactor, y, x-size, y-size);
+			shapes.line(x-size, y+size, x-size*skewFactor, y);
+			
+		}
+		shapes.end();
 		
 	}
 	
@@ -218,6 +249,15 @@ public class ShapeBatch {
 	public void drawPath(IntArray path) {
 		if (path != null);
 			pathQ.add(path);
+		
+	}
+	public void drawDebug(float x, float y, float z, Color col){
+		//Gdx.app.log(TAG, "debug draw");
+
+		debugQ.add(z);
+		debugQ.add(y);
+		debugQ.add(x);
+		debugColorQ.add(col);
 		
 	}
 

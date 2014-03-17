@@ -72,7 +72,7 @@ public class MovementSystem extends EntityProcessingSystem {
 		if (alpha < 1f){
 			tmp.scl(-alpha);
 			position.set(oldPosition).add(tmp.x, tmp.y, 0);
-			Gdx.app.log(TAG, "move"+alpha);
+			//Gdx.app.log(TAG, "move"+alpha);
 		}
 	
 	}
@@ -103,8 +103,33 @@ public class MovementSystem extends EntityProcessingSystem {
 			//position.sub(tmp);
 		}
 		
+		if (c.jumping){
+			continuousJump(position, oldPosition, c.speedLimit, c.jumpStrength);
+		}
 		
 		
+		
+	}
+
+
+	private void continuousJump(Vector3 position, Vector3 oldPosition, float speedLimit, float jumpSpeed) {
+		position.y = oldPosition.y + speedLimit*jumpSpeed;
+		tmp.set(oldPosition).sub(position);
+		float 
+		vx = Math.abs(tmp.x)
+		, vy = Math.abs(tmp.y)
+		, vz = Math.abs(tmp.z);
+		
+		float dx = speedLimit/vx
+				, dy = (speedLimit*jumpSpeed)/vy
+				, dz = speedLimit / vz;
+
+		float alpha = Math.min(Math.min(dx, dy), dz);
+		if (alpha < 1f){
+			tmp.scl(-alpha);
+			position.set(oldPosition).add(tmp.x, tmp.y, 0);
+			//Gdx.app.log(TAG, "move"+alpha);
+		}
 	}
 	
 

@@ -10,6 +10,8 @@ public class Move implements Component {
 	public float speed = .04f, speedLimit = .07f;;
 	public boolean moving, jumpQueued;
 	public float jumpStrength = 2f;
+	public boolean jumping;
+	//public float jumpingSpeed = .1f;
 	
 	@Override
 	public void reset() {

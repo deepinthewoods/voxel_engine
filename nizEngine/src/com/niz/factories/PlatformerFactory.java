@@ -4,7 +4,6 @@ import voxel.BlockDefinition;
 
 import com.artemis.Entity;
 import com.artemis.World;
-import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
@@ -24,11 +23,11 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.ClickDragListener;
 import com.niz.NizEngine;
 import com.niz.ShapeBatch;
 import com.niz.actions.AJump;
@@ -37,20 +36,30 @@ import com.niz.actions.ActionList;
 import com.niz.blocks.TopBottomBlock;
 import com.niz.component.AABBBody;
 import com.niz.component.ActionComponent;
+import com.niz.component.CameraController;
+import com.niz.component.CameraInfluences;
+import com.niz.component.DebugPosition;
+import com.niz.component.DebugVector;
 import com.niz.component.ModelInfo;
 import com.niz.component.Move;
 import com.niz.component.Physics;
 import com.niz.component.Player;
 import com.niz.component.Position;
+import com.niz.component.RollingAverage;
 import com.niz.component.Target;
+import com.niz.component.VelocityPredictor;
 import com.niz.component.systems.AABBBodySystem;
 import com.niz.component.systems.ActionSystem;
 import com.niz.component.systems.BucketedSystem;
-import com.niz.component.systems.CameraBehaviorSystem;
+import com.niz.component.systems.CameraBehaviourSystem;
+import com.niz.component.systems.CameraFollowerSystem;
+import com.niz.component.systems.DebugPositionSystem;
+import com.niz.component.systems.DebugVectorSystem;
 import com.niz.component.systems.ModelRenderingSystem;
 import com.niz.component.systems.MovementSystem;
 import com.niz.component.systems.PhysicsSystem;
-import com.niz.component.systems.TargetLineRenderingSystem;
+import com.niz.component.systems.RollingAverageSystem;
+import com.niz.component.systems.VelocityPredictionSystem;
 import com.niz.component.systems.VoxelRenderingSystem;
 import com.niz.component.systems.VoxelSystem;
 
@@ -68,7 +77,7 @@ public class PlatformerFactory extends GameFactory{
 	
 	Vector3 tmp = new Vector3(), tmp2 = new Vector3();
 
-	private CameraBehaviorSystem cameraSystem;
+	private CameraFollowerSystem cameraSystem;
 	
 	@Override
 	public void register(World world, AssetManager assets, Camera camera) {
@@ -88,7 +97,7 @@ public class PlatformerFactory extends GameFactory{
 		playerModel(assets);
 		PerspectiveCamera cam = (PerspectiveCamera) camera;
 		cam.fieldOfView = 67;
-		camera.position.set(8, 12f, 22);
+		camera.position.set(1, 12f, 22);
 		camera.far =52;
 		camera.near = 8;
 		camera.rotate(0, -1, 0, 0);
@@ -108,6 +117,9 @@ public class PlatformerFactory extends GameFactory{
 
 		world.setSystem(voxelSystem);
 		
+		world.setSystem(new RollingAverageSystem());
+		world.setSystem(new VelocityPredictionSystem());
+		
 		VoxelRenderingSystem voxelR = new VoxelRenderingSystem();	
 		//voxelR.set(modelBatch, camera, tiles[0]);
 		world.setDrawSystem(voxelR);
@@ -116,10 +128,13 @@ public class PlatformerFactory extends GameFactory{
 		//modelR.set(modelBatch, camera, voxelR.lights);
 		world.setDrawSystem(modelR );
 
-		world.setDrawSystem(new TargetLineRenderingSystem());
+		world.setDrawSystem(new DebugVectorSystem());
+		world.setDrawSystem(new DebugPositionSystem());
+		//world.setDrawSystem(new TargetLineRenderingSystem());
 		
-		cameraSystem = new CameraBehaviorSystem(camera);
+		cameraSystem = new CameraFollowerSystem(camera);
 		world.setSystem(cameraSystem);
+		world.setSystem(new CameraBehaviourSystem());
 		
 		//inputSys = new PlatformerInputSystem(camera, voxelR.voxelWorld);
 		//inputSys.setPlayer(e);
@@ -143,7 +158,7 @@ public class PlatformerFactory extends GameFactory{
 		pos.pos.set(1f, 5, .5f);
 		e.add(Physics.class);
 		e.add(AABBBody.class).ys = .75f;
-		e.add(Target.class);
+		e.add(Target.class).v.set(10000,0,0);
 		
 		Move move = e.add(Move.class);
 		move.jumpStrength = 2.5f;
@@ -156,9 +171,47 @@ public class PlatformerFactory extends GameFactory{
 		
 		e.add(Move.class);
 		e.add(Player.class);
+		e.add(DebugPosition.class);
 		//inputSys.setPlayer(e);
 		cameraSystem.prevPosition.set(e.get(Position.class).pos);
 		stage.addActor(dragger);
+		
+		
+		Entity posAcc = world.createEntity();
+		posAcc.add(Position.class);
+		posAcc.add(RollingAverage.class).set(e.get(Position.class).pos, 10);
+		posAcc.add(DebugVector.class).add(posAcc.get(Position.class).pos, Color.CYAN);
+		//posAcc.add(DebugPosition.class);
+		world.addEntity(posAcc);
+		
+		Entity velocityAcc = world.createEntity();
+		velocityAcc.add(Position.class);
+		velocityAcc.add(VelocityPredictor.class).set(e, 180);
+		velocityAcc.get(VelocityPredictor.class).y = false;
+		velocityAcc.add(RollingAverage.class).set(velocityAcc.get(VelocityPredictor.class).vel, 80);
+		velocityAcc.add(DebugPosition.class);
+		velocityAcc.add(DebugVector.class)
+		.add(velocityAcc.get(VelocityPredictor.class).vel, Color.RED)
+		.add(velocityAcc.get(Position.class).pos, Color.ORANGE);
+		
+		world.addEntity(velocityAcc);
+		
+		Entity camC = world.createEntity();
+		camC.add(CameraController.class);
+		camC.add(Position.class);
+		CameraInfluences camInf = camC.add(CameraInfluences.class);
+		camInf.add(posAcc, 1f);
+		camInf.add(velocityAcc, 12f);
+		world.addEntity(camC);
+		
+		Entity tester = world.createEntity();
+		tester.add(Position.class).pos.set(0,0,1);
+		tester.add(DebugPosition.class);
+		world.addEntity(tester);
+		
+		
+		
+		
 	}
 
 
@@ -324,47 +377,39 @@ public class PlatformerFactory extends GameFactory{
 	}
 
 	public void setInput(Actor dragger, Actor clicker, final Entity player, final Camera camera){
-		dragger.addListener(new ClickDragListener(){
-			@Override
+		dragger.addListener(new InputListener(){
+			/*@Override
 			public void drag (InputEvent event, float x, float y, int pointer) {
-	
-				//Entity player = getActives().get(0);
-				//if time < limit or drag amount small maybe cancel
-				//move
+
 				tmp.set(0,0,0);
 				camera.project(tmp);
-				
-				//tmp.x = 0;
-				//tmp.y = 0;
+	
 				tmp.set(0,0,.5f);
 				tmp2.set(Gdx.input.getDeltaX(), Gdx.input.getDeltaY(), .5f);
 				camera.unproject(tmp);
 				camera.unproject(tmp2);
-				//camera.un
 				tmp2.sub(tmp);
 				tmp2.z = 0;
-				//move by tmp2
-				//tmp2.scl(.085f);
+			
 				camera.position.sub(tmp2.x, 0, 0);
 				camera.update(true);
 				//Gdx.app.log(TAG,  "dragged"+tmp2);
 				player.get(Target.class).v.x = camera.position.x;;
-				//return false;
-			}
-			public void click(InputEvent event, float x, float y, int pointer)
-			{
+			}*/
+			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
 				Move move = player.get(Move.class);
 				AABBBody body = player.get(AABBBody.class);
 				if (body.onGround){
-					player.get(Move.class).jumpQueued = true;
+					player.get(Move.class).jumping = true;
 					ActionComponent actionC = player.get(ActionComponent.class);
 					actionC.action.actions.clear();
 					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
 				}
 				if (body.onWall){
-					player.get(Move.class).jumpQueued = true;
+					player.get(Move.class).jumping = true;
 					player.get(Move.class).rotation += 180;
 					player.get(Move.class).rotation %= 360;
+					player.get(Target.class).v.x *= -1;
 					ActionComponent actionC = player.get(ActionComponent.class);
 					actionC.action.actions.clear();
 					Gdx.app.log(TAG, "wjump "+actionC.action.actions.size());
@@ -372,11 +417,18 @@ public class PlatformerFactory extends GameFactory{
 					body.onWall = false;
 					
 					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
-				}
-				
-			}
+				}	                return true;
+	        }
+	 
+	        public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+	        	player.get(Move.class).jumping = false;
+				//Gdx.app.log(TAG, "NOT JUMPSING ANY MORE");	       
+	        	}
+
+			
 			
 		});
+		
 		
 	}
 	
