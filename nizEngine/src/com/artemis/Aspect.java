@@ -3,6 +3,7 @@ package com.artemis;
 import java.util.BitSet;
 
 import com.artemis.managers.ComponentManager;
+import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * An Aspects is used by systems as a matcher against entities, to check if a system is
@@ -31,7 +32,8 @@ public class Aspect {
     private BitSet allSet;
     private BitSet exclusionSet;
     private BitSet oneSet;
-
+    public static ObjectMap<Class<? extends Component>, Class<? extends Component>> components = new ObjectMap<Class<? extends Component>, Class<? extends Component>>();
+    
     private Aspect() {
         this.allSet = new BitSet();
         this.exclusionSet = new BitSet();
@@ -108,10 +110,20 @@ public class Aspect {
     public static Aspect getAspectForAll(Class<? extends Component> type, Class<? extends Component>... types) {
         Aspect aspect = new Aspect();
         aspect.all(type, types);
+        addToList(type, types);
         return aspect;
     }
 
-    /**
+    private static void addToList(Class<? extends Component> type,
+			Class<? extends Component>[] types) {
+    	components.put(type, type);
+    	for (int i = 0; i < types.length; i++){
+        	components.put(types[i], types[i]);
+
+    	}
+	}
+
+	/**
      * Creates an aspect where an entity must possess one of the specified component types.
      * 
      * @param type one of the types the entity must possess
@@ -121,6 +133,8 @@ public class Aspect {
     public static Aspect getAspectForOne(Class<? extends Component> type, Class<? extends Component>... types) {
         Aspect aspect = new Aspect();
         aspect.one(type, types);
+        addToList(type, types);
+
         return aspect;
     }
 
