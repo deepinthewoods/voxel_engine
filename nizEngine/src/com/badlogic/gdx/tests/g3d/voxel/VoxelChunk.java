@@ -35,9 +35,11 @@ public class VoxelChunk {
 	private final int rightOffset;
 	private final int frontOffset;
 	private final int backOffset;
+	public int index;
+	
 	public static BlockDefinition[] defs;
 	
-	public VoxelChunk(int width, int height, int depth) {
+	public VoxelChunk(int width, int height, int depth, int index) {
 		this.voxels = new byte[width * height * depth];
 		this.width = width;
 		this.height = height;
@@ -49,6 +51,7 @@ public class VoxelChunk {
 		this.frontOffset = - width;
 		this.backOffset = width;
 		this.widthTimesDepth = width * depth;
+		this.index = index;
 	}
 
 	public byte get(int x, int y, int z) {

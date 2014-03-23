@@ -2,14 +2,13 @@ package com.niz.actions;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
+import com.niz.component.Brain;
 import com.niz.component.ModelInfo;
 import com.niz.component.Move;
 import com.niz.component.Physics;
 import com.niz.component.Position;
-import com.niz.component.Target;
 
 public class AStand extends Action {
 	//private static final float MIN_RUN_DIST = 0.0852f;
@@ -17,13 +16,14 @@ public class AStand extends Action {
 	private static final String TAG = "AStand";
 
 	private ComponentMapper<Position> positionMap;
-	private ComponentMapper<Target> targetMap;
 
 	private ComponentMapper<ModelInfo> animM;
 
 	private ComponentMapper<Move> moveMap;
 
 	private ComponentMapper<Physics> physMap;
+
+	private ComponentMapper<Brain> brainMap;
 	
 	
 	
@@ -34,7 +34,7 @@ public class AStand extends Action {
 		//Gdx.app.log(TAG, "RUN"+(positionMap == null));
 		Vector3 v = positionMap.get(parent)
 				.pos,
-				targetPos = targetMap.get(parent).v;
+				targetPos = brainMap.get(parent).getShortTarget();
 		float dist = Math.abs(targetPos.x-v.x);
 
 		if (dist > ARun.MIN_RUN_DIST){
@@ -53,7 +53,7 @@ public class AStand extends Action {
 	public void onStart(World world) {
 		//animation
 		positionMap = world.getMapper(Position.class);
-		targetMap = world.getMapper(Target.class);
+		brainMap = world.getMapper(Brain.class);
 		animM = world.getMapper(ModelInfo.class);
 		moveMap = world.getMapper(Move.class);
 		physMap = world.getMapper(Physics.class);

@@ -17,7 +17,8 @@ public abstract class Action extends Node implements Poolable{
 	public static final float ANIM_TRANSITION_TIME = .25f;
 
 	public static final int LEGS = 1, RIGHT_ARM = 2, LEFT_ARM = 4, HEAD = 8;
-	public  static final int LANE_MOVING = 16;
+	public  static final int LANE_MOVING = 16, LANE_DELAY = 1;
+	//public static final int LANE_DEYAL_MASK = ;
 	private static final String TAG = "Action";
 	public abstract void update(float dt);
 	public abstract void onStart(World world);
@@ -31,7 +32,7 @@ public abstract class Action extends Node implements Poolable{
 	private Action next;
 	protected DoublyLinkedList parentList;
 	protected Entity parent;
-	public boolean delayed = false;;
+	//public boolean delayed = false;;
 	
 	public void insertAfterMe(Action node){
 		
@@ -73,7 +74,8 @@ public abstract class Action extends Node implements Poolable{
 
 	public void delay(float f){
 		if (f == 0) return;
-		delayed = true;
+		//delayed = true;
+		lanes |= LANE_DELAY;
 		//removeSelf();
 		float value = currentTime+f;
 		delayedActions.add(this, value);
@@ -85,8 +87,10 @@ public abstract class Action extends Node implements Poolable{
 		{
 
 
-			delayed = false;
-			//prog.insertAfterMe(this);
+			lanes &= ~LANE_DELAY;
+			//lanes = lanes ^ LANE_DELAY;
+			//TODO test
+			
 		}
 	}
 	

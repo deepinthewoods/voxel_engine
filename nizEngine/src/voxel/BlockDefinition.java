@@ -15,6 +15,8 @@ public abstract class BlockDefinition {
 	public int dayLightLoss = 16;
 	public byte lightLoss = 16;
 	public boolean isSolid = true;
+	public int aoValue;
+	public int lightValue;
 	private static BlockDefinition[] defs = new BlockDefinition[256];
 	public BlockDefinition(){
 		

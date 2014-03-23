@@ -16,7 +16,7 @@ public class ActionList {
 	
 	public void update(float dt){
 		
-		int lanes = 0;
+		int lanes = Action.LANE_DELAY;
 		actions.iter();
 		
 
@@ -26,7 +26,7 @@ public class ActionList {
 			if ((lanes & action.lanes) != 0){
 				continue;
 			}
-			if (!action.delayed) action.update(dt);
+			action.update(dt);
 			//Gdx.app.log(TAG, "update2");
 
 			if (action.isBlocking)

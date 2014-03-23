@@ -26,7 +26,7 @@ public class RollingAverageSystem extends EntityProcessingSystem {
 		RollingAverage av = raM.get(e);
 		av.progress++;
 		if (av.progress >= av.arr.size) av.progress = 0;
-		Gdx.app.log(TAG, "v"+av.arr.get(av.progress) + "  aver "+pos + "  target "+av.target);
+		//Gdx.app.log(TAG, "v"+av.arr.get(av.progress) + "  aver "+pos + "  target "+av.target);
 		av.total.add(av.target);
 		av.total.sub(av.arr.get(av.progress));
 		av.arr.get(av.progress).set(av.target);

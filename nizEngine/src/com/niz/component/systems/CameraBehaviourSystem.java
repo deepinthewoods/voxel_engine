@@ -35,6 +35,8 @@ public class CameraBehaviourSystem extends EntityProcessingSystem {
 		}
 		tot.scl(1f/weightTotal);
 		p.pos.set(tot);
+		//limits
+		
 	}
 	
 	public void initialize(){

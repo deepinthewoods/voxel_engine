@@ -60,7 +60,7 @@ public class Brain implements Component {
 		float rot = tmp.angle();
 		
 		mov.rotation = rot;
-		mov.moving = true;
+	//	mov.moving = true;
 		Body body = e.get(Body.class);
 		//if (needsToJump(pos, rot)) mov.jumpQueued = true;
 		

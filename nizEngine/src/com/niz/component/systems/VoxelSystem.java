@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher;
+import com.badlogic.gdx.tests.g3d.voxel.UberMesh;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
 
@@ -25,7 +27,7 @@ public class VoxelSystem extends EntitySystem {
 		Material material = new Material(new ColorAttribute(ColorAttribute.Diffuse,  1f, 1f, 1f, 1)
 		, new TextureAttribute(TextureAttribute.Diffuse, tiles[0].getTexture()) 
 		);
-		voxelWorld = new VoxelWorld(defs, material, 10, 10, 1);
+		voxelWorld = new VoxelWorld(defs, material, 10, 10, 1, new GreedyMesher(new UberMesh(10000000)));
 
 	}
 	

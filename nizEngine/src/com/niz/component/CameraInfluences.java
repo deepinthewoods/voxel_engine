@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.FloatArray;
 public class CameraInfluences implements Component {
 	public Array<Vector3> influences = new Array<Vector3>();
 	public FloatArray weights = new FloatArray();
+	//public float xLimit, yLimit;
 	public void add(Entity ent, float weight){
 		
 		influences.add(ent.get(Position.class).pos);

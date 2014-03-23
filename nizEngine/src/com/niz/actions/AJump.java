@@ -30,7 +30,7 @@ public class AJump extends Action {
 	public void onStart(World world) {
 		bodyMap = world.getMapper(AABBBody.class);
 		moveMap = world.getMapper(Move.class);
-		moveMap.get(parent).moving = false;
+		moveMap.get(parent).moving = true;
 		//Gdx.app.log(TAG, "start");
 	}
 

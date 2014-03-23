@@ -31,7 +31,7 @@ public class AWallSlide extends Action {
 		Gdx.app.log(TAG, "start wallslide");
 
 		moveMap = world.getMapper(Move.class);
-		moveMap.get(parent).moving =false;
+		//moveMap.get(parent).moving =false;
 	}
 
 	@Override

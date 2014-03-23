@@ -8,6 +8,7 @@ import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
+import com.niz.EngineScreen;
 import com.niz.component.AABBBody;
 import com.niz.component.Move;
 import com.niz.component.Physics;
@@ -67,13 +68,17 @@ public class MovementSystem extends EntityProcessingSystem {
 		float dx = speedLimit/vx
 				, dy = (speedLimit*jumpSpeed)/vy
 				, dz = speedLimit / vz;
+		//if (vy < 0) 
+			//dy = 2f;
 
 		float alpha = Math.min(Math.min(dx, dy), dz);
 		if (alpha < 1f){
 			tmp.scl(-alpha);
-			position.set(oldPosition).add(tmp.x, tmp.y, 0);
+		//	position.set(oldPosition).add(tmp.x, tmp.y, 0);
 			//Gdx.app.log(TAG, "move"+alpha);
 		}
+		if (dx < 1f)
+			position.x = oldPosition.x + tmp.x;
 	
 	}
 	
@@ -105,8 +110,27 @@ public class MovementSystem extends EntityProcessingSystem {
 		
 		if (c.jumping){
 			continuousJump(position, oldPosition, c.speedLimit, c.jumpStrength);
+			if (c.jumpEndTick <= EngineScreen.tick){
+				c.jumping = false;
+				Gdx.app.log(TAG, "jump false");
+			}
+		}
+		if (c.jumpEndTick > EngineScreen.tick){
+			c.jumping = true;
 		}
 		
+		/*if (c.jumping){
+			if (c.jumpEndTick <= EngineScreen.tick){
+				c.jumping = false;
+				Gdx.app.log(TAG, "reset");
+			}
+			else 
+				forceJump(position, oldPosition, c.jumpForce);
+		} else if (c.jumpEndTick > EngineScreen.tick){
+			continuousJump(position, oldPosition, c.speedLimit, c.jumpStrength);
+			Gdx.app.log(TAG, "continuous");
+			c.jumping = true;
+		}*/
 		
 		
 	}
@@ -115,6 +139,7 @@ public class MovementSystem extends EntityProcessingSystem {
 	private void continuousJump(Vector3 position, Vector3 oldPosition, float speedLimit, float jumpSpeed) {
 		position.y = oldPosition.y + speedLimit*jumpSpeed;
 		tmp.set(oldPosition).sub(position);
+		//tmp.set(oldPosition).sub(position);
 		float 
 		vx = Math.abs(tmp.x)
 		, vy = Math.abs(tmp.y)
@@ -123,13 +148,17 @@ public class MovementSystem extends EntityProcessingSystem {
 		float dx = speedLimit/vx
 				, dy = (speedLimit*jumpSpeed)/vy
 				, dz = speedLimit / vz;
+		//if (vy < 0) 
+			//dy = 2f;
 
 		float alpha = Math.min(Math.min(dx, dy), dz);
 		if (alpha < 1f){
 			tmp.scl(-alpha);
-			position.set(oldPosition).add(tmp.x, tmp.y, 0);
+		//	position.set(oldPosition).add(tmp.x, tmp.y, 0);
 			//Gdx.app.log(TAG, "move"+alpha);
 		}
+		if (dx < 1f)
+			position.x = oldPosition.x + tmp.x;
 	}
 	
 
