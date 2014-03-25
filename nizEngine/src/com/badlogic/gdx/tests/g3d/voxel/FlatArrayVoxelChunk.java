@@ -19,10 +19,9 @@ package com.badlogic.gdx.tests.g3d.voxel;
 import voxel.BlockDefinition;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
 
-public class VoxelChunk {
+public class FlatArrayVoxelChunk {
 	public static final int VERTEX_SIZE = 4;
 	public final byte[] voxels;
 	public final int width;
@@ -37,13 +36,10 @@ public class VoxelChunk {
 	private final int frontOffset;
 	private final int backOffset;
 	public int index;
-	public Mesh mesh;
-	public int numVerts;
-	
 	
 	public static BlockDefinition[] defs;
 	
-	public VoxelChunk(int width, int height, int depth, int index) {
+	public FlatArrayVoxelChunk(int width, int height, int depth, int index) {
 		this.voxels = new byte[width * height * depth];
 		this.width = width;
 		this.height = height;
@@ -444,6 +440,4 @@ public class VoxelChunk {
 	public static BlockDefinition blockDef(int i) {
 		return defs[i];
 	}
-
-	
 }

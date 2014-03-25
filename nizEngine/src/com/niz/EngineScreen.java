@@ -104,8 +104,8 @@ public class EngineScreen implements Screen{
 		camera.update();
 		
 		env = new Environment();
-		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
-		env.add(new DirectionalLight().set(1, 1, 1, 0, -1, .5f));
+		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
+		//env.add(new DirectionalLight().set(1, 1, 1, 0, -1, .5f));
 		
 		//orthoCamera = new OrthographicCamera();
 		

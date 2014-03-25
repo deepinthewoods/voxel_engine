@@ -4,6 +4,9 @@ import com.badlogic.gdx.graphics.Mesh;
 
 public interface Mesher {
 
-	int calculateVertices(float[] vertices, VoxelChunk chunk, Mesh mesh, VoxelWorld voxelWorld);
+	int calculateVertices(VoxelChunk chunk, VoxelWorld voxelWorld, MeshBatcher batch);
+
+
+	Mesh newMesh(int vertexCount);
 
 }

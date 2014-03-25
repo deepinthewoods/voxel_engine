@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -61,7 +62,6 @@ import com.niz.component.systems.PhysicsSystem;
 import com.niz.component.systems.PositionLimiterSystem;
 import com.niz.component.systems.RollingAverageSystem;
 import com.niz.component.systems.VelocityPredictionSystem;
-import com.niz.component.systems.VoxelMeshingSystem;
 import com.niz.component.systems.VoxelRenderingSystem;
 import com.niz.component.systems.VoxelSystem;
 
@@ -114,11 +114,10 @@ public class PlatformerFactory extends GameFactory{
 		world.setSystem(new BucketedSystem());
 		world.setSystem(new ActionSystem());
 		world.setSystem(new MovementSystem());
-		VoxelSystem voxelSystem = new VoxelSystem(10,10,1, false, false, false, false, false, false, defs, tiles[0]);
+		VoxelSystem voxelSystem = new VoxelSystem(1,1,1, false, false, false, false, false, false, defs, tiles[0]);
 		
 		world.setSystem(voxelSystem);
 		
-		world.setSystem(new VoxelMeshingSystem());
 		
 		world.setSystem(new RollingAverageSystem());
 		world.setSystem(new VelocityPredictionSystem());
@@ -316,23 +315,25 @@ public class PlatformerFactory extends GameFactory{
 	}
 	
 	private void setDefaultMap(VoxelWorld voxelWorld) {
-		for (int x = 0; x < 200; x++)
-			for (int y = 0; y < 1; y++)
-				for (int z = 0; z < 1; z++){
+		for (int x = 0; x < 880; x++)
+			for (int y = 0; y < 2; y++)
+				for (int z = 0; z < 2; z++){
 					//if (MathUtils.randomBoolean()) {
 						//Gdx.app.log(TAG, "ww"+x+","+y+","+z+(voxelWorld == null));
 						voxelWorld.set(x, y, z, (byte) 10);
 					}
-		for (int i = 0; i < 30; i++){
+		/*for (int i = 0; i < 30; i++){
 			voxelWorld.set(60,i,0, (byte)1);
 		}
 		for (int i = 5; i < 50; i++){
 			voxelWorld.set(56,i,0, (byte)1);
 		}
 		
-		for (int i = 0; i < 30; i++){
-			voxelWorld.set(i+61,30,0, (byte)1);
-			voxelWorld.set(0,i,0, (byte)1);
+		*/
+		for (int c = 0; c < 1000; c+= MathUtils.random(14, 15))
+		for (int i = 0; i < MathUtils.random(3,6); i++){
+			voxelWorld.set(c,i,0, (byte)1);
+			//voxelWorld.set(0,i,0, (byte)1);
 		}
 	}
 
@@ -348,6 +349,7 @@ public class PlatformerFactory extends GameFactory{
 		};
 		defs[0].dayLightLoss = 0;
 		defs[0].isSolid = false;
+		defs[0].isEmpty = true;
 		//for (int i = 1; i < 32; i++){
 		//	defs[i] = new BlockDefinition(tiles, i);
 			//BlockDefinition.add(i, defs[i]);
@@ -434,10 +436,10 @@ public class PlatformerFactory extends GameFactory{
 					//player.get(Target.class).v.x *= -1;
 					ActionComponent actionC = player.get(ActionComponent.class);
 					actionC.action.actions.clear();
-					//Gdx.app.log(TAG, "wjump "+actionC.action.actions.size());
+					Gdx.app.log(TAG, "wjump "+actionC.action.actions.size());
 					//body.wasOnWall = false;
 					body.onWall = false;
-					
+					body.offWall = true;
 					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
 				}	                return true;
 	        }

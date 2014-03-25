@@ -143,7 +143,10 @@ public class AABBBodySystem extends EntityProcessingSystem {
 				body.onGround = true;
 			}
 		}
-		
+		if (body.offWall){
+			body.onWall = false;
+			body.offWall = false;
+		}
 		//Gdx.app.log(TAG, "gr"+body.onGround+"  ,  "+body.onWall);// + "  pos "+position + "  oldPos "+oldPosition);
 		return false;
 		

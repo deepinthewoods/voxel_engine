@@ -17,6 +17,7 @@ public abstract class BlockDefinition {
 	public boolean isSolid = true;
 	public int aoValue;
 	public int lightValue;
+	public boolean isEmpty = false;;
 	private static BlockDefinition[] defs = new BlockDefinition[256];
 	public BlockDefinition(){
 		

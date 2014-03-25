@@ -20,7 +20,7 @@ public class JPhysicsEngine{
 	protected int particleTotal = 0;
 	private float fTimeStep, fTimeStep2;//Vector3.fixedMul(fTimeStep, fTimeStep);
 	
-	float xLimit1 = 0f, xLimit2 = 512, yLimit1 = 0f, yLimit2 = 512, zLimit1 = 0f, zLimit2 = 512;
+	float xLimit1 = 0f, xLimit2 = 11111512, yLimit1 = 0f, yLimit2 = 512, zLimit1 = .5f, zLimit2 = .5f;
 	
 	
 	public JPhysicsEngine(int constraintReps, int maxParticle, Vector3[] vectors) {

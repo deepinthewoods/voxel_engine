@@ -15,7 +15,7 @@ public class AWallSlide extends Action {
 
 	@Override
 	public void update(float dt) {
-		if (bodyMap.get(parent).onGround){
+		if (bodyMap.get(parent).onGround || bodyMap.get(parent).offWall){
 			
 			AJump stand = Pools.obtain(AJump.class);
 			this.insertBeforeMe(stand);

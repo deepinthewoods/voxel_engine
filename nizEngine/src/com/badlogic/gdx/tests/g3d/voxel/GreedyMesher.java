@@ -1,4 +1,7 @@
+package com.badlogic.gdx.tests.g3d.voxel;
+
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
 
@@ -36,7 +39,7 @@ public class GreedyMesher implements Mesher {
      * here allows for a simple demostration.
      */
     private static final int CHUNK_WIDTH = 3;
-    private static final int CHUNK_HEIGHT = 3;
+    private static final int CHUNK_HEIGHT = 3, CHUNK_DEPTH = 2;
  
     /*
      * This is a 3D array of sample data – I’m using voxel faces here because I’m returning
@@ -46,6 +49,8 @@ public class GreedyMesher implements Mesher {
      * then attributes like sunlight, artificial light which face per face or even per vertex.
      */
     private final VoxelFace [][][] voxels = new VoxelFace [CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+
+	private MeshBatcher meshBatch;
  
     /*
      * These are just constants to keep track of which face we’re dealing with – their actual
@@ -81,7 +86,11 @@ public class GreedyMesher implements Mesher {
  
     
  
-    /**
+    public GreedyMesher(final MeshBatcher mesh) {
+		meshBatch = mesh;
+	}
+
+	/**
      * This is an initialization function used here to set up the sample voxel data
      * and launch the greedy meshing.
      */
@@ -110,7 +119,7 @@ public class GreedyMesher implements Mesher {
                          * To see an example of face culling being used in combination with
                          * greedy meshing, you could set the trasparent attribute to true.
                          */
-//                        face.transparent = true;
+                       // face.transparent = true;
  
                     } else if (i == 0) {
  
@@ -137,7 +146,7 @@ public class GreedyMesher implements Mesher {
         /*
          * And now that the sample data is prepared, we launch the greedy meshing.
          */
-        greedy();
+        //greedy();
     }
  
     /**
@@ -333,6 +342,7 @@ public class GreedyMesher implements Mesher {
                 }
             }
         }
+        
     }
  
     /**
@@ -375,6 +385,7 @@ public class GreedyMesher implements Mesher {
      * @param height
      * @param voxel
      * @param backFace
+     * @param meshBatch 
      */
     void quad(final Vector3 bottomLeft,
               final Vector3 topLeft,
@@ -387,10 +398,10 @@ public class GreedyMesher implements Mesher {
  
         final Vector3 [] vertices = new Vector3[4];
  
-        vertices[2] = topLeft.mul(VOXEL_SIZE);
-        vertices[3] = topRight.mul(VOXEL_SIZE);
-        vertices[0] = bottomLeft.mul(VOXEL_SIZE);
-        vertices[1] = bottomRight.mul(VOXEL_SIZE);
+        vertices[2] = topLeft.scl(VOXEL_SIZE);
+        vertices[3] = topRight.scl(VOXEL_SIZE);
+        vertices[0] = bottomLeft.scl(VOXEL_SIZE);
+        vertices[1] = bottomRight.scl(VOXEL_SIZE);
  
         final int [] indexes = backFace ? new int[] { 2,0,1, 1,3,2 } : new int[]{ 2,3,1, 1,0,2 };
  
@@ -426,7 +437,7 @@ public class GreedyMesher implements Mesher {
             }
         }
  
-        Mesh mesh = new Mesh();
+        /*Mesh mesh = new Mesh();
  
         mesh.setBuffer(Type.Position, 3, BufferUtils.newFloatBuffer(vertices.length));
         mesh.setBuffer(Type.Color,    4, colorArray);
@@ -435,21 +446,42 @@ public class GreedyMesher implements Mesher {
  
         Geometry geo = new Geometry(“ColoredMesh”, mesh);
         Material mat = new Material(assetManager, “Common/MatDefs/Misc/Unshaded.j3md”);
-        mat.setBoolean(“VertexColor”, true);
+        mat.setBoolean(“VertexColor”, true);*/
+        meshBatch.addVertices(vertices, colorArray, indexes);
  
         /*
          * To see the actual rendered quads rather than the wireframe, just comment outthis line.
          */
-        mat.getAdditionalRenderState().setWireframe(true);
+       /* mat.getAdditionalRenderState().setWireframe(true);
  
         geo.setMaterial(mat);
  
-        rootNode.attachChild(geo);
+        rootNode.attachChild(geo);*/
     }
 
+	private void addToMesh(Vector3[] vertices, float[] colorArray, int[] indexes) {
+		
+	}
+
 	@Override
-	public int calculateVertices(float[] vertices, VoxelChunk chunk, Mesh mesh,
-			VoxelWorld voxelWorld) {
-		return 0;
+	public int calculateVertices( VoxelChunk chunk,
+			VoxelWorld voxelWorld, MeshBatcher batch) {
+		simpleInitApp();
+		greedy();
+		return meshBatch.flushCache(chunk, this);
+		
+		
+	}
+
+	@Override
+	public Mesh newMesh(int size) {
+		Mesh mesh = new Mesh(true, 
+				size, 
+				size / 4 * 6,
+				VertexAttribute.Position(),
+				VertexAttribute.Color());
+		
+		
+		return mesh;
 	}
 }

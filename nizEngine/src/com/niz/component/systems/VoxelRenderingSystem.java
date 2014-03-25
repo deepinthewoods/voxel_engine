@@ -56,8 +56,8 @@ public class VoxelRenderingSystem extends DrawSystem{
 		//spriteBatch = new SpriteBatch();
 		
 		
-		DefaultShader.defaultCullFace = GL20.GL_FRONT;
-		GLES10Shader.defaultCullFace = GL20.GL_FRONT;
+		//DefaultShader.defaultCullFace = GL20.GL_FRONT;
+		//GLES10Shader.defaultCullFace = GL20.GL_FRONT;
 
 		
 
