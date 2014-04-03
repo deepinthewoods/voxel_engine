@@ -9,21 +9,20 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.niz.component.AABBBody;
 import com.niz.component.ActionComponent;
 import com.niz.component.Move;
+import com.niz.component.systems.CameraSystem;
 import com.niz.factories.GameFactory;
-import com.niz.factories.PlatformerFactory;
+import com.niz.factories.GeneralFactory;
 
 public class EngineScreen implements Screen{
 
@@ -69,7 +68,7 @@ public class EngineScreen implements Screen{
 	private boolean assetsLoaded;
 	private ModelBatch modelBatch;
 	
-	private Camera camera, shapeCamera;
+	private Camera shapeCamera;
 	private Skin skin;
 	private Stage stage;
 	private BitmapFont font;
@@ -93,15 +92,11 @@ public class EngineScreen implements Screen{
 		assets = new AssetManager();
 		assetsLoaded = false;
 		
-		factory = new PlatformerFactory();
+		factory = new GeneralFactory();
 		modelBatch = new ModelBatch();
 		shapeCamera = new OrthographicCamera(Gdx.graphics.getWidth()/ Gdx.graphics.getHeight(), 1);
 		//shapeCamera.update();
-		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		//camera = new OrthographicCamera(20f,15f);
-		camera.near = 0.5f;
-		camera.far = 1000f;
-		camera.update();
+		
 		
 		env = new Environment();
 		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
@@ -109,9 +104,9 @@ public class EngineScreen implements Screen{
 		
 		//orthoCamera = new OrthographicCamera();
 		
-		factory.register(world, assets, camera);
+		factory.assets(world, assets);
 		
-		factory.initMenu(world, skin, stage, camera);
+		factory.initMenu(world, skin, stage);
 		//worldTest.create(camera);
 		font = new BitmapFont();
 	}
@@ -121,7 +116,7 @@ public class EngineScreen implements Screen{
 	@Override
 	public void render(float delta) {		
 		if(!assetsLoaded && assets.update()) {
-			factory.init(timeStep, world, env, assets, camera, modelBatch, shapeBatch);
+			factory.init(timeStep, world, env, assets, modelBatch, shapeBatch);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){
@@ -143,7 +138,7 @@ public class EngineScreen implements Screen{
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
 		stage.draw();
-		
+		Camera camera = world.getSystem(CameraSystem.class).camera;
 		modelBatch.begin(camera);
 		//worldTest.render(modelBatch);
 		world.draw(delta);
@@ -185,9 +180,9 @@ public class EngineScreen implements Screen{
 	@Override
 	public void resize(int width, int height) {
 		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
-		camera.viewportWidth = width;
-		camera.viewportHeight = height;
-		camera.update();
+		//camera.viewportWidth = width;
+		//camera.viewportHeight = height;
+		//camera.update();
 	
 	}
 

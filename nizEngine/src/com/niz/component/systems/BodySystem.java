@@ -1,12 +1,12 @@
 package com.niz.component.systems;
 
-import voxel.BlockDefinition;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.niz.RayCaster;

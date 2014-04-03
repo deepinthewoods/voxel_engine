@@ -1,8 +1,8 @@
 package com.niz.blocks;
 
-import voxel.BlockDefinition;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 
 public class TopBottomBlock extends BlockDefinition {

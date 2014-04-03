@@ -8,6 +8,9 @@ import com.artemis.EntityObserver;
 import com.artemis.World;
 import com.artemis.utils.SafeArray;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.Json.Serializable;
 import com.badlogic.gdx.utils.ObjectIntMap;
 
 /**
@@ -18,7 +21,7 @@ import com.badlogic.gdx.utils.ObjectIntMap;
  * @author Arni Arent
  *
  */
-public abstract class EntitySystem implements EntityObserver {
+public abstract class EntitySystem implements EntityObserver, Serializable {
     protected final int systemIndex;
 
     protected World world;
@@ -233,5 +236,15 @@ public abstract class EntitySystem implements EntityObserver {
             return index;
         }
     }
+    
+    @Override
+	public void write(Json json) {
+    	
+	}
+
+	@Override
+	public void read(Json json, JsonValue jsonData) {
+		
+	};
 
 }

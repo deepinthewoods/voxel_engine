@@ -16,11 +16,11 @@
 
 package com.badlogic.gdx.tests.g3d.voxel;
 
-import voxel.BlockDefinition;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher.VoxelFace;
 
 public class VoxelChunk {
 	public static final int VERTEX_SIZE = 4;
@@ -444,6 +444,62 @@ public class VoxelChunk {
 	public static BlockDefinition blockDef(int i) {
 		return defs[i];
 	}
-
 	
+	public static int getAO(int side1, int side2, int corner){
+		if (side1 != 0 && side2!= 0){
+			return 0;
+		} else {
+			return 3-(side1+side2+corner);
+		}
+	}
+	
+	//static final int[] xo = {0,0,0,0,0,0,0,0}, yo = {0,0,0,0,0,0,0,0}, zo = {0,0,0,0,0,0,0,0};
+	public void visibility(int[] mask, int[][][] light, VoxelFace[][][][] faces){
+    	int mx = 0;
+    	
+		int i = 0, maskIndex = 0;
+				
+		for(int y = 0; y < height; y++) {
+			
+			
+			for(int z = 0; z < depth; z++) {
+				
+				
+				for(int x = 0; x < width; x++) {
+					int b = voxels[i];
+					if (b > 0){
+						mx &= 1<<x;
+					}
+					BlockDefinition def = blockDef(b);
+					
+					for (int faceID = 0; faceID < 6; faceID++){
+						VoxelFace face = faces[x][y][z][faceID];
+						face.set(def, faceID, b);
+					}
+					//light totals for verts
+					for (int xo = 0; xo < 2; xo++)
+						for (int zo = 0; zo < 2; zo++)
+					light[
+					      x
+					      +xo
+					      +1
+							][
+							  y
+							  +1
+								][
+								  z
+								  +zo
+								  +1
+									    ] += def.lightValue;
+					i++;
+				}
+				mask[maskIndex] = mx;
+				mx = 0;
+				maskIndex++;
+				
+			}
+			
+		}
+		
+	}
 }

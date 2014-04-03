@@ -1,9 +1,9 @@
 package com.niz;
 
-import voxel.BlockDefinition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 
 public class RayCaster{
 	//converted from xna wiki http://www.xnawiki.com/index.php?title=Voxel_traversal

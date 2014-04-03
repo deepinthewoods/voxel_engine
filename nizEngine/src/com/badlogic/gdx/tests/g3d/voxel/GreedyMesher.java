@@ -1,9 +1,12 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 /**
  * This is a Java greedy meshing implementation based on the javascript implementation
@@ -22,6 +25,14 @@ import com.badlogic.gdx.utils.BufferUtils;
  *
  * @author Rob O’Leary
  */
+/**
+ * @author User
+ *
+ */
+/**
+ * @author User
+ *
+ */
 public class GreedyMesher implements Mesher {
  
     /*
@@ -38,8 +49,8 @@ public class GreedyMesher implements Mesher {
      * be larger – for example, in my voxel engine chunks are 16x16x16 – but the small size
      * here allows for a simple demostration.
      */
-    private static final int CHUNK_WIDTH = 3;
-    private static final int CHUNK_HEIGHT = 3, CHUNK_DEPTH = 2;
+    private static final int CHUNK_WIDTH = 16;
+    private static final int CHUNK_HEIGHT = 16, CHUNK_DEPTH = 16;
  
     /*
      * This is a 3D array of sample data – I’m using voxel faces here because I’m returning
@@ -48,8 +59,8 @@ public class GreedyMesher implements Mesher {
      * each voxel has a type, temperature, humidity, etc – which are constant across all faces, and
      * then attributes like sunlight, artificial light which face per face or even per vertex.
      */
-    private final VoxelFace [][][] voxels = new VoxelFace [CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
-
+    private final VoxelFace [][][][] voxels = new VoxelFace [CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH][6];
+    
 	private MeshBatcher meshBatch;
  
     /*
@@ -61,7 +72,9 @@ public class GreedyMesher implements Mesher {
     private static final int EAST       = 2;
     private static final int WEST       = 3;
     private static final int TOP        = 4;
-    private static final int BOTTOM     = 5;    
+    private static final int BOTTOM     = 5;
+
+	private static final String TAG = "Greedy Mesher";    
  
     /**
      * This class is used to encapsulate all information about a single voxel face.  Any number of attributes can be
@@ -75,81 +88,249 @@ public class GreedyMesher implements Mesher {
      * might be when this algorithm is used in a real engine – could set the transparent attribute on faces based
      * on whether they should be visible or not.
      */
+	public Color tc = new Color();
+
+	private int[][][] lightCache;
+
+	
+	/**
+	 * face offsets for vertices
+	 * 0 for dont move in this plane
+	 * snewtb
+	 */
+	private int[] fox = {1,1,1,1,1,1};
+	
+	private int[] foy = {1,1,1,1,1,1};
+	private int[] foz = {1,1,1,1,1,1};
+
+	
+
+	private int width;
+	private int height;
+	private int depth;
+	private int topOffset;
+	private int bottomOffset;
+	private int leftOffset;
+	private int rightOffset;
+	private int frontOffset;
+	private int backOffset;
+	private int widthTimesDepth;
+
+	private int[] visibilityMask;
+	
+	
+	public void setConstants(int width, int height, int depth){
+		this.width = width;
+		this.height = height;
+		this.depth = depth;
+		this.topOffset = width * depth;
+		this.bottomOffset = -width * depth;
+		this.leftOffset = -1;
+		this.rightOffset = 1;
+		this.frontOffset = - width;
+		this.backOffset = width;
+		this.widthTimesDepth = width * depth;
+	}
+	
+	private static float[] lightValues;
     class VoxelFace {
- 
+    	
+		public BlockDefinition def;
         public boolean transparent;
         public int type;
         public int side;
- 
-        public boolean equals(final VoxelFace face) { return face.transparent == this.transparent && face.type == this.type; }
+		public float u , u2, v, v2;
+		float[] c = new float[4];
+		private float[] vertex = {Color.toFloatBits(1f, 1f, 1f, 1f), Color.toFloatBits(1f, 1f, 1f, 1f), Color.toFloatBits(1f, 1f, 1f, 1f), Color.toFloatBits(1f, 1f, 1f, 1f)};
+		
+        public boolean equals(final VoxelFace face) { 
+        	boolean result = face.transparent == this.transparent && 
+        			face.type == this.type;
+        	//if (face.type != type) throw new GdxRuntimeException("right"+result+type);//Gdx.app.log(TAG,  "fal");
+        	if (result){
+        		
+        		for (int i = 0; i < 4; i++){
+        			if (vertex[i] != face.vertex[i])
+            			result = false;
+        		}
+        			
+        		
+        		
+        		
+        			
+        	}
+        	return result;
+        	
+        }
+        
+
+		public void set(BlockDefinition def2, int faceID, int b) {
+			this.def = def2;
+			this.side = faceID;
+			def.setFace(this);
+			//corner colors
+
+			if (b == 0){
+				transparent = true;
+				
+				
+			}else {
+				
+				
+
+				transparent = false;
+			}
+			type = b;
+			//offsets +1 0 1
+			//look in cache[]
+			
+			
+			c[0] = tc.toFloatBits();
+		}
+
+
+		public void vertex(int i, int light) {
+			vertex [i] = lightValues[light];
+		}
     }
  
     
  
+    public void readBlocks(VoxelChunk chunk){
+    	
+    	//light level cache, per vert
+    	
+    	for (int i = 0; i < CHUNK_WIDTH; i++) {
+    		
+    		for (int j = 0; j < CHUNK_HEIGHT; j++) {
+    			
+    			for (int k = 0; k < CHUNK_DEPTH; k++) {
+    	
+    				lightCache[i][j][k] = 0;
+    				
+    				
+    				
+    	}}}   
+    	
+		chunk.visibility(visibilityMask, lightCache, voxels);
+    	
+
+    	for (int i = 0; i < CHUNK_WIDTH-1; i++) {
+    		
+    		for (int j = 0; j < CHUNK_HEIGHT-1; j++) {
+    			
+    			for (int k = 0; k < CHUNK_DEPTH-1; k++) {//looping vertices
+    				//for (int faceID = 0; faceID < 6; faceID++){
+    				int light = lightCache[i+2][j+2][k+2]/4;
+    			
+    				//setLighting(light);
+    				if (light != 0)Gdx.app.log(TAG, "light"+light);
+    				//starts bottom left, goes clockwise
+    				for (int f = 0; f < 6; f++)
+    					for (int v  = 0; v < 4; v++){
+        				//voxels[i][j][k][f].vertex(v,v);
+        				//voxels[i][j][k][EAST].vertex(v, 5);
+    				}
+    				//00
+    				voxels[i][j+1][k][SOUTH].vertex(2,light);
+    				voxels[i][j+1][k][WEST].vertex(1,light);
+    				//01
+    				voxels[i][j+1][k+1][NORTH].vertex(2,light);
+    				voxels[i][j+1][k+1][WEST].vertex(0,light);
+    				//10
+    				voxels[i+1][j+1][k][SOUTH].vertex(0,light);
+    				voxels[i+1][j+1][k][EAST].vertex(1,light);
+    				//11
+    				voxels[i+1][j+1][k+1][NORTH].vertex(0,light);
+    				voxels[i+1][j+1][k+1][EAST].vertex(0,light);
+    				
+    				//top row
+    				voxels[i][j][k][SOUTH].vertex(3,light);
+    				voxels[i][j][k][WEST].vertex(3,light);
+    				//01
+    				voxels[i][j][k+1][NORTH].vertex(3,light);
+    				voxels[i][j][k+1][WEST].vertex(2,light);
+    				//10
+    				voxels[i+1][j][k][SOUTH].vertex(1,light);
+    				voxels[i+1][j][k][EAST].vertex(3,light);
+    				//11
+    				voxels[i+1][j][k+1][NORTH].vertex(1,light);
+    				voxels[i+1][j][k+1][EAST].vertex(2,light);
+    				
+    				
+    				
+    				
+    	}}}//}
+    }
+    	
+    	 	
+    	
+    	
+    	
+    
+    
+    
+		
+		
+		
+		
+		
+//		if(voxels[i+topOffset] <= 0) my += ();
+//		if(voxels[i+bottomOffset] <= 0) my += ();
+//		if(voxels[i+leftOffset] <= 0) mx += ();
+//		if(voxels[i+rightOffset] <= 0) mx += ();
+//		if(voxels[i+frontOffset] <= 0) mz += ();
+//		if(voxels[i+backOffset] <= 0) mz += ();
+		
+    
+ 
     public GreedyMesher(final MeshBatcher mesh) {
+    	lightValues = new float[16];
+    	float r,g,b,a = 1f;;
+    	for (int i = 0; i < 16; i++){
+    		r = i/16f;
+    		g = r;
+    		b = r;
+    		
+    		lightValues[i] = Color.BLACK.toFloatBits();//Color.toFloatBits(r, g, b, a);
+    	}
 		meshBatch = mesh;
+		setConstants(16,16,16);
+		VoxelFace face, face2;
+		for (int i = 0; i < CHUNK_WIDTH; i++) {
+			
+			for (int j = 0; j < CHUNK_HEIGHT; j++) {
+				
+				for (int k = 0; k < CHUNK_DEPTH; k++) {
+					
+					for (int faceID = 0; faceID < 6; faceID++){
+						
+						
+						/*
+						 * To see an example of face culling being used in combination with
+						 * greedy meshing, you could set the trasparent attribute to true.
+						 */
+						// face.transparent = true;
+						
+						
+						
+						
+						face = new VoxelFace();
+						face.side = faceID;
+						face2 = new VoxelFace();
+						face2.side = faceID;
+						voxels[i][j][k][faceID] = face;
+						voxels[i][j][k][faceID] = face2;
+					}
+				}
+			}
+		}
+		visibilityMask = new int[CHUNK_WIDTH*CHUNK_HEIGHT*CHUNK_DEPTH];
+		lightCache = new int[CHUNK_WIDTH+2][CHUNK_HEIGHT+2][CHUNK_DEPTH+2];
 	}
 
+
 	/**
-     * This is an initialization function used here to set up the sample voxel data
-     * and launch the greedy meshing.
-     */
-    public void simpleInitApp() {
- 
-        VoxelFace face;
- 
-        for (int i = 0; i < CHUNK_WIDTH; i++) {
- 
-            for (int j = 0; j < CHUNK_HEIGHT; j++) {
- 
-                for (int k = 0; k < CHUNK_HEIGHT; k++) {
- 
-                    if (i > CHUNK_WIDTH/2 && i < CHUNK_WIDTH*0.75 &&
-                        j > CHUNK_HEIGHT/2 && j < CHUNK_HEIGHT*0.75 &&
-                        k > CHUNK_HEIGHT/2 && k < CHUNK_HEIGHT*0.75) {
- 
-                        /*
-                         * We add a set of voxels of type 1 at the top-right of the chunk.
-                         *
-                         */
-                        face = new VoxelFace();
-                        face.type = 1;
- 
-                        /*
-                         * To see an example of face culling being used in combination with
-                         * greedy meshing, you could set the trasparent attribute to true.
-                         */
-                       // face.transparent = true;
- 
-                    } else if (i == 0) {
- 
-                        /*
-                         * We add a set of voxels of type 2 on the left of the chunk.
-                         */
-                        face = new VoxelFace();
-                        face.type = 2;
- 
-                    } else {
- 
-                        /*
-                         * And the rest are set to type 3.
-                         */
-                        face = new VoxelFace();
-                        face.type = 3;
-                    }
- 
-                    voxels[i][j][k] = face;
-                }
-            }
-        }
- 
-        /*
-         * And now that the sample data is prepared, we launch the greedy meshing.
-         */
-        //greedy();
-    }
- 
-    /**
      *
      */
     void greedy() {
@@ -360,10 +541,10 @@ public class GreedyMesher implements Mesher {
      */
     VoxelFace getVoxelFace(final int x, final int y, final int z, final int side) {
  
-        VoxelFace voxelFace = voxels[x][y][z];
+        VoxelFace voxelFace = voxels[x][y][z][side];
  
-        voxelFace.side = side;
- 
+        //voxelFace.side = side;
+        
         return voxelFace;
     }
  
@@ -395,7 +576,7 @@ public class GreedyMesher implements Mesher {
               final int height,
               final VoxelFace voxel,
               final boolean backFace) {
- 
+    	// Gdx.app.log(TAG, "type"+voxel.type+topLeft);
         final Vector3 [] vertices = new Vector3[4];
  
         vertices[2] = topLeft.scl(VOXEL_SIZE);
@@ -405,21 +586,25 @@ public class GreedyMesher implements Mesher {
  
         final int [] indexes = backFace ? new int[] { 2,0,1, 1,3,2 } : new int[]{ 2,3,1, 1,0,2 };
  
-        final float[] colorArray = new float[4*4];
+        //final float[] colorArray = new float[4*4];
  
-        for (int i = 0; i < colorArray.length; i+=4) {
+        for (int i = 0; i < 4; i++) {
  
             /*
              * Here I set different colors for quads depending on the “type” attribute, just
              * so that the different groups of voxels can be clearly seen.
              *
              */
-            if (voxel.type == 1) {
+            
+        	
+           /* if (voxel.type == 1) {
  
                 colorArray[i]   = 1.0f;
                 colorArray[i+1] = 0.0f;
                 colorArray[i+2] = 0.0f;
-                colorArray[i+3] = 1.0f;                
+                colorArray[i+3] = 1.0f;  
+               // Gdx.app.log(TAG, "ret");
+              //  return;
  
             } else if (voxel.type == 2) {
  
@@ -434,7 +619,7 @@ public class GreedyMesher implements Mesher {
                 colorArray[i+1] = 0.0f;
                 colorArray[i+2] = 1.0f;
                 colorArray[i+3] = 1.0f;
-            }
+            }*/
         }
  
         /*Mesh mesh = new Mesh();
@@ -447,7 +632,7 @@ public class GreedyMesher implements Mesher {
         Geometry geo = new Geometry(“ColoredMesh”, mesh);
         Material mat = new Material(assetManager, “Common/MatDefs/Misc/Unshaded.j3md”);
         mat.setBoolean(“VertexColor”, true);*/
-        meshBatch.addVertices(vertices, colorArray, indexes);
+        meshBatch.addVertices(vertices, voxel.vertex, indexes);
  
         /*
          * To see the actual rendered quads rather than the wireframe, just comment outthis line.
@@ -459,14 +644,12 @@ public class GreedyMesher implements Mesher {
         rootNode.attachChild(geo);*/
     }
 
-	private void addToMesh(Vector3[] vertices, float[] colorArray, int[] indexes) {
-		
-	}
+	
 
 	@Override
 	public int calculateVertices( VoxelChunk chunk,
 			VoxelWorld voxelWorld, MeshBatcher batch) {
-		simpleInitApp();
+		readBlocks(chunk);
 		greedy();
 		return meshBatch.flushCache(chunk, this);
 		

@@ -16,28 +16,22 @@
 
 package com.badlogic.gdx.tests.g3d.voxel;
 
-import voxel.BlockDefinition;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Pool;
+import com.niz.factories.AssetDefinition;
+import com.niz.factories.GeneralFactory;
 
 public class VoxelWorld implements RenderableProvider {
-	public static final int CHUNK_SIZE_X = 28;
-	public static final int CHUNK_SIZE_Y = 28;
-	public static final int CHUNK_SIZE_Z = 28;
+	public static final int CHUNK_SIZE_X = 16;
+	public static final int CHUNK_SIZE_Y = 16;
+	public static final int CHUNK_SIZE_Z = 16;
 	private static final String TAG = "VoxelWorld";
 
 	public final VoxelChunk[] chunks;
@@ -59,10 +53,10 @@ public class VoxelWorld implements RenderableProvider {
 	private Mesher mesher;
 	private MeshBatcher batch;
 	
-	public VoxelWorld(BlockDefinition[] blockDefs, Material material, int chunksX, int chunksY, int chunksZ, Mesher mesher, MeshBatcher meshBatcher) {
+	public VoxelWorld(Material material, int chunksX, int chunksY, int chunksZ, Mesher mesher, MeshBatcher meshBatcher) {
 		batch = meshBatcher;
-		VoxelChunk.defs = blockDefs;
-		if (blockDefs == null) throw new GdxRuntimeException("nill init");
+		VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
+		//if (blockDefs == null) throw new GdxRuntimeException("nill init");
 		this.material = material;
 		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
 		this.chunksX = chunksX;
@@ -203,7 +197,7 @@ public class VoxelWorld implements RenderableProvider {
 			//if (chunk.mesh == null) continue;
 			renderable.mesh = chunk.mesh;
 			renderable.meshPartOffset = 0;
-			renderable.meshPartSize = chunk.numVerts/4*6;
+			renderable.meshPartSize = chunk.numVerts;
 			
 			renderable.primitiveType = GL20.GL_TRIANGLES;
 			renderable.worldTransform.set(idMatrix);

@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.niz.component.AABBBody;
 import com.niz.component.CameraController;
-import com.niz.component.Player;
 import com.niz.component.Position;
 
 /**
@@ -24,7 +23,7 @@ public class CameraFollowerSystem extends EntitySystem {
 	public Vector3 prevPosition;
 	private ComponentMapper<AABBBody> bodyM;
 	
-	public CameraFollowerSystem(Camera camera) {
+	public CameraFollowerSystem() {
 		super(Aspect.getAspectForAll(CameraController.class, Position.class));
 		this.camera = camera;
 		prevPosition = new Vector3();
@@ -55,6 +54,7 @@ public class CameraFollowerSystem extends EntitySystem {
 	public void initialize(){
 		positionM = world.getMapper(Position.class);
 		bodyM = world.getMapper(AABBBody.class);
+		camera = world.getSystem(CameraSystem.class).camera;
 		//Entity e = 
 		//prevPosition.set(positionM.get(e));
 	}

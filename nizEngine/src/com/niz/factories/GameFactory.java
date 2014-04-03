@@ -22,21 +22,21 @@ import com.niz.ShapeBatch;
 
 public abstract class GameFactory {
 
-public abstract void register(World world, AssetManager assets, Camera camera) ;
+public abstract void assets(World world, AssetManager assets) ;
 
-public abstract void doneLoading(float timeStep, World world, AssetManager assets, Camera camera, ModelBatch modelBatch, ShapeBatch shapeBatch);
+public abstract void systems(float timeStep, World world, AssetManager assets, ModelBatch modelBatch, ShapeBatch shapeBatch);
 
 public abstract void newGame(World world, Stage stage);
 
 public abstract void load(World world);
 
-public void init(float timeStep, World world, Environment env, AssetManager assets, Camera camera, ModelBatch modelBatch, ShapeBatch shapeBatch){
+public void init(float timeStep, World world, Environment env, AssetManager assets, ModelBatch modelBatch, ShapeBatch shapeBatch){
 	
 	
-	doneLoading(timeStep, world, assets, camera, modelBatch, shapeBatch);
+	systems(timeStep, world, assets, modelBatch, shapeBatch);
 	
 	world.initialize();
-	world.initializeDraw(modelBatch, camera, env, shapeBatch);
+	world.initializeDraw(modelBatch, env, shapeBatch);
 }
 
 	Array<Component> components = new Array<Component>();
@@ -49,7 +49,7 @@ public void init(float timeStep, World world, Environment env, AssetManager asse
 		}
 	}
 
-	public void initMenu(final World world, Skin skin, final Stage stage, Camera camera) {
+	public void initMenu(final World world, Skin skin, final Stage stage) {
 		//Group group = new WidgetGroup();
 		Gdx.input.setInputProcessor(stage);
 		final Table table = new Table();

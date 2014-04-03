@@ -17,6 +17,7 @@ public class MeshBatcher{
 	public ObjectMap<VoxelChunk, IntervalInt> smallChunks, normalChunks;
 	StaticIntervalTreeInt<IntervalInt> smallChunksTree;
 	private static final String TAG = "mesh batcher";
+	public static final float[] highlightColors = {Color.RED.toFloatBits(), Color.GREEN.toFloatBits(), Color.BLUE.toFloatBits(), Color.CYAN.toFloatBits()};
 	public MeshBatcher(int vertexSize, int indexSize, int levels) {
 		cachedVerts = new float[vertexSize];
 		cachedIndexes = new short[indexSize];
@@ -76,10 +77,10 @@ public class MeshBatcher{
 		cacheProgress = 0;
 		vertexTotal = 0;
 		indexProgress = 0;
-		chunk.numVerts = size;
+		chunk.numVerts = size/6*4;
 		chunk.mesh = mesh;
-		Gdx.app.log(TAG, "mesh");
-		return size/4;
+		//Gdx.app.log(TAG, "mesh");
+		return 0;
 	}
 
 	/** adds verts from a quad
@@ -87,11 +88,39 @@ public class MeshBatcher{
 	 * @param colorArray 4-digit float values
 	 * @param indexes
 	 */
+	public void addVerticesRGBA(Vector3[] vertices, float[] colorArray,
+			int[] indexes) {
+		for (int i = 0; i < 4; i++){
+			Vector3 v = vertices[i];
+			float c = Color.toFloatBits(colorArray[i*4], colorArray[i*4+1], colorArray[i*4+2], colorArray[i*4+3]);
+			//Color.WHITE.toFloatBits();//
+			cachedVerts[cacheProgress++] = v.x;
+			cachedVerts[cacheProgress++] = v.y;
+			cachedVerts[cacheProgress++] = v.z;
+			cachedVerts[cacheProgress++] = c;
+		}
+		
+		for (int i = 0; i < 6; i++){
+			cachedIndexes[indexProgress++] = (short) (indexes[i]+vertexTotal);
+			//Gdx.app.log(TAG, "index  "+cachedIndexes[indexProgress-1]);
+
+		}
+		//Gdx.app.log(TAG, "index length "+vertexTotal);
+		vertexTotal += 4;
+
+	}
+	
+	/**
+	 * @param vertices positions
+	 * @param colorArray 1-digit colors
+	 * @param indexes
+	 */
 	public void addVertices(Vector3[] vertices, float[] colorArray,
 			int[] indexes) {
 		for (int i = 0; i < 4; i++){
 			Vector3 v = vertices[i];
-			float c = Color.toFloatBits(colorArray[i*4], colorArray[i*4+1], colorArray[i*4+2], colorArray[i*4+3]);//Color.WHITE.toFloatBits();//
+			float c = colorArray[i];//highlightColors[i];//
+			//Gdx.app.log(TAG, "color array"+colorArray[i]);
 			cachedVerts[cacheProgress++] = v.x;
 			cachedVerts[cacheProgress++] = v.y;
 			cachedVerts[cacheProgress++] = v.z;
@@ -116,7 +145,7 @@ public class MeshBatcher{
 		chunk.mesh = getMesh(count, mesher);
 		chunk.mesh.setVertices(vertices, 0, count);
 		chunk.mesh.setIndices(indices, 0, (count*6)/4);
-		chunk.numVerts = count/4;
+		chunk.numVerts = count/4*6;
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.niz.factories;
 
-import voxel.BlockDefinition;
 
 import com.artemis.Entity;
 import com.artemis.World;
@@ -27,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.EngineScreen;
@@ -82,7 +82,7 @@ public class PlatformerFactory extends GameFactory{
 	private CameraFollowerSystem cameraSystem;
 	
 	@Override
-	public void register(World world, AssetManager assets, Camera camera) {
+	public void assets(World world, AssetManager assets, Camera camera) {
 		
 		assets.load("data/tiles.png", Texture.class);
 		assets.load("data/fades.png", Pixmap.class);
@@ -92,14 +92,14 @@ public class PlatformerFactory extends GameFactory{
 	}
 
 	@Override
-	public void doneLoading(float timeStep, World world, AssetManager assets, Camera camera, ModelBatch modelBatch, ShapeBatch shapeBatch) {
+	public void systems(float timeStep, World world, AssetManager assets, ModelBatch modelBatch, ShapeBatch shapeBatch) {
 		TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
 		BlockDefinition[] defs = getBlockDefs(tiles);
 		Pixmap fades = assets.get("data/fades.png", Pixmap.class);
 		playerModel(assets);
 		PerspectiveCamera cam = (PerspectiveCamera) camera;
 		cam.fieldOfView = 67;
-		camera.position.set(10, 10f, 22);
+		camera.position.set(10, 10f, 32);
 		camera.far =52;
 		camera.near = 8;
 		camera.rotate(0, -1, 0, 0);
@@ -117,7 +117,6 @@ public class PlatformerFactory extends GameFactory{
 		VoxelSystem voxelSystem = new VoxelSystem(1,1,1, false, false, false, false, false, false, defs, tiles[0]);
 		
 		world.setSystem(voxelSystem);
-		
 		
 		world.setSystem(new RollingAverageSystem());
 		world.setSystem(new VelocityPredictionSystem());
@@ -320,21 +319,24 @@ public class PlatformerFactory extends GameFactory{
 				for (int z = 0; z < 2; z++){
 					//if (MathUtils.randomBoolean()) {
 						//Gdx.app.log(TAG, "ww"+x+","+y+","+z+(voxelWorld == null));
-						voxelWorld.set(x, y, z, (byte) 10);
+						voxelWorld.set(x, y, z, (byte) 1);
 					}
 		/*for (int i = 0; i < 30; i++){
 			voxelWorld.set(60,i,0, (byte)1);
 		}
 		for (int i = 5; i < 50; i++){
 			voxelWorld.set(56,i,0, (byte)1);
-		}
+		}*/
 		
-		*/
+		
 		for (int c = 0; c < 1000; c+= MathUtils.random(14, 15))
-		for (int i = 0; i < MathUtils.random(3,6); i++){
-			voxelWorld.set(c,i,0, (byte)1);
-			//voxelWorld.set(0,i,0, (byte)1);
-		}
+			for (int d = 0; d < 10; d++)
+				for (int i = 0; i < 4; i++){
+					voxelWorld.set(c,i,d, (byte)1);
+					//voxelWorld.set(0,i,0, (byte)1);
+				}
+		//voxelWorld.set(0,0,0, (byte)1);*/
+
 	}
 
 	private BlockDefinition[] getBlockDefs(TextureRegion[][] tiles) {
