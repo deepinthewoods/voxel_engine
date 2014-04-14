@@ -174,4 +174,31 @@ public class MeshBatcher{
 	
 	}
 
+    public void addVertices(Vector3[] vertices, int[] colorArray, int[] indexes, boolean flip, GreedyMesher.VoxelFace voxel) {
+        for (int i = 0; i < 4; i++){
+            Vector3 v = vertices[i];
+            float c = colorArray[i];//highlightColors[i];//
+            //Gdx.app.log(TAG, "color array"+colorArray[i]);
+            cachedVerts[cacheProgress++] = v.x;
+            cachedVerts[cacheProgress++] = v.y;
+            cachedVerts[cacheProgress++] = v.z;
+            cachedVerts[cacheProgress++] = c;
+            cachedVerts[cacheProgress++] = voxel.u;
+            cachedVerts[cacheProgress++] = voxel.v;
+            cachedVerts[cacheProgress++] = voxel.u2;
+            cachedVerts[cacheProgress++] = voxel.v2;
+
+        }
+
+        for (int i = 0; i < 6; i++){
+            cachedIndexes[indexProgress++] = (short) (indexes[i]+vertexTotal);
+            //Gdx.app.log(TAG, "index  "+cachedIndexes[indexProgress-1]);
+
+        }
+        //Gdx.app.log(TAG, "index length "+vertexTotal);
+        vertexTotal += 4;
+
+
+
+    }
 }

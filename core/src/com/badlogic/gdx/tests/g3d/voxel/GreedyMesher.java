@@ -819,7 +819,7 @@ public class GreedyMesher implements Mesher {
         : flip?new int[]{3,1,0, 0,2,3}:new int[]{ 2,3,1, 1,0,2 };
 
         
-		meshBatch.addVertices(vertices, voxel.vertex, indexes, flip );
+		meshBatch.addVertices(vertices, voxel.vertex, indexes, flip , voxel);
  
     }
 
@@ -841,7 +841,9 @@ public class GreedyMesher implements Mesher {
 				size, 
 				size / 4 * 6,
 				VertexAttribute.Position(),
-				VertexAttribute.Color());
+				VertexAttribute.Color(),
+                VertexAttribute.TexCoords(1)
+        );
 		
 
 		return mesh;
