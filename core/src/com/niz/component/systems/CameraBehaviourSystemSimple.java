@@ -13,9 +13,9 @@ import com.niz.component.Position;
 
 public class CameraBehaviourSystemSimple extends EntitySystem {
 
-	private Camera camera;
+	private transient Camera camera;
 	private ComponentMapper<Position> positionM;
-	public Vector3 prevPosition;
+	public transient Vector3 prevPosition;
 	private ComponentMapper<AABBBody> bodyM;
 	
 	public CameraBehaviourSystemSimple(Camera camera) {

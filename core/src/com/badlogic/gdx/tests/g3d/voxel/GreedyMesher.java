@@ -236,6 +236,9 @@ public class GreedyMesher implements Mesher {
 				int maskTop = visibilityMask[(y+2)*my+(z+1)];
 				int maskBottom = visibilityMask[(y)*my+(z+1)];
 
+                int maskXY0 = visibilityMask[(y+1)*my+(z+2)];
+
+
                 maskNorth &= mask;
                 maskSouth &= mask;
                 maskTop &= mask;
@@ -324,25 +327,27 @@ public class GreedyMesher implements Mesher {
             for(int z = 0; z < CHUNK_DEPTH; z++) {
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light = lightCache[x+2][y+3][z+2]/4 ;
-
+                    int light00 = lightCache[x+2][y+3][z+2]/4
+                            , light01 = light00, light10 = light00
+                            , light11 = light00
+                            , lightTop00 = light00, lightTop01 = light00
+                            , lightTop10 = light00, lightTop11 = light00;
                     //00
-                    voxels[x][y+1][z][NORTH].vertex(2,light);
-                    voxels[x][y+1][z][EAST].vertex(1,light);
-                    voxels[x][y+1][z][TOP].vertex(3,light);
+                    voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
+                    voxels[x][y+1][z][EAST].vertex(1,lightTop10);
+                    voxels[x][y+1][z][TOP].vertex(3,light00);
                     //01
-                    voxels[x][y+1][z+1][SOUTH].vertex(2,light);
-                    voxels[x][y+1][z+1][EAST].vertex(0,light);
-                    voxels[x][y+1][z+1][TOP].vertex(1,light);
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
+                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
+                    voxels[x][y+1][z+1][TOP].vertex(1,light01);
                     //10
-                    voxels[x+1][y+1][z][NORTH].vertex(0,light);
-                    voxels[x+1][y+1][z][WEST].vertex(1,light);
-                    voxels[x+1][y+1][z][TOP].vertex(2,light);
+                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
+                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
+                    voxels[x+1][y+1][z][TOP].vertex(2,light10);
                     //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,light);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,light);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light);
-
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
+                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
 
 
                 }}}//}
@@ -351,29 +356,30 @@ public class GreedyMesher implements Mesher {
             for(int z = 0; z < CHUNK_DEPTH; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light = lightCache[x+2][y+3][z+2]/4 ;
-
-                    //00
-
-                    //10
-                    voxels[x+1][y+1][z][NORTH].vertex(0,light);
-                    voxels[x+1][y+1][z][WEST].vertex(1,light);
-                    voxels[x+1][y+1][z][TOP].vertex(2,light);
-                    //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,light);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,light);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light);
-
-                    //
+                    int light00 = lightCache[x+2][y+3][z+2]/4
+                            , light01 = light00, light10 = light00
+                            , light11 = light00
+                            , lightTop00 = light00, lightTop01 = light00
+                            , lightTop10 = light00, lightTop11 = light00;
 
                     //10
-                    voxels[x+1][y][z][NORTH].vertex(1,light);
-                    voxels[x+1][y][z][WEST].vertex(3,light);
-                    voxels[x+1][y][z][BOTTOM].vertex(2,light);
+                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
+                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
+                    voxels[x+1][y+1][z][TOP].vertex(2,light10);
                     //11
-                    voxels[x+1][y][z+1][SOUTH].vertex(1,light);
-                    voxels[x+1][y][z+1][WEST].vertex(2,light);
-                    voxels[x+1][y][z+1][BOTTOM].vertex(0,light);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
+                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+
+
+                    //10
+                    voxels[x+1][y][z][NORTH].vertex(1,light11);
+                    voxels[x+1][y][z][WEST].vertex(3,light00);
+                    voxels[x+1][y][z][BOTTOM].vertex(2,lightTop10);
+                    //11
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
+                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
+                    voxels[x+1][y][z+1][BOTTOM].vertex(0,lightTop11);
 
                 }}}//}
 
@@ -382,87 +388,104 @@ public class GreedyMesher implements Mesher {
             for(int z = -1; z < 0; z++) {
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light = lightCache[x+2][y+3][z+2]/4 ;
+                    int light00 = lightCache[x+2][y+3][z+2]/4
+                            , light01 = light00, light10 = light00
+                            , light11 = light00
+                            , lightTop00 = light00, lightTop01 = light00
+                            , lightTop10 = light00, lightTop11 = light00;
+//00
+                    //01
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
+                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
+                    voxels[x][y+1][z+1][TOP].vertex(1,light01);
+
+                    //11
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
+                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
 
 
                     //01
-                    voxels[x][y+1][z+1][SOUTH].vertex(2,light);
-                    voxels[x][y+1][z+1][EAST].vertex(0,light);
-                    voxels[x][y+1][z+1][TOP].vertex(1,light);
+                    voxels[x][y][z+1][SOUTH].vertex(3,light00);
+                    voxels[x][y][z+1][EAST].vertex(2,light11);
+                    voxels[x][y][z+1][BOTTOM].vertex(1,lightTop01);
 
                     //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,light);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,light);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light);
-
-
-                    //01
-                    voxels[x][y][z+1][SOUTH].vertex(3,light);
-                    voxels[x][y][z+1][EAST].vertex(2,light);
-                    voxels[x][y][z+1][BOTTOM].vertex(1,light);
-                    //10
-                    //11
-                    voxels[x+1][y][z+1][SOUTH].vertex(1,light);
-                    voxels[x+1][y][z+1][WEST].vertex(2,light);
-                    voxels[x+1][y][z+1][BOTTOM].vertex(0,light);
-
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
+                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
+                    voxels[x+1][y][z+1][BOTTOM].vertex(0,lightTop11);
                 }}}//}
 
         //0 diagonal x
         for(int y = -1; y < 0; y++) {
             for(int z = -1; z < 0; z++) {
-                for(int x = -1; x < CHUNK_WIDTH; x++) {
+                for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light = lightCache[x+2][y+3][z+2]/4 ;
+                    int light00 = lightCache[x+2][y+3][z+2]/4
+                            , light01 = light00, light10 = light00
+                            , light11 = light00
+                            , lightTop00 = light00, lightTop01 = light00
+                            , lightTop10 = light00, lightTop11 = light00;
 
 
+
+                    //01
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
+                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
+                    voxels[x][y+1][z+1][TOP].vertex(1,light01);
 
                     //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,light);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,light);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
+                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
 
-
-                    //10
-
-
+                    //00
 
                 }}}//}
 
         //diag y
-        for(int y = -1; y < CHUNK_HEIGHT; y++) {
+        for(int y = 0; y < CHUNK_HEIGHT; y++) {
             for(int z = -1; z < 0; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light = lightCache[x+2][y+3][z+2]/4 ;
-
-                    //00
-
-                    //10
+                    int light00 = lightCache[x+2][y+3][z+2]/4
+                            , light01 = light00, light10 = light00
+                            , light11 = light00
+                            , lightTop00 = light00, lightTop01 = light00
+                            , lightTop10 = light00, lightTop11 = light00;
 
                     //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,light);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,light);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
+                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
 
-                    //
+
+                    //11
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
+                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
+                    voxels[x+1][y][z+1][BOTTOM].vertex(0,lightTop11);
 
 
                 }}}//}
 
         //diag z
         for(int y = -1; y < 0; y++) {
-            for(int z = -1; z < CHUNK_DEPTH; z++) {
+            for(int z = 0; z < CHUNK_DEPTH; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light = lightCache[x+2][y+3][z+2]/4 ;
-
-                    //00
-
+                    int light00 = lightCache[x+2][y+3][z+2]/4
+                            , light01 = light00, light10 = light00
+                            , light11 = light00
+                            , lightTop00 = light00, lightTop01 = light00
+                            , lightTop10 = light00, lightTop11 = light00;
+                    //10
+                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
+                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
+                    voxels[x+1][y+1][z][TOP].vertex(2,light10);
                     //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,light);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,light);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
+                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
 
 
                 }}}//}

@@ -12,7 +12,7 @@ import com.niz.component.Position;
 import com.niz.physics.JPhysicsEngine;
 
 public class PhysicsSystem extends EntitySystem {
-	public JPhysicsEngine engine;
+	public transient JPhysicsEngine engine;
 	private ComponentMapper<Physics> physMap;
 	private ComponentMapper<Position> posMap;
 	int reps = 1; int max = 100; float step = 1f/128f;

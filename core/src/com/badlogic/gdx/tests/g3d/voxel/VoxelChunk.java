@@ -465,15 +465,15 @@ public class VoxelChunk {
 
 
         //outside blocks, east and west
-        for(int y = 0; y < height; y++) {
+        for(int y = -1; y < height+1; y++) {
 
-            for(int z = 0; z < depth; z++) {
+            for(int z = -1; z < depth+1; z++) {
 
                 maskIndex = z+1+(y+1)*yM;
                 mx = 0;//mask[maskIndex];
                 boolean flip = false;
                 for(int x = -1; x < width+2; x+= width+1, flip = !flip) {
-                    Gdx.app.log(TAG, "x "+x + " shitf "+(2 << -1));
+                  //  Gdx.app.log(TAG, "x "+x + " shitf "+(2 << -1));
                     int bx = (int) (x + offset.x), by = (int) (y + offset.y), bz = (int) (z + offset.z);
 
                     int b = world.get(bx,by,bz);
@@ -489,7 +489,7 @@ public class VoxelChunk {
                         light[x + 1 + 1][y + 1][z + 1 + 1] += def.lightValue;
                     }
                     else
-                        light[x + 1 + 1][y + 1][z + 1 + 1] = def.lightValue;
+                        light[x + 1 + 1][y + 1][z + 1 + 1] += def.lightValue;
                     light[x +  1][y + 1][z +  1] += def.lightValue;
                     light[x +  1][y + 1][z + 1 + 1] += def.lightValue;
                     light[x + 1 + 1][y + 1][z +  1] += def.lightValue;
@@ -540,7 +540,7 @@ public class VoxelChunk {
 
                 maskIndex = z+1+(y+1)*yM;
                 mx = 0;
-                for(int x = -1; x < width+1; x++) {
+                for(int x = 0; x < width+1; x++) {
                     //
                     int bx = (int) (x + offset.x), by = (int) (y + offset.y), bz = (int) (z + offset.z);
                     int b = world.get(bx,by,bz);
@@ -571,7 +571,7 @@ public class VoxelChunk {
 
                 maskIndex = z+1+(y+1)*yM;
                 mx = 0;
-                for(int x = -1; x < width+1; x++) {
+                for(int x = 0; x < width; x++) {
                     int bx = (int) (x + offset.x), by = (int) (y + offset.y), bz = (int) (z + offset.z);
 
                     int b = world.get(bx, by, bz);

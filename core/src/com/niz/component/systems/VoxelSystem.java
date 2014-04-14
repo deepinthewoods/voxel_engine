@@ -20,7 +20,7 @@ import com.badlogic.gdx.utils.Array;
 public class VoxelSystem extends EntitySystem {
 
     private static final String TAG = "voxel system";
-    public VoxelWorld voxelWorld;
+    public transient VoxelWorld voxelWorld;
 	//private BlockDefinition[] defs;
 	//private TextureRegion[] tiles;
 
@@ -39,8 +39,8 @@ public class VoxelSystem extends EntitySystem {
        // Gdx.app.log(TAG, "material"+voxelWorld.m);
 
 	}
-	
-	Vector3 tmp = new Vector3();
+
+    transient Vector3 tmp = new Vector3();
 	
 	
 	

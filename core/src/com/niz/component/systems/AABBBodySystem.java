@@ -33,7 +33,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		, new Vector3()
 		, new Vector3()
 	};
-	int[] sides = new int[3];
+    transient int[] sides = new int[3];
 	Vector3 dir = new Vector3();
 	Vector3 start = new Vector3(), end = new Vector3(), tStart = new Vector3(), tEnd = new Vector3();
 
@@ -240,17 +240,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 	}
 	
 
-	Vector3[] perpNormal = {
-			new Vector3()
-			, new Vector3()
-			, new Vector3()
-			, new Vector3()
-			, new Vector3()
-			, new Vector3()
-	};
-	static {
-		
-	}
+
 	
 	@Override
 	protected void process(Entity e) {

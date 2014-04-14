@@ -176,10 +176,10 @@ public class GeneralFactory extends GameFactory{
 
 		//systemDef.preWrite();
 		
-		systemDef.procesesSystems(world);
+		systemDef.procesesSystems(world, json);
 		//world.getSystem(CameraSystem.class).camera = cam;
-		
-		String s = json.toJson(systemDef);
+		//json = new Json();
+		String s = json.toJson(world.getSystems());
 		//file.writeString(json.prettyPrint(s), false);
 		Gdx.app.log(TAG, json.prettyPrint(s));
         VoxelSystem vw = world.getSystem(VoxelSystem.class);

@@ -26,10 +26,10 @@ public class CameraInfluenceSystem extends EntitySystem{
 	Vector3 tmpV = new Vector3(), tot = new Vector3();
 	private int weightTotal;
 	
-	public Subject notifyPositionChanged = new Subject();
+	public transient Subject notifyPositionChanged = new Subject();
 	//private Vector3 v = new Vector3();
 	private Position v = new Position();
-	public Subject notifyAccumulateInfluence= new Subject();
+	public transient Subject notifyAccumulateInfluence= new Subject();
 	
 	
 	protected void process(Entity e, CameraInfluencer inf) {

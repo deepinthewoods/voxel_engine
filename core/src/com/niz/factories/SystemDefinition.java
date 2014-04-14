@@ -6,6 +6,7 @@ import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectMap.Entries;
 import com.badlogic.gdx.utils.ObjectMap.Entry;
@@ -27,7 +28,7 @@ public class SystemDefinition{
 		drawSystemClasses.put(ClassReflection.getSimpleName(class1), class1);
 	}
 	
-	public void procesesSystems(World world){
+	public void procesesSystems(World world, Json json){
 		
 		for (String s : systems){
 			EntitySystem sys = null;
@@ -37,8 +38,11 @@ public class SystemDefinition{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (sys != null)
-				world.setSystem(sys);	
+			if (sys != null) {
+                world.setSystem(sys);
+                Class cl = sys.getClass();
+                json.addClassTag(cl.getSimpleName(), cl);
+            }
 		}
 		
 		for (String s : drawSystems){
@@ -49,8 +53,11 @@ public class SystemDefinition{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (dsys != null)
-				world.setDrawSystem(dsys);
+			if (dsys != null) {
+                world.setDrawSystem(dsys);
+                Class cl = dsys.getClass();
+                json.addClassTag(cl.getSimpleName(), cl);
+            }
 			
 			
 		}

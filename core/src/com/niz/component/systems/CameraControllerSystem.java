@@ -23,11 +23,11 @@ import com.niz.observer.Subject.Event;
 public class CameraControllerSystem extends EntitySystem implements Observer{
 
 	private static final String TAG = "camera controller system";
-	private Camera camera;
+	private transient Camera camera;
 	private ComponentMapper<Position> positionM;
-	public Vector3 prevPosition;
+	public transient Vector3 prevPosition;
 	private ComponentMapper<AABBBody> bodyM;
-	private Vector3 newPos;
+	private transient Vector3 newPos;
 	
 	
 	public CameraControllerSystem() {

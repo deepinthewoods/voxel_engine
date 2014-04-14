@@ -44,7 +44,7 @@ public class BodySystem extends EntityProcessingSystem {
 	private static int[] tmpVoxels = new int[8];
 	
 	
-	RayCaster ray;// = new RayCaster2(0f, 0f, 0f, 1, 1, 1);
+	transient RayCaster ray;// = new RayCaster2(0f, 0f, 0f, 1, 1, 1);
 
 	int normalCount;
 	
@@ -56,7 +56,7 @@ public class BodySystem extends EntityProcessingSystem {
 		, new Vector3()
 		, new Vector3()
 	};
-	int[] sides = new int[3];
+	transient int[] sides = new int[3];
 	static Vector3 dir = new Vector3();
 	
 	public static void  onTick(Vector3 position, Vector3 oldPosition, Body c) {

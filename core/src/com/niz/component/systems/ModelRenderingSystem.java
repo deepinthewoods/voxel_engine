@@ -36,7 +36,7 @@ public class ModelRenderingSystem extends DrawSystem{
 	
 	
 	
-	private Matrix4 rotationTransform = new Matrix4(), positionTransform = new Matrix4();
+	private transient Matrix4 rotationTransform = new Matrix4(), positionTransform = new Matrix4();
 
 	
 	protected void process(com.artemis.Entity e, float dt) {

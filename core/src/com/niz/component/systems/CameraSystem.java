@@ -16,7 +16,7 @@ public CameraSystem() {
 		
 	}
 
-public Camera camera;
+public transient Camera camera;
 
 @Override
 protected void processEntities(Array<Entity> entities) {

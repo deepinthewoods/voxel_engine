@@ -21,18 +21,18 @@ import com.badlogic.gdx.utils.ObjectIntMap;
  * @author Arni Arent
  *
  */
-public abstract class EntitySystem implements EntityObserver, Serializable {
+public abstract class EntitySystem implements EntityObserver {
     protected final int systemIndex;
 
-    protected World world;
+    protected transient World world;
 
-    protected Array<Entity> actives;
+    protected transient Array<Entity> actives;
 
-    protected Aspect aspect;
+    protected transient Aspect aspect;
 
-    protected BitSet allSet;
-    protected BitSet exclusionSet;
-    protected BitSet oneSet;
+    protected transient BitSet allSet;
+    protected transient BitSet exclusionSet;
+    protected transient BitSet oneSet;
 
     protected boolean passive;
 
@@ -237,7 +237,7 @@ public abstract class EntitySystem implements EntityObserver, Serializable {
         }
     }
     
-    @Override
+   /* @Override
 	public void write(Json json) {
     	
 	}
@@ -245,6 +245,6 @@ public abstract class EntitySystem implements EntityObserver, Serializable {
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		
-	};
+	};*/
 
 }
