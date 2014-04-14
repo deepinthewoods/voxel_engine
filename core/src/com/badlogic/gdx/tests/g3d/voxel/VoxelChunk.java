@@ -539,7 +539,7 @@ public class VoxelChunk {
             for(int z = -1; z < depth+1; z++) {
 
                 maskIndex = z+1+(y+1)*yM;
-                mx = 0;
+                mx = mask[maskIndex];;
                 for(int x = 0; x < width+1; x++) {
                     //
                     int bx = (int) (x + offset.x), by = (int) (y + offset.y), bz = (int) (z + offset.z);
@@ -570,7 +570,7 @@ public class VoxelChunk {
             for(int z = -1; z < depth+2; z+= depth+1) {
 
                 maskIndex = z+1+(y+1)*yM;
-                mx = 0;
+                mx = mask[maskIndex];
                 for(int x = 0; x < width; x++) {
                     int bx = (int) (x + offset.x), by = (int) (y + offset.y), bz = (int) (z + offset.z);
 
