@@ -20,15 +20,21 @@ public class SystemDefinition{
 	transient public ObjectMap<String, Class<? extends DrawSystem>> drawSystemClasses = new ObjectMap<String, Class<? extends DrawSystem>>();
 
 	public Array<String> systems = new Array<String>(), drawSystems = new Array<String>();
-	public void setSystem(Class<? extends EntitySystem> class1) {
-		
-		systemClasses .put(ClassReflection.getSimpleName(class1), class1);
+    private Json json;
+
+    public void setSystem(Class<? extends EntitySystem> class1) {
+		String name = ClassReflection.getSimpleName(class1);
+		systemClasses .put(name, class1);
+        json.addClassTag(name, class1);
 	}
 	public void setDrawSystem(Class<? extends DrawSystem> class1) {
-		drawSystemClasses.put(ClassReflection.getSimpleName(class1), class1);
-	}
+        String name = ClassReflection.getSimpleName(class1);
+        drawSystemClasses.put(name, class1);
+        json.addClassTag(name, class1);
+
+    }
 	
-	public void procesesSystems(World world, Json json){
+	public void procesesSystems(World world){
 		
 		for (String s : systems){
 			EntitySystem sys = null;
@@ -40,8 +46,7 @@ public class SystemDefinition{
 			}
 			if (sys != null) {
                 world.setSystem(sys);
-                Class cl = sys.getClass();
-                json.addClassTag(cl.getSimpleName(), cl);
+
             }
 		}
 		
@@ -55,8 +60,7 @@ public class SystemDefinition{
 			}
 			if (dsys != null) {
                 world.setDrawSystem(dsys);
-                Class cl = dsys.getClass();
-                json.addClassTag(cl.getSimpleName(), cl);
+
             }
 			
 			
@@ -106,6 +110,9 @@ public class SystemDefinition{
 			drawSystems.add(c.key);
 		}
 	}
-	
-	
+
+
+    public void setJson(Json json) {
+        this.json = json;
+    }
 }

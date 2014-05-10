@@ -50,7 +50,6 @@ public class EngineScreen implements Screen{
 	@Override
 	public void dispose() {
 		world.dispose();
-		shapeBatch.dispose();
 		assets.dispose();
 	}
 	
@@ -60,19 +59,17 @@ public class EngineScreen implements Screen{
 	//private PerspectiveCamer
 	private Batch spriteBatch;
 	private World world;
-	private ShapeBatch shapeBatch;
-	//private ModelBatch modelBatch;
+	//private ShapeBatch shapeBatch;
 	public static float accumulator, timeStep = 1f/128f, minTimeStep = 1f/15f;
 	protected GameFactory factory;
 	protected AssetManager assets;
 	private boolean assetsLoaded;
-	private ModelBatch modelBatch;
-	
-	private Camera shapeCamera;
+	//private ModelBatch modelBatch;
+
 	private Skin skin;
 	private Stage stage;
 	private BitmapFont font;
-	private Environment env;
+	//private Environment env;
 	public static Entity player;
 	public static int tick;
 	public NizMain game;
@@ -86,24 +83,21 @@ public class EngineScreen implements Screen{
 		stage = new Stage();
 		spriteBatch = stage.getSpriteBatch();
 		//spriteBatch = new SpriteBatch();
-		shapeBatch = new ShapeBatch();
 		world = new World();
 		world.getInputMux().addProcessor(stage);
 		assets = new AssetManager();
 		assetsLoaded = false;
 		
 		factory = new GeneralFactory();
-		modelBatch = new ModelBatch();
-		shapeCamera = new OrthographicCamera(Gdx.graphics.getWidth()/ Gdx.graphics.getHeight(), 1);
+
 		//shapeCamera.update();
-		
-		
-		env = new Environment();
-		env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
+
+
+
 		//env.add(new DirectionalLight().set(1, 1, 1, 0, -1, .5f));
-		
+
 		//orthoCamera = new OrthographicCamera();
-		
+
 		factory.assets(world, assets);
 		
 		factory.initMenu(world, skin, stage);
@@ -116,7 +110,7 @@ public class EngineScreen implements Screen{
 	@Override
 	public void render(float delta) {		
 		if(!assetsLoaded && assets.update()) {
-			factory.init(timeStep, world, env, assets, modelBatch, shapeBatch);
+			factory.init(timeStep, world, assets);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){
@@ -139,11 +133,9 @@ public class EngineScreen implements Screen{
 		
 		stage.draw();
 		Camera camera = world.getSystem(CameraSystem.class).camera;
-		modelBatch.begin(camera);
-		//worldTest.render(modelBatch);
 
 		world.draw(delta);
-		modelBatch.end();
+
 		
 		spriteBatch.begin();
 		Array<Component> array = new Array<Component>();
@@ -174,8 +166,7 @@ public class EngineScreen implements Screen{
 			, 280, 20);
 	
 		spriteBatch.end();
-		shapeBatch.draw(shapeCamera, camera);
-		
+
 	}
 
 	@Override

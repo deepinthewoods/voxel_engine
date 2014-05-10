@@ -24,19 +24,19 @@ public abstract class GameFactory {
 
 public abstract void assets(World world, AssetManager assets) ;
 
-public abstract void systems(float timeStep, World world, AssetManager assets, ModelBatch modelBatch, ShapeBatch shapeBatch);
+public abstract void systems(float timeStep, World world, AssetManager assets);
 
 public abstract void newGame(World world, Stage stage);
 
 public abstract void load(World world);
 
-public void init(float timeStep, World world, Environment env, AssetManager assets, ModelBatch modelBatch, ShapeBatch shapeBatch){
+public void init(float timeStep, World world, AssetManager assets){
 	
 	
-	systems(timeStep, world, assets, modelBatch, shapeBatch);
+	systems(timeStep, world, assets);
 	
 	world.initialize();
-	world.initializeDraw(modelBatch, env, shapeBatch);
+	world.initializeDraw();
 }
 
 	Array<Component> components = new Array<Component>();
@@ -84,15 +84,58 @@ public void init(float timeStep, World world, Environment env, AssetManager asse
 				newGame.removeListener(this);
 			}
 		});
-		
-		
+
+        final Button extract = new Button(new Label("New", skin), skin);
+
+        extract.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+                table.addAction(
+                        Actions.sequence(
+                                Actions.fadeOut(.14f)
+                                ,
+                                Actions.parallel(
+                                        Actions.removeActor(table)
+                                        ,
+                                        new Action(){
+
+                                            @Override
+                                            public boolean act(float delta) {
+                                                Process p;
+                                                try {
+                                                    String command = "ffmpeg ";
+                                                    p = Runtime.getRuntime().exec(command);
+                                                    p.waitFor();
+
+                                                } catch (Exception ex){
+
+                                                }
+
+
+                                                return true;
+                                            }
+
+
+
+                                        }
+                                )
+                        )
+                );
+
+                extract.removeListener(this);
+            }
+        });
+
 		table.add(newGame);
-		
+		//table.add(extract);
 		table.setFillParent(true);
 		table.layout();
 		
 		stage.addActor(table);
-		
+
+
+
 		//stage.addActor(group);
 		
 		

@@ -128,10 +128,10 @@ public class World implements Disposable {
         }
     }
     
-    public void initializeDraw(ModelBatch modelBatch, Environment env, ShapeBatch shapeBatch){
+    public void initializeDraw(){
     	for (int i = 0; i < drawSystemsArray.size; i++) {
             drawSystemsArray.get(i).initialize();
-            drawSystemsArray.get(i).set(modelBatch, null, env, shapeBatch);
+
 
         }
     }

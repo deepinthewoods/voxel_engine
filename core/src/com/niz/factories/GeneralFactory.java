@@ -10,13 +10,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -30,7 +28,6 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.EngineScreen;
-import com.niz.ShapeBatch;
 import com.niz.actions.AJump;
 import com.niz.actions.AStand;
 import com.niz.actions.ActionList;
@@ -49,24 +46,7 @@ import com.niz.component.Position;
 import com.niz.component.PositionRollingAverage;
 import com.niz.component.VelocityPredictor;
 import com.niz.component.VelocityRollingAverage;
-import com.niz.component.systems.AABBBodySystem;
-import com.niz.component.systems.ActionSystem;
-import com.niz.component.systems.BrainSystem;
-import com.niz.component.systems.BucketedSystem;
-import com.niz.component.systems.CameraControllerSystem;
-import com.niz.component.systems.CameraInfluenceSystem;
-import com.niz.component.systems.CameraSystem;
-import com.niz.component.systems.DebugPositionSystem;
-import com.niz.component.systems.DebugVectorSystem;
-import com.niz.component.systems.ModelRenderingSystem;
-import com.niz.component.systems.MovementSystem;
-import com.niz.component.systems.PhysicsSystem;
-import com.niz.component.systems.PositionLimiterSystem;
-import com.niz.component.systems.PositionRollingAverageSystem;
-import com.niz.component.systems.VelocityPredictionSystem;
-import com.niz.component.systems.VelocityRollingAverageSystem;
-import com.niz.component.systems.VoxelRenderingSystem;
-import com.niz.component.systems.VoxelSystem;
+import com.niz.component.systems.*;
 
 public class GeneralFactory extends GameFactory{
 	public static final float VIEWPORT_SIZE = 20;
@@ -93,36 +73,27 @@ public class GeneralFactory extends GameFactory{
 	public void assets(World world, AssetManager assets) {
 		
 		FileHandle file = Gdx.files.external(path+"assets.ini");
-		
-		//String[] s = file.readString().split("/n");
-		//Gdx.app.log(TAG, "strings"+s[0]);
-		
-		//Writer wrietr = new FileWriter()
-		
+
 		Json json = new Json();
 		
 		JsonValue value;
-		
-		
-		
-		
-		
+
 		json.addClassTag("assets", AssetDefinition.class);
 		ass = json.fromJson(AssetDefinition.class, file);//new AssetDefinition();//
 		ass.process(world, assets);
 		
 		
 		//String jtext = json.toJson(ass);
-		
+
 		//file.writeString(json.prettyPrint(jtext), false);
 		//Gdx.app.log(TAG, "strings"+jtext);
-		
+
 		player = world.createEntity();
 		EngineScreen.player = player;
 	}
 
 	@Override
-	public void systems(float timeStep, World world, AssetManager assets, ModelBatch modelBatch, ShapeBatch shapeBatch) {
+	public void systems(float timeStep, World world, AssetManager assets) {
 		ass.postProcess(assets);
 		//TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
 		//BlockDefinition[] defs = getBlockDefs(tiles);
@@ -144,9 +115,9 @@ public class GeneralFactory extends GameFactory{
 				
 		//systemDef = new SystemDefinition();
 		systemDef = json.fromJson(SystemDefinition.class, file);	
-				
+		systemDef.setJson(json);
 		systemDef.setSystem(CameraSystem.class);
-		
+		systemDef.setSystem(GraphicsSystem.class);
 				
 		systemDef.setSystem( PhysicsSystem.class );
 		systemDef.setSystem( MovementSystem.class);
@@ -160,7 +131,7 @@ public class GeneralFactory extends GameFactory{
 		
 		systemDef.setSystem( PositionRollingAverageSystem.class);
 		systemDef.setSystem( VelocityRollingAverageSystem.class);
-		systemDef.setSystem(VelocityPredictionSystem.class);;
+		systemDef.setSystem(VelocityPredictionSystem.class);
 		systemDef.setDrawSystem(VoxelRenderingSystem.class);
 		
 
@@ -175,13 +146,14 @@ public class GeneralFactory extends GameFactory{
 		systemDef.setSystem( PositionLimiterSystem.class);
 
 		//systemDef.preWrite();
-		
-		systemDef.procesesSystems(world, json);
-		//world.getSystem(CameraSystem.class).camera = cam;
+		systemDef.procesesSystems(world);
+        world.setSystem(new AssetsSystem(assets));
+
+        //world.getSystem(CameraSystem.class).camera = cam;
 		//json = new Json();
-		String s = json.toJson(world.getSystems());
+		//String s = json.toJson(world.getSystems());
 		//file.writeString(json.prettyPrint(s), false);
-		Gdx.app.log(TAG, json.prettyPrint(s));
+		//Gdx.app.log(TAG, json.prettyPrint(s));
         VoxelSystem vw = world.getSystem(VoxelSystem.class);
         Gdx.app.log(TAG, "shader "+ vw);
 		
@@ -317,7 +289,7 @@ public class GeneralFactory extends GameFactory{
 		e.add(VelocityPredictor.class).scale = 240f;
 		e.get(VelocityPredictor.class).y = false;
 		e.add(VelocityRollingAverage.class).size = 100;
-		;
+
 		e.add(DebugVector.class).add(e.get(VelocityRollingAverage.class).result, Color.CYAN);
 		//posAcc.add(DebugVector.class).add(posAcc.get(Position.class).pos, Color.CYAN);
 		//posAcc.add(DebugPosition.class);

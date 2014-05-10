@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.niz.ShapeBatch;
 import com.niz.component.DebugPosition;
 import com.niz.component.Position;
 
@@ -15,7 +16,9 @@ public class DebugPositionSystem extends DrawSystem {
 
 	private static final String TAG = "debug position system";
 	private ComponentMapper<Position> posM;
-	public DebugPositionSystem() {
+    private ShapeBatch shapeBatch;
+
+    public DebugPositionSystem() {
 		
 		super(Aspect.getAspectForAll(DebugPosition.class, Position.class));
 		// TODO Auto-generated constructor stub
@@ -34,6 +37,7 @@ public class DebugPositionSystem extends DrawSystem {
 	}
 	@Override
 	public void initialize(){
+        shapeBatch = world.getSystem(GraphicsSystem.class).shapeBatch;
 		posM = world.getMapper(Position.class);
 	}
 }

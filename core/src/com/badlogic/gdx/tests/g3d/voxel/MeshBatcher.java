@@ -77,7 +77,7 @@ public class MeshBatcher{
 		cacheProgress = 0;
 		vertexTotal = 0;
 		indexProgress = 0;
-		chunk.numVerts = size/6*4;
+		chunk.numVerts = size/6*2;
 		chunk.mesh = mesh;
 		//Gdx.app.log(TAG, "mesh");
 		return 0;

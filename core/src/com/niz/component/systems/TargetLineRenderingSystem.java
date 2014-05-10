@@ -14,9 +14,10 @@ public class TargetLineRenderingSystem extends DrawSystem {
 
 	//private ShapeBatch batch;
 	private ComponentMapper<ActionComponent> actionMap;
-	
+    private ShapeBatch shapeBatch;
 
-	public TargetLineRenderingSystem() {
+
+    public TargetLineRenderingSystem() {
 		super(Aspect.getAspectForAll(Player.class, ActionComponent.class));
 		//this.batch = batch;
 	}
@@ -27,6 +28,7 @@ public class TargetLineRenderingSystem extends DrawSystem {
 	public void initialize(){
 		super.initialize();
 		actionMap = world.getMapper(ActionComponent.class);
+        shapeBatch = world.getSystem(GraphicsSystem.class).shapeBatch;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import com.artemis.systems.DrawSystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.niz.ShapeBatch;
 import com.niz.component.DebugVector;
 
 public class DebugVectorSystem extends DrawSystem {
@@ -14,7 +15,9 @@ public class DebugVectorSystem extends DrawSystem {
 	private static final String TAG = "debug position system";
 	//private ComponentMapper<Position> posM;
 	private ComponentMapper<DebugVector> vecM;
-	public DebugVectorSystem() {
+    private ShapeBatch shapeBatch;
+
+    public DebugVectorSystem() {
 		
 		super(Aspect.getAspectForAll(DebugVector.class));
 		// TODO Auto-generated constructor stub
@@ -40,5 +43,6 @@ public class DebugVectorSystem extends DrawSystem {
 	public void initialize(){
 		//posM = world.getMapper(Position.class);
 		vecM = world.getMapper(DebugVector.class);
+        shapeBatch = world.getSystem(GraphicsSystem.class).shapeBatch;
 	}
 }

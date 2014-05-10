@@ -20,10 +20,12 @@ public class ModelRenderingSystem extends DrawSystem{
 	ComponentMapper<ModelInfo> miMap;
 	ComponentMapper<Position> posMap;
 	ComponentMapper<Move> moveMap;
-	
-	
-	
-	public ModelRenderingSystem(){
+    private ModelBatch modelBatch;
+    private Environment env;
+    private Camera camera;
+
+
+    public ModelRenderingSystem(){
 		super(Aspect.getAspectForAll(ModelInfo.class, Position.class, Move.class));
 		
 	}
@@ -32,6 +34,9 @@ public class ModelRenderingSystem extends DrawSystem{
 		miMap = world.getMapper(ModelInfo.class);
 		posMap =  world.getMapper(Position.class);
 		moveMap = world.getMapper(Move.class);
+        modelBatch = world.getSystem(GraphicsSystem.class).modelBatch;
+        env = world.getSystem(GraphicsSystem.class).env;
+        camera = world.getSystem(GraphicsSystem.class).camera;
 	}
 	
 	
@@ -56,8 +61,10 @@ public class ModelRenderingSystem extends DrawSystem{
 
 	@Override
 	protected void processEntities(Array<Entity> entities) {
+        modelBatch.begin(camera);
 		for (Entity e : entities)
 			process(e, world.getDelta());
+        modelBatch.end();
 		
 	}
 }

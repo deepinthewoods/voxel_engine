@@ -22,6 +22,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
@@ -50,12 +52,13 @@ public class VoxelWorld implements RenderableProvider {
 	public final int voxelsZ;
 	public int renderedChunks;
 	public int numChunks;
-	private final Material material;
+	private Material material;
 	public int offsetX, offsetY, offsetZ;
 	private Mesher mesher;
 	private MeshBatcher batch;
-	
-	public VoxelWorld(Material material, int chunksX, int chunksY, int chunksZ, Mesher mesher, MeshBatcher meshBatcher) {
+    private Shader shader;
+
+    public VoxelWorld(int chunksX, int chunksY, int chunksZ, Mesher mesher, MeshBatcher meshBatcher) {
 		batch = meshBatcher;
 		VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
 		//if (blockDefs == null) throw new GdxRuntimeException("nill init");
@@ -91,7 +94,11 @@ public class VoxelWorld implements RenderableProvider {
 		//for(i = 0; i < numVertices.length; i++) numVertices[i] = 0;
 
 		//this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z*2];
+        
+     
+                
 		this.mesher = mesher;
+       
 	}
 
 	
@@ -201,7 +208,7 @@ public class VoxelWorld implements RenderableProvider {
 			renderable.mesh = chunk.mesh;
 			renderable.meshPartOffset = 0;
 			renderable.meshPartSize = chunk.numVerts;
-			
+			renderable.shader = shader;
 			renderable.primitiveType = GL20.GL_TRIANGLES;
 			renderable.worldTransform.idt().translate(chunk.offset);
 			renderables.add(renderable);
@@ -234,5 +241,16 @@ public class VoxelWorld implements RenderableProvider {
 		return closestChunk;
 	}
 
-	
+
+    public void setMaterial(Material material) {
+        this.material = material;
+    }
+
+    public void setShader(Shader shader) {
+        this.shader = shader;
+    }
+
+    public Shader getShader() {
+        return shader;
+    }
 }
