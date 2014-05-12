@@ -77,7 +77,7 @@ public class MeshBatcher{
 		cacheProgress = 0;
 		vertexTotal = 0;
 		indexProgress = 0;
-		chunk.numVerts = size/6*2;
+		chunk.numVerts = size/8*2;
 		chunk.mesh = mesh;
 		//Gdx.app.log(TAG, "mesh");
 		return 0;
@@ -146,6 +146,7 @@ public class MeshBatcher{
 		chunk.mesh.setVertices(vertices, 0, count);
 		chunk.mesh.setIndices(indices, 0, (count*6)/4);
 		chunk.numVerts = count/4*6;
+
 	}
 
 	public void addVertices(Vector3[] vertices, int[] colorArray, int[] indexes,
@@ -183,7 +184,7 @@ public class MeshBatcher{
             cachedVerts[cacheProgress++] = v.x;
             cachedVerts[cacheProgress++] = v.y;
             cachedVerts[cacheProgress++] = v.z;
-            cachedVerts[cacheProgress++] = highlightColors[i];//c;
+            cachedVerts[cacheProgress++] = c;
             if (voxel.side == 2
                     || voxel.side == 3
                     ){
