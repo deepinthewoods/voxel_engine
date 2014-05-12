@@ -22,6 +22,7 @@ import com.artemis.systems.DrawSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -55,28 +56,7 @@ public class VoxelRenderingSystem extends DrawSystem{
     public VoxelRenderingSystem() {
 		super(Aspect.getEmpty());
 		//this.defs = defs;
-        String vertexShader = "attribute vec4 a_position;    \n" +
-                "attribute vec4 a_color;\n" +
-                "attribute vec2 a_texCoord0;\n" +
-                "uniform mat4 u_worldView;\n" +
-                "varying vec4 v_color;" +
-                "varying vec2 v_texCoords;" +
-                "void main()                  \n" +
-                "{                            \n" +
-                "   v_color = vec4(1, 1, 1, 1); \n" +
-                "   v_texCoords = a_texCoord0; \n" +
-                "   gl_Position =  u_worldView * a_position;  \n"      +
-                "}                            \n" ;
-        String fragmentShader = "#ifdef GL_ES\n" +
-                "precision mediump float;\n" +
-                "#endif\n" +
-                "varying vec4 v_color;\n" +
-                "varying vec2 v_texCoords;\n" +
-                "uniform sampler2D u_texture;\n" +
-                "void main()                                  \n" +
-                "{                                            \n" +
-                "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords);\n"+
-                "}";
+
        // Gdx.app.log(TAG, "INIT VW RENDERINGSYSTEM");
 
     }
@@ -85,17 +65,16 @@ public class VoxelRenderingSystem extends DrawSystem{
 	@Override
 	protected void processEntities(Array<Entity> entities) {
         //if (shaderProgram.isCompiled())
+       // Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        //shaderProgram.begin();
         Shader shader = voxelWorld.getShader();
-
+        Texture voxelTexture = world.getSystem(AssetsSystem.class).assets.get("data/tiles.png", Texture.class);
+        voxelTexture.bind();
         modelBatch.begin(camera);
 
-       // if (env == null) throw new GdxRuntimeException("null environment");
-       modelBatch.render(voxelWorld, shader);
+        modelBatch.render(voxelWorld, shader);
 
-        modelBatch
-                .end();
+        modelBatch.end();
 
 
 		
@@ -106,22 +85,21 @@ public class VoxelRenderingSystem extends DrawSystem{
 		super.initialize();
         GraphicsSystem grap = world.getSystem(GraphicsSystem.class);
         modelBatch = world.getSystem(GraphicsSystem.class).modelBatch;
-        camera = world.getSystem(GraphicsSystem.class).camera;
+        camera = world.getSystem(CameraSystem.class).camera;
         voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
 
 
         Texture voxelTexture = world.getSystem(AssetsSystem.class).assets.get("data/tiles.png", Texture.class);
-        Material material = new Material(new ColorAttribute(ColorAttribute.Diffuse,  1f, 1f, 1f, 1)
+        Material material = new Material( new ColorAttribute(ColorAttribute.Diffuse,  1f, 1f, 1f, 1)
                 , new TextureAttribute(TextureAttribute.Diffuse, voxelTexture)
         );
         voxelWorld.setMaterial(material);
-        final Renderable ren = new Renderable();
-        ren.material = material;
-        ren.environment = grap.env;
+
 
         Shader shader = new VoxelShader();
-        voxelWorld.setShader(shader);
         shader.init();
+        voxelWorld.setShader(shader);
+
 
 
 	};

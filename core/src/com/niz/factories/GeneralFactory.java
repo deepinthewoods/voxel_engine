@@ -455,6 +455,7 @@ public class GeneralFactory extends GameFactory{
 	}
 
 	public static  BlockDefinition[] getBlockDefs(TextureRegion[][] tiles) {
+        Gdx.app.log(TAG, "BLOCK DEFS");
 		BlockDefinition[] defs = new BlockDefinition[32];
 		defs[0] = new BlockDefinition(tiles, 0)
 		{

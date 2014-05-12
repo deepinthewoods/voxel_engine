@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.math.Vector3;
 
 /**
@@ -519,9 +520,9 @@ public class GreedyMesher implements Mesher {
     		r = i/16f;
     		g = r;
     		b = r;
-    		
+
     		lightValues[i] = Color.toFloatBits(r, g, b, a);
-    		
+
     	}
 		meshBatch = mesh;
 		setConstants(16,16,16);
@@ -819,7 +820,7 @@ public class GreedyMesher implements Mesher {
         : flip?new int[]{3,1,0, 0,2,3}:new int[]{ 2,3,1, 1,0,2 };
 
         
-		meshBatch.addVertices(vertices, voxel.vertex, indexes, flip , voxel);
+		meshBatch.addVertices(vertices, voxel.vertex, indexes, flip , voxel, width, height);
  
     }
 
@@ -840,9 +841,10 @@ public class GreedyMesher implements Mesher {
 		Mesh mesh = new Mesh(true, 
 				size, 
 				size / 4 * 6,
-				VertexAttribute.Position(),
+                VertexAttribute.Position(),
 				VertexAttribute.Color(),
-                VertexAttribute.TexCoords(1)
+                VertexAttribute.TexCoords(0),
+                new VertexAttribute(VertexAttributes.Usage.Generic, 2, "a_texStart")
         );
 		
 

@@ -22,15 +22,11 @@ public class GraphicsSystem extends EntitySystem {
      *
      */
     protected ModelBatch modelBatch;
-    protected Camera camera;
     protected Environment env;
     protected ShapeBatch shapeBatch;
     private Camera shapeCamera;
 
-    public void set(ModelBatch modelBatch, Camera cam, Environment env, ShapeBatch shapeBatch){
-        this.camera = cam;
-        this.env = env;
-    }
+
     public GraphicsSystem() {
         super(Aspect.getEmpty());
 
@@ -40,6 +36,8 @@ public class GraphicsSystem extends EntitySystem {
 
     @Override
     protected void processEntities(Array<Entity> entities) {
+
+        Camera camera = world.getSystem(CameraSystem.class).camera;
         shapeBatch.draw(shapeCamera, camera);
 
     }

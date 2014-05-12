@@ -36,7 +36,7 @@ public class ModelRenderingSystem extends DrawSystem{
 		moveMap = world.getMapper(Move.class);
         modelBatch = world.getSystem(GraphicsSystem.class).modelBatch;
         env = world.getSystem(GraphicsSystem.class).env;
-        camera = world.getSystem(GraphicsSystem.class).camera;
+        camera = world.getSystem(CameraSystem.class).camera;
 	}
 	
 	

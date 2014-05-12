@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
  * Created by niz on 14/04/2014.
  */
 public class VoxelShader implements Shader {
+    private static final String TAG ="voxel shader" ;
     private ShaderProgram program;
     private Camera camera;
     private RenderContext context;
@@ -24,6 +25,7 @@ public class VoxelShader implements Shader {
         program = new ShaderProgram(vert, frag);
         if (!program.isCompiled())
             throw new GdxRuntimeException(program.getLog());
+
     }
 
     @Override
@@ -33,7 +35,7 @@ public class VoxelShader implements Shader {
 
     @Override
     public boolean canRender(Renderable instance) {
-        return false;
+        return true;
     }
 
     @Override
@@ -49,6 +51,8 @@ public class VoxelShader implements Shader {
 
     @Override
     public void render(Renderable renderable) {
+        //
+        // Gdx.app.log(TAG, "render");
         program.setUniformMatrix("u_worldTrans", renderable.worldTransform);
         renderable.mesh.render(program,
                 renderable.primitiveType,

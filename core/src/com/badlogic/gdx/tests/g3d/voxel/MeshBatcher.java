@@ -174,19 +174,59 @@ public class MeshBatcher{
 	
 	}
 
-    public void addVertices(Vector3[] vertices, int[] colorArray, int[] indexes, boolean flip, GreedyMesher.VoxelFace voxel) {
+    public void addVertices(Vector3[] vertices, int[] colorArray, int[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height) {
         for (int i = 0; i < 4; i++){
             Vector3 v = vertices[i];
-            float c = colorArray[i];//highlightColors[i];//
-            //Gdx.app.log(TAG, "color array"+colorArray[i]);
+            float c = GreedyMesher.lightValues[colorArray[i]];//highlightColors[i];//
+
+            Gdx.app.log(TAG, "verts"+width+"  "+height);
             cachedVerts[cacheProgress++] = v.x;
             cachedVerts[cacheProgress++] = v.y;
             cachedVerts[cacheProgress++] = v.z;
             cachedVerts[cacheProgress++] = c;
+            if (voxel.side == 2 || voxel.side == 3){
+                switch (i){
+                    case 0:
+                        cachedVerts[cacheProgress++] = width;
+                        cachedVerts[cacheProgress++] = height;
+                        break;
+                    case 1:
+                        cachedVerts[cacheProgress++] = width;
+                        cachedVerts[cacheProgress++] = 0;
+                        break;
+                    case 2:
+                        cachedVerts[cacheProgress++] = 0;
+                        cachedVerts[cacheProgress++] = height;
+                        break;
+                    case 3:
+                        cachedVerts[cacheProgress++] = 0;
+                        cachedVerts[cacheProgress++] = 0;
+                        break;
+                }
+            } else {
+                switch (i){
+                    case 0://bl
+                        cachedVerts[cacheProgress++] = 0;
+                        cachedVerts[cacheProgress++] = height;
+                        break;
+                    case 1://tl
+                        cachedVerts[cacheProgress++] = 0;
+                        cachedVerts[cacheProgress++] = 0;
+                        break;
+                    case 2://tr
+                        cachedVerts[cacheProgress++] = width;
+                        cachedVerts[cacheProgress++] = height;
+                        break;
+                    case 3://br
+                        cachedVerts[cacheProgress++] = width;
+                        cachedVerts[cacheProgress++] = 0;
+                        break;
+                }
+            }
+
+
             cachedVerts[cacheProgress++] = voxel.u;
             cachedVerts[cacheProgress++] = voxel.v;
-            cachedVerts[cacheProgress++] = voxel.u2;
-            cachedVerts[cacheProgress++] = voxel.v2;
 
         }
 
