@@ -183,23 +183,25 @@ public class MeshBatcher{
             cachedVerts[cacheProgress++] = v.x;
             cachedVerts[cacheProgress++] = v.y;
             cachedVerts[cacheProgress++] = v.z;
-            cachedVerts[cacheProgress++] = c;
-            if (voxel.side == 2 || voxel.side == 3){
+            cachedVerts[cacheProgress++] = highlightColors[i];//c;
+            if (voxel.side == 2
+                    || voxel.side == 3
+                    ){
                 switch (i){
                     case 0:
-                        cachedVerts[cacheProgress++] = width;
-                        cachedVerts[cacheProgress++] = height;
-                        break;
-                    case 1:
-                        cachedVerts[cacheProgress++] = width;
                         cachedVerts[cacheProgress++] = 0;
+                        cachedVerts[cacheProgress++] = width;
                         break;
                     case 2:
                         cachedVerts[cacheProgress++] = 0;
+                        cachedVerts[cacheProgress++] = 0;
+                        break;
+                    case 1:
                         cachedVerts[cacheProgress++] = height;
+                        cachedVerts[cacheProgress++] = width;
                         break;
                     case 3:
-                        cachedVerts[cacheProgress++] = 0;
+                        cachedVerts[cacheProgress++] = height;
                         cachedVerts[cacheProgress++] = 0;
                         break;
                 }
