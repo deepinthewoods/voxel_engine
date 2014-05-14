@@ -49,8 +49,8 @@ public class GreedyMesher implements Mesher {
      * be larger � for example, in my voxel engine chunks are 16x16x16 � but the small size
      * here allows for a simple demostration.
      */
-    private static final int CHUNK_WIDTH = 16;
-    private static final int CHUNK_HEIGHT = 16, CHUNK_DEPTH = 16;
+    private static int CHUNK_WIDTH = 16;
+    private static int CHUNK_HEIGHT = 16;
  
     /*
      * This is a 3D array of sample data � I�m using voxel faces here because I�m returning
@@ -211,7 +211,7 @@ public class GreedyMesher implements Mesher {
     		
     		for (int j = 0; j < CHUNK_HEIGHT+2; j++) {
     			
-    			for (int k = 0; k < CHUNK_DEPTH+2; k++) {
+    			for (int k = 0; k < CHUNK_WIDTH+2; k++) {
     	
     				lightCache[i][j][k] = 0;
     				
@@ -221,11 +221,11 @@ public class GreedyMesher implements Mesher {
     	
 		chunk.visibility(visibilityMask, lightCache, voxels, voxelWorld);
     	
-        int my = CHUNK_DEPTH+2;
+        int my = CHUNK_WIDTH+2;
 		for(int y = 0; y < CHUNK_HEIGHT; y++) {
 			
 			
-			for(int z = 0; z < CHUNK_DEPTH; z++) {
+			for(int z = 0; z < CHUNK_WIDTH; z++) {
 				
 				//create masks for each row here
 				
@@ -325,7 +325,7 @@ public class GreedyMesher implements Mesher {
 
     //BOTTOMS
         for(int y = -1; y < 0; y++) {
-            for(int z = 0; z < CHUNK_DEPTH; z++) {
+            for(int z = 0; z < CHUNK_WIDTH; z++) {
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
                     int light00 = lightCache[x+2][y+3][z+2]/4
@@ -354,7 +354,7 @@ public class GreedyMesher implements Mesher {
                 }}}//}
 
         for(int y = 0; y < CHUNK_HEIGHT; y++) {
-            for(int z = 0; z < CHUNK_DEPTH; z++) {
+            for(int z = 0; z < CHUNK_WIDTH; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
                     int light00 = lightCache[x+2][y+3][z+2]/4
@@ -471,7 +471,7 @@ public class GreedyMesher implements Mesher {
 
         //diag z
         for(int y = -1; y < 0; y++) {
-            for(int z = 0; z < CHUNK_DEPTH; z++) {
+            for(int z = 0; z < CHUNK_WIDTH; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
                     int light00 = lightCache[x+2][y+3][z+2]/4
@@ -531,7 +531,7 @@ public class GreedyMesher implements Mesher {
 			
 			for (int j = 0; j < CHUNK_HEIGHT+1; j++) {
 				
-				for (int k = 0; k < CHUNK_DEPTH+1; k++) {
+				for (int k = 0; k < CHUNK_WIDTH+1; k++) {
 					
 					for (int faceID = 0; faceID < 6; faceID++){
 						
@@ -555,8 +555,8 @@ public class GreedyMesher implements Mesher {
 				}
 			}
 		}
-		visibilityMask = new int[(CHUNK_HEIGHT+3)*(CHUNK_DEPTH+3)];
-		lightCache = new int[CHUNK_WIDTH+4][CHUNK_HEIGHT+4][CHUNK_DEPTH+4];
+		visibilityMask = new int[(CHUNK_HEIGHT+3)*(CHUNK_WIDTH+3)];
+		lightCache = new int[CHUNK_WIDTH+4][CHUNK_HEIGHT+4][CHUNK_WIDTH+4];
 	}
 
 

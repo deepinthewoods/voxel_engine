@@ -53,7 +53,7 @@ public class GeneralFactory extends GameFactory{
 
 	private static final String TAG = "General Factory";
 
-	private static final String path = "/data/";
+	private static final String path = "data/";
 	
 	//VoxelSystem voxelSys;
 	//PlatformerInputSystem inputSys;
@@ -72,7 +72,7 @@ public class GeneralFactory extends GameFactory{
 	@Override
 	public void assets(World world, AssetManager assets) {
 		
-		FileHandle file = Gdx.files.external(path+"assets.ini");
+		FileHandle file = Gdx.files.internal(path+"assets.ini");
 
 		Json json = new Json();
 		
@@ -93,28 +93,27 @@ public class GeneralFactory extends GameFactory{
 	}
 
 	@Override
-	public void systems(float timeStep, World world, AssetManager assets) {
+	public void systems(float timeStep, World world, AssetManager assets, FileHandle file) {
 		ass.postProcess(assets);
 		//TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
 		//BlockDefinition[] defs = getBlockDefs(tiles);
 		//Pixmap fades = assets.get("data/fades.png", Pixmap.class);
 		playerModel(assets);
-		
-		
-		
+
+
+
 		world.setDelta(timeStep);
-		
+
 
 		Json json = new Json();
-		FileHandle file = Gdx.files.external(path+"systems.ini");
-		
+
 		//String s = json.toJson(ass);
 				
 
 		//funct.execute(world);
 				
 		//systemDef = new SystemDefinition();
-		systemDef = json.fromJson(SystemDefinition.class, file);	
+		systemDef = json.fromJson(SystemDefinition.class, file);
 		systemDef.setJson(json);
 		systemDef.setSystem(CameraSystem.class);
 		systemDef.setSystem(GraphicsSystem.class);
@@ -154,8 +153,8 @@ public class GeneralFactory extends GameFactory{
 		//String s = json.toJson(world.getSystems());
 		//file.writeString(json.prettyPrint(s), false);
 		//Gdx.app.log(TAG, json.prettyPrint(s));
-        VoxelSystem vw = world.getSystem(VoxelSystem.class);
-        Gdx.app.log(TAG, "shader "+ vw);
+       // VoxelSystem vw = world.getSystem(VoxelSystem.class);
+      //  Gdx.app.log(TAG, "shader "+ vw);
 		
 	}
 	@Override
@@ -489,8 +488,8 @@ public class GeneralFactory extends GameFactory{
 	}
 
 	@Override
-	public void initMenu(final World world, Skin skin, Stage stage) {
-		super.initMenu(world, skin, stage);
+	public void initMenu(final World world, Skin skin, Stage stage, AssetManager assets, float timestep) {
+		super.initMenu(world, skin, stage, assets, timestep);
 		dragger = new Actor();
 		dragger.setSize(100000, 100000);
 		clicker = new Actor();
@@ -534,17 +533,8 @@ public class GeneralFactory extends GameFactory{
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
 				Move move = player.get(Move.class);
 				AABBBody body = player.get(AABBBody.class);
-				if (body.onGround){
-					//Move move = player.get(Move.class);
-					//move.jumping = true;
-					move.jumpEndTick = (int) (EngineScreen.tick + move.jumpTime / EngineScreen.timeStep);
-					//Gdx.app.log(TAG, "jump"+(move.jumpTime / EngineScreen.timeStep));
 
-					ActionComponent actionC = player.get(ActionComponent.class);
-					actionC.action.actions.clear();
-					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
-				}
-				if (body.onWall){
+				if (body.onWall && body.onGround){
 					//move.jumping = true;
 					move.jumpEndTick = (int) (EngineScreen.tick + move.jumpTime / EngineScreen.timeStep);	
 					Brain brain = player.get(Brain.class);;
@@ -559,8 +549,22 @@ public class GeneralFactory extends GameFactory{
 					//body.wasOnWall = false;
 					body.onWall = false;
 					body.offWall = true;
+
 					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
-				}	                return true;
+                    return true;
+				}
+                if (body.onGround){
+                    //Move move = player.get(Move.class);
+                    //move.jumping = true;
+                    move.jumpEndTick = (int) (EngineScreen.tick + move.jumpTime / EngineScreen.timeStep);
+                    //Gdx.app.log(TAG, "jump"+(move.jumpTime / EngineScreen.timeStep));
+
+                    ActionComponent actionC = player.get(ActionComponent.class);
+                    actionC.action.actions.clear();
+                    actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
+                    return true;
+                }
+                return false;
 	        }
 	 
 	        public void touchUp (InputEvent event, float x, float y, int pointer, int button) {

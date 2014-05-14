@@ -72,7 +72,7 @@ public class VoxelRenderingSystem extends DrawSystem{
         voxelTexture.bind();
         modelBatch.begin(camera);
 
-        modelBatch.render(voxelWorld, shader);
+        modelBatch.render(voxelWorld);
 
         modelBatch.end();
 

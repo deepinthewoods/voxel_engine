@@ -53,6 +53,8 @@ public class VoxelSystem extends EntitySystem {
 	protected void processEntities(Array<Entity> entities) {
 		//batch.render(voxelWorld, env);
 		//voxelWorld.processRandomUpdates();
+        //TODO manage threaded meshing stuff here
+
 	}
 
     @Override

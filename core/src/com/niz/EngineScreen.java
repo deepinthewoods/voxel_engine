@@ -8,12 +8,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
@@ -100,7 +96,7 @@ public class EngineScreen implements Screen{
 
 		factory.assets(world, assets);
 		
-		factory.initMenu(world, skin, stage);
+		factory.initMenu(world, skin, stage, assets, 1f);
 		//worldTest.create(camera);
 		font = new BitmapFont();
 	}
@@ -110,7 +106,7 @@ public class EngineScreen implements Screen{
 	@Override
 	public void render(float delta) {		
 		if(!assetsLoaded && assets.update()) {
-			factory.init(timeStep, world, assets);
+			//factory.init(timeStep, world, assets);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){
@@ -132,7 +128,7 @@ public class EngineScreen implements Screen{
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
 		stage.draw();
-		Camera camera = world.getSystem(CameraSystem.class).camera;
+		//Camera camera = world.getSystem(CameraSystem.class).camera;
 
 		world.draw(delta);
 

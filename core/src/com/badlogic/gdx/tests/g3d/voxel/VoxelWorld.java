@@ -207,7 +207,7 @@ public class VoxelWorld implements RenderableProvider {
 			//if (chunk.mesh == null) continue;
 			renderable.mesh = chunk.mesh;
 			renderable.meshPartOffset = 0;
-			renderable.meshPartSize = chunk.numVerts;
+			renderable.meshPartSize = chunk.numVerts/4*6;
 			renderable.shader = shader;
 			renderable.primitiveType = GL20.GL_TRIANGLES;
 			renderable.worldTransform.idt().translate(chunk.offset);

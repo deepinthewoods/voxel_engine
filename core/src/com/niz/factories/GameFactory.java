@@ -5,6 +5,7 @@ import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -24,16 +25,16 @@ public abstract class GameFactory {
 
 public abstract void assets(World world, AssetManager assets) ;
 
-public abstract void systems(float timeStep, World world, AssetManager assets);
+public abstract void systems(float timeStep, World world, AssetManager assets, FileHandle file);
 
 public abstract void newGame(World world, Stage stage);
 
 public abstract void load(World world);
 
-public void init(float timeStep, World world, AssetManager assets){
+public void init(float timeStep, World world, AssetManager assets, FileHandle file){
 	
 	
-	systems(timeStep, world, assets);
+	systems(timeStep, world, assets, file);
 	
 	world.initialize();
 	world.initializeDraw();
@@ -49,7 +50,7 @@ public void init(float timeStep, World world, AssetManager assets){
 		}
 	}
 
-	public void initMenu(final World world, Skin skin, final Stage stage) {
+	public void initMenu(final World world, Skin skin, final Stage stage, final AssetManager assets, final float timestep) {
 		//Group group = new WidgetGroup();
 		Gdx.input.setInputProcessor(stage);
 		final Table table = new Table();
@@ -70,6 +71,8 @@ public void init(float timeStep, World world, AssetManager assets){
 
 											@Override
 											public boolean act(float delta) {
+                                                FileHandle file = Gdx.files.internal("data/systems.ini");
+                                                init(timestep, world, assets, file);
 												newGame(world, stage);
 												return true;
 											}
@@ -85,47 +88,7 @@ public void init(float timeStep, World world, AssetManager assets){
 			}
 		});
 
-        final Button extract = new Button(new Label("New", skin), skin);
 
-        extract.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-
-                table.addAction(
-                        Actions.sequence(
-                                Actions.fadeOut(.14f)
-                                ,
-                                Actions.parallel(
-                                        Actions.removeActor(table)
-                                        ,
-                                        new Action(){
-
-                                            @Override
-                                            public boolean act(float delta) {
-                                                Process p;
-                                                try {
-                                                    String command = "ffmpeg ";
-                                                    p = Runtime.getRuntime().exec(command);
-                                                    p.waitFor();
-
-                                                } catch (Exception ex){
-
-                                                }
-
-
-                                                return true;
-                                            }
-
-
-
-                                        }
-                                )
-                        )
-                );
-
-                extract.removeListener(this);
-            }
-        });
 
 		table.add(newGame);
 		//table.add(extract);

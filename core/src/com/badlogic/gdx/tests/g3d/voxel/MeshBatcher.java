@@ -77,7 +77,7 @@ public class MeshBatcher{
 		cacheProgress = 0;
 		vertexTotal = 0;
 		indexProgress = 0;
-		chunk.numVerts = size/8*2;
+		chunk.numVerts = size/8;
 		chunk.mesh = mesh;
 		//Gdx.app.log(TAG, "mesh");
 		return 0;
@@ -180,7 +180,7 @@ public class MeshBatcher{
             Vector3 v = vertices[i];
             float c = GreedyMesher.lightValues[colorArray[i]];//highlightColors[i];//
 
-            Gdx.app.log(TAG, "verts"+width+"  "+height);
+            //Gdx.app.log(TAG, "verts"+width+"  "+height);
             cachedVerts[cacheProgress++] = v.x;
             cachedVerts[cacheProgress++] = v.y;
             cachedVerts[cacheProgress++] = v.z;
