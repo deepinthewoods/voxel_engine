@@ -57,41 +57,72 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
 		final Button newGame = new Button(new Label("New", skin), skin);
 		
 		newGame.addListener(new ClickListener(){
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				
-				table.addAction(
-						Actions.sequence(
-								Actions.fadeOut(.4f)
-								, 
-								Actions.parallel(
-										Actions.removeActor(table)
-										,
-										new Action(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
 
-											@Override
-											public boolean act(float delta) {
-                                                FileHandle file = Gdx.files.internal("data/systems.ini");
+                table.addAction(
+                        Actions.sequence(
+                                Actions.fadeOut(.4f)
+                                ,
+                                Actions.parallel(
+                                        Actions.removeActor(table)
+                                        ,
+                                        new Action(){
+
+                                            @Override
+                                            public boolean act(float delta) {
+                                                FileHandle file = Gdx.files.internal("data/game.ini");
                                                 init(timestep, world, assets, file);
-												newGame(world, stage);
-												return true;
-											}
+                                                newGame(world, stage);
+                                                return true;
+                                            }
 
-											
-											
-										}
-								)
-						)
-				);
-				
-				newGame.removeListener(this);
-			}
-		});
 
+
+                                        }
+                                )
+                        )
+                );
+
+                newGame.removeListener(this);
+            }
+        });
+
+        final Button editorBtn = new Button(new Label("Editor", skin), skin);
+        editorBtn.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+                table.addAction(
+                        Actions.sequence(
+                                Actions.fadeOut(.4f)
+                                ,
+                                Actions.parallel(
+                                        Actions.removeActor(table)
+                                        ,
+                                        new Action(){
+
+                                            @Override
+                                            public boolean act(float delta) {
+                                                FileHandle file = Gdx.files.internal("data/editor.ini");
+                                                init(timestep, world, assets, file);
+                                                newGame(world, stage);
+                                                return true;
+                                            }
+
+                                        }
+                                )
+                        )
+                );
+
+                editorBtn.removeListener(this);
+            }
+        });
 
 
 		table.add(newGame);
-		//table.add(extract);
+        table.row();
+		table.add(editorBtn);
 		table.setFillParent(true);
 		table.layout();
 		
