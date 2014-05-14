@@ -2,6 +2,7 @@ package com.niz.component.systems;
 
 
 import com.artemis.Aspect;
+import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.Gdx;
@@ -21,6 +22,8 @@ import com.badlogic.gdx.tests.g3d.voxel.MeshBatcher;
 import com.badlogic.gdx.tests.g3d.voxel.SimpleMesher;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
+import com.niz.component.Player;
+import com.niz.component.Position;
 
 public class VoxelSystem extends EntitySystem {
 
@@ -28,11 +31,12 @@ public class VoxelSystem extends EntitySystem {
     public transient VoxelWorld voxelWorld;
     private Renderable baseRenderable;
     private Texture voxelTexture;
+    private ComponentMapper<Position> posM;
     //private BlockDefinition[] defs;
 	//private TextureRegion[] tiles;
 
 	public VoxelSystem() {
-		super(Aspect.getEmpty());
+		super(Aspect.getAspectForAll(Player.class, Position.class));
 
 		int x = 12, y = 2, z = 2;
 		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
@@ -51,6 +55,8 @@ public class VoxelSystem extends EntitySystem {
 	
 	@Override
 	protected void processEntities(Array<Entity> entities) {
+        if (entities.size == 0) return;
+        voxelWorld.makeMesh(posM.get(entities.get(0)).pos);
 		//batch.render(voxelWorld, env);
 		//voxelWorld.processRandomUpdates();
         //TODO manage threaded meshing stuff here
@@ -59,7 +65,7 @@ public class VoxelSystem extends EntitySystem {
 
     @Override
     public void initialize(){
-
+        posM = world.getMapper(Position.class);
 
     }
 
