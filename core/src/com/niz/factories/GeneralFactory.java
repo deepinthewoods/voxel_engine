@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -21,12 +22,20 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pools;
+import com.niz.ColorPicker;
+import com.niz.ColorPickerButton;
 import com.niz.EngineScreen;
 import com.niz.actions.AJump;
 import com.niz.actions.AStand;
@@ -127,8 +136,10 @@ public class GeneralFactory extends GameFactory{
 		
 		
 		systemDef.setSystem(VoxelSystem.class);
-		
-		systemDef.setSystem( PositionRollingAverageSystem.class);
+        systemDef.setSystem(EditVoxelSystem.class);
+
+
+        systemDef.setSystem( PositionRollingAverageSystem.class);
 		systemDef.setSystem( VelocityRollingAverageSystem.class);
 		systemDef.setSystem(VelocityPredictionSystem.class);
 		systemDef.setDrawSystem(VoxelRenderingSystem.class);
@@ -256,9 +267,10 @@ public class GeneralFactory extends GameFactory{
 	CustomCommand -> create E
 
 		 */
-		
-		
-		Entity e = player;
+        VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
+
+
+        Entity e = player;
 		world.addEntity(e);
 		
 		Position pos = e.add(Position.class);
@@ -502,7 +514,97 @@ public class GeneralFactory extends GameFactory{
 		//stage.addActor(dragger);
 	}
 
-	public void setInput(Actor dragger, Actor clicker, final Entity player){
+    @Override
+    protected void editor(World world, final Stage stage, final Skin skin, Sprite sprite) {
+        //color picker
+        Gdx.app.log(TAG, "editor");
+        for (int i = 0; i < 8; i++)
+        {
+            final ColorPickerButton colorA = new ColorPickerButton(skin, sprite, i*2);
+            final ColorPickerButton colorB = new ColorPickerButton(skin, sprite, i*2+1);
+
+            colorA.addListener(new ActorGestureListener(){
+                public boolean longPress(Actor actor,
+                                         float x,
+                                         float y){
+                    openColorSelectionScreen(colorA, stage, skin);
+                    return true;
+                }
+            });
+            colorB.addListener(new ActorGestureListener(){
+                public boolean longPress(Actor actor,
+                                         float x,
+                                         float y){
+                    openColorSelectionScreen(colorB, stage, skin);
+                    return true;
+                }
+            });
+            paletteTable.add(colorA);
+            paletteTable.add(colorB);
+            paletteTable.row();
+        }
+
+        paletteTable.left();
+        stage.addActor(paletteTable);
+        //save/load btns
+        //default chunk
+        //new btn(selectable size)
+    }
+
+    Table paletteTable = new Table();
+
+    public static ColorPicker colorPicker;
+    Button okBtn, cancelBtn;
+    public static ColorPickerButton currentSelectedColor;
+    Table selectTable = new Table();
+
+    private void openColorSelectionScreen(ColorPickerButton actor, final Stage stage, Skin skin) {
+        Gdx.app.log(TAG, "sdfjksdfjksdfjk");
+        if (colorPicker == null){
+            colorPicker = new ColorPicker(skin);
+            okBtn = new Button(skin);
+            okBtn.add(new Label("Ok", skin));
+            cancelBtn = new Button(skin);
+            cancelBtn.add(new Label("Cancel", skin));
+            okBtn.addListener(new ClickListener(){
+                public void clicked(InputEvent event,
+                                    float x,
+                                    float y){
+
+                    currentSelectedColor.color.set(colorPicker.getSelectedColor());
+                    stage.clear();
+                    stage.addActor(paletteTable);
+                }
+            });
+            cancelBtn.addListener(new ClickListener(){
+                public void clicked(InputEvent event,
+                     float x,
+                     float y) {
+
+                    stage.clear();
+                    stage.addActor(paletteTable);
+
+                }
+            });
+
+            selectTable.setFillParent(true);
+            selectTable.add(colorPicker);
+            selectTable.row();
+            selectTable.add(okBtn);
+            selectTable.add(cancelBtn);
+
+
+        }
+
+        currentSelectedColor = actor;
+
+
+
+
+        stage.addActor(selectTable);
+    }
+
+    public void setInput(Actor dragger, Actor clicker, final Entity player){
 		dragger.addListener(new InputListener(){
 			/*@Override
 			public void drag (InputEvent event, float x, float y, int pointer) {
@@ -541,7 +643,7 @@ public class GeneralFactory extends GameFactory{
 					//Gdx.app.log(TAG, "jump"+(move.jumpTime / EngineScreen.timeStep));
 					//move.rotation += 180;
 					//move.rotation %= 360;
-					brain.getShortTarget().scl(-1f, 0, 0);
+					//brain.getShortTarget().scl(-1f, 0, 0);
 					//player.get(Target.class).v.x *= -1;
 					ActionComponent actionC = player.get(ActionComponent.class);
 					actionC.action.actions.clear();

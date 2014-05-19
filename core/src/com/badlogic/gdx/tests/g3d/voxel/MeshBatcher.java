@@ -68,7 +68,7 @@ public class MeshBatcher{
 
 	
 	public int flushCache(VoxelChunk chunk, Mesher mesher) {
-		Mesh mesh = getMesh(cacheProgress, mesher);
+		Mesh mesh = getMesh(cacheProgress/8, mesher);
 		
 		mesh.setVertices(cachedVerts, 0, cacheProgress);
 		int size = cacheProgress;

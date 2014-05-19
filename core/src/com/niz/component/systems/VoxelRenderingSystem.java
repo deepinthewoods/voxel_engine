@@ -86,7 +86,12 @@ public class VoxelRenderingSystem extends DrawSystem{
         GraphicsSystem grap = world.getSystem(GraphicsSystem.class);
         modelBatch = world.getSystem(GraphicsSystem.class).modelBatch;
         camera = world.getSystem(CameraSystem.class).camera;
-        voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
+        VoxelSystem voxS = world.getSystem(VoxelSystem.class);
+        if (voxS != null)
+            voxelWorld = voxS.voxelWorld;
+        else {
+            voxelWorld = world.getSystem(EditVoxelSystem.class).voxelWorld;
+        }
 
 
         Texture voxelTexture = world.getSystem(AssetsSystem.class).assets.get("data/tiles.png", Texture.class);

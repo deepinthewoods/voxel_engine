@@ -86,14 +86,6 @@ public class EngineScreen implements Screen{
 		
 		factory = new GeneralFactory();
 
-		//shapeCamera.update();
-
-
-
-		//env.add(new DirectionalLight().set(1, 1, 1, 0, -1, .5f));
-
-		//orthoCamera = new OrthographicCamera();
-
 		factory.assets(world, assets);
 		
 		factory.initMenu(world, skin, stage, assets, 1f);

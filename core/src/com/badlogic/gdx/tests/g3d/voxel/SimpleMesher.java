@@ -23,9 +23,9 @@ public class SimpleMesher implements Mesher{
 	private float[] vertices;
 
 	public SimpleMesher(int width, int height, int depth) {
-		this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * VoxelWorld.CHUNK_SIZE_X * VoxelWorld.CHUNK_SIZE_Y * VoxelWorld.CHUNK_SIZE_Z*2];
+		this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * width * height * depth*2];
 
-		int len = VoxelWorld.CHUNK_SIZE_X * VoxelWorld.CHUNK_SIZE_Y * VoxelWorld.CHUNK_SIZE_Z * 6 * 6 / 3;
+		int len = width * height * depth * 6 * 6 / 3;
 		indices = new short[len];
 		short j = 0;
 		int i = 0;

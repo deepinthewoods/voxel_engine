@@ -34,9 +34,9 @@ import com.niz.factories.AssetDefinition;
 import com.niz.factories.GeneralFactory;
 
 public class VoxelWorld implements RenderableProvider {
-	public static final int CHUNK_SIZE_X = 16;
-	public static final int CHUNK_SIZE_Y = 16;
-	public static final int CHUNK_SIZE_Z = 16;
+	public final int CHUNK_SIZE_X;
+	public final int CHUNK_SIZE_Y;
+	public final int CHUNK_SIZE_Z;
 	private static final String TAG = "VoxelWorld";
 
 	public final VoxelChunk[] chunks;
@@ -59,9 +59,11 @@ public class VoxelWorld implements RenderableProvider {
 	private MeshBatcher batch;
     private Shader shader;
 
-    public VoxelWorld(int chunksX, int chunksY, int chunksZ, Mesher mesher, MeshBatcher meshBatcher) {
+    public VoxelWorld(int chunksX, int chunksY, int chunksZ, Mesher mesher, MeshBatcher meshBatcher, int sizeX, int sizeY) {
+        CHUNK_SIZE_X = sizeX;
+        CHUNK_SIZE_Y = sizeY;
+        CHUNK_SIZE_Z = sizeX;
 		batch = meshBatcher;
-		VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
 		//if (blockDefs == null) throw new GdxRuntimeException("nill init");
 		this.material = material;
 		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];

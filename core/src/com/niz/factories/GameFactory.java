@@ -7,6 +7,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -50,7 +52,7 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
 		}
 	}
 
-	public void initMenu(final World world, Skin skin, final Stage stage, final AssetManager assets, final float timestep) {
+	public void initMenu(final World world, final Skin skin, final Stage stage, final AssetManager assets, final float timestep) {
 		//Group group = new WidgetGroup();
 		Gdx.input.setInputProcessor(stage);
 		final Table table = new Table();
@@ -87,7 +89,7 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
                 newGame.removeListener(this);
             }
         });
-
+        final Sprite btnSprite = assets.get("data/tiles.png", TextureAtlas.class).createSprite("button");
         final Button editorBtn = new Button(new Label("Editor", skin), skin);
         editorBtn.addListener(new ClickListener(){
             @Override
@@ -106,7 +108,15 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
                                             public boolean act(float delta) {
                                                 FileHandle file = Gdx.files.internal("data/editor.ini");
                                                 init(timestep, world, assets, file);
-                                                newGame(world, stage);
+                                                return true;
+                                            }
+
+                                        },
+                                        new Action(){
+
+                                            @Override
+                                            public boolean act(float delta) {
+                                                editor(world, stage, skin, btnSprite);
                                                 return true;
                                             }
 
@@ -136,7 +146,7 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
 		
 	}
 
-	
 
-	
+
+    protected abstract void editor(World world, Stage stage, Skin skin, Sprite sprite);
 }
