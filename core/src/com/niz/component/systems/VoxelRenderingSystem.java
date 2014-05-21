@@ -18,30 +18,19 @@ package com.niz.component.systems;
 
 import com.artemis.Aspect;
 import com.artemis.Entity;
-import com.artemis.systems.DrawSystem;
-import com.badlogic.gdx.Gdx;
+import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.graphics.Camera;
-
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
-import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelShader;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 
-public class VoxelRenderingSystem extends DrawSystem{
+public class VoxelRenderingSystem extends EntitySystem {
 	private static final String TAG = "voxel rendering system";
     private transient ModelBatch modelBatch;
     private Camera camera;

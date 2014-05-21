@@ -1,32 +1,36 @@
 package com.artemis.managers;
 
-import java.util.BitSet;
-
 import com.artemis.Component;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.utils.SafeArray;
 import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.ObjectMap.Entry;
 
 /**
  * Responsible for pooling and managing of Components and their
  * mapping to entities.
  */
 public class ComponentManager extends Manager {
-    protected Array<Array<Component>> componentsByType;
-    protected Array<Entity> deleted;
+    protected Array<Array<? extends Component>> componentsByType;
+    protected Array<Entity> deletedEntities;
+    protected ObjectMap<Entity, IntArray> componentsToDelete;
 
     protected ObjectMap<Class<?>, ComponentMapper<?>> mappers;
 
     protected static int nextComponentClassIndex = 0;
     protected static ObjectIntMap<Class<? extends Component>> componentClassIndeces =
-            new ObjectIntMap<Class<? extends Component>>();    /**
-             * Returns the index of a Component class. Indices are cached, so retrieval
-             * should be fast.
-             * 
-             * @param type Component class to retrieve the index for.
-             * @return Index of a specific component class.
-             */
+            new ObjectIntMap<Class<? extends Component>>();
+
+    Array<Component> returnedComponents;
+
+    /**
+     * Returns the index of a Component class. Indices are cached, so retrieval
+     * should be fast.
+     * 
+     * @param type Component class to retrieve the index for.
+     * @return Index of a specific component class.
+     */
     public static int getComponentClassIndex(Class<? extends Component> type) {
         if (componentClassIndeces.containsKey(type)) {
             return componentClassIndeces.get(type, -1);
@@ -40,16 +44,19 @@ public class ComponentManager extends Manager {
      * Default constructor
      */
     public ComponentManager() {
-        componentsByType = new SafeArray<Array<Component>>();
-        deleted = new SafeArray<Entity>();
+        componentsByType = new SafeArray<Array<? extends Component>>();
+        deletedEntities = new Array<Entity>();
+        componentsToDelete = new ObjectMap<Entity, IntArray>();
         this.mappers = new ObjectMap<Class<?>, ComponentMapper<?>>();
+
+        this.returnedComponents = new Array<Component>();
     }
 
     /**
      * Preferred way to create Components to allow for pooling.
      * 
-     * @param type
-     * @return
+     * @param type Type of component to create
+     * @return Pooled Component of specified type.
      */
     public <T extends Component> T createComponent(Class<T> type) {
         return Pools.obtain(type);
@@ -73,12 +80,19 @@ public class ComponentManager extends Manager {
      * @param e Entity the component belongs to
      * @param component Component to add
      */
-    public void addComponent(Entity e, Component component) {
+    public <T extends Component> void addComponent(Entity e, T component) {
         int classIndex = getComponentClassIndex(component.getClass());
-        Array<Component> components = componentsByType.get(classIndex);
+        @SuppressWarnings("unchecked")
+        Array<T> components = (Array<T>) componentsByType.get(classIndex);
         if(components == null) {
-            components = new SafeArray<Component>();
+            components = new SafeArray<T>();
             componentsByType.set(classIndex, components);
+        }
+
+        // clean up existing component belonging to the entity
+        Component current = components.get(e.id);
+        if (current != null && current != component) {
+            Pools.free(current);
         }
         components.set(e.id, component);
 
@@ -94,8 +108,12 @@ public class ComponentManager extends Manager {
     public void removeComponent(Entity e, Class<? extends Component> type) {
         int classIndex = getComponentClassIndex(type);
         if(e.getComponentBits().get(classIndex)) {
-            removeComponent(e.id, classIndex);
             e.getComponentBits().clear(classIndex);
+
+            if (!componentsToDelete.containsKey(e)) {
+                componentsToDelete.put(e, Pools.obtain(IntArray.class));
+            }
+            componentsToDelete.get(e).add(classIndex);
         }
     }
 
@@ -105,11 +123,12 @@ public class ComponentManager extends Manager {
      * @param type Type of Componets to return
      * @return an Array of said components.
      */
-    public Array<Component> getComponents(Class<? extends Component> type) {
+    @SuppressWarnings("unchecked")
+    public <T extends Component> Array<T> getComponents(Class<T> type) {
         int classIndex = getComponentClassIndex(type);
-        Array<Component> components = componentsByType.get(classIndex);
+        Array<T> components = (Array<T>) componentsByType.get(classIndex);
         if(components == null) {
-            components = new SafeArray<Component>();
+            components = new SafeArray<T>();
             componentsByType.set(classIndex, components);
         }
         return components;
@@ -123,17 +142,19 @@ public class ComponentManager extends Manager {
      * @param type Type of Component to return.
      * @return Component or null if not found.
      */
+    @SuppressWarnings("unchecked")
     public <T extends Component> T getComponent(Entity e, Class<T> type) {
         int classIndex = getComponentClassIndex(type);
-        Array<Component> components = componentsByType.get(classIndex);
+        Array<T> components = (Array<T>) componentsByType.get(classIndex);
         if(components != null) {
-            return type.cast(components.get(e.id));
+            return components.get(e.id);
         }
         return null;
     }
 
     /**
      * Fills an array with Components belonging to the specified Entity.
+     * 
      * @param e Entity to get Components with.
      * @param array Array of Components to fill.
      */
@@ -146,11 +167,21 @@ public class ComponentManager extends Manager {
     }
 
     /**
-     * Marks entity for clean up.
+     * Returns an array of components for the specified entity.
+     * The Array is generated newly every time and making changes to its
+     * contents will not affect the components belonging to the entity.
+     * 
+     * @param e Entity to get Components with.
      */
+    public Array<Component> getComponents(Entity e) {
+        returnedComponents.clear();
+        getComponents(e, returnedComponents);
+        return returnedComponents;
+    }
+
     @Override
     public void deleted(Entity e) {
-        deleted.add(e);
+        deletedEntities.add(e);
     }
 
     /**
@@ -159,12 +190,27 @@ public class ComponentManager extends Manager {
      * the removal of an entity.
      */
     public void clean() {
-        if(deleted.size > 0) {
-            for(int i = 0; deleted.size > i; i++) {
-                removeComponentsOfEntity(deleted.get(i));
+        if (deletedEntities.size > 0) {
+            for (Entity entity : deletedEntities) {
+                removeComponentsOfEntity(entity);
             }
-            deleted.clear();
+            deletedEntities.clear();
         }
+        cleanRemovedComponents();
+    }
+
+    /**
+     * Cleans up components that have removed from the world.
+     */
+    protected void cleanRemovedComponents() {
+        for (Entry<Entity, IntArray> entry : componentsToDelete.entries()) {
+            for (int i = 0; i < entry.value.size; i++) {
+                removeComponent(entry.key.id, entry.value.items[i]);
+            }
+            entry.value.clear();
+            Pools.free(entry.value);
+        }
+        componentsToDelete.clear();
     }
 
     /**
@@ -175,7 +221,8 @@ public class ComponentManager extends Manager {
      * @param componentClassIndex Component index to remove.
      */
     protected void removeComponent(int entityId, int componentClassIndex) {
-        Array<Component> components = componentsByType.get(componentClassIndex);
+        Array<? extends Component> components =
+                componentsByType.get(componentClassIndex);
         if (components != null) {
             Component compoment = components.get(entityId);
             if (compoment != null) {
@@ -186,7 +233,8 @@ public class ComponentManager extends Manager {
     }
 
     /**
-     * Retrieves a ComponentMapper instance for fast retrieval of components from entities.
+     * Retrieves a ComponentMapper instance for fast retrieval of
+     * components from entities.
      * 
      * @param type of component to get mapper for.
      * @return mapper for specified component type.
@@ -205,14 +253,14 @@ public class ComponentManager extends Manager {
 
     @Override
     public void dispose() {
-        for (Array<Component> components : componentsByType) {
+        for (Array<? extends Component> components : componentsByType) {
             if (components != null) {
                 Pools.freeAll(components);
                 components.clear();
             }
         }
         componentsByType.clear();
-        deleted.clear();
+        deletedEntities.clear();
         mappers.clear();
     }
 

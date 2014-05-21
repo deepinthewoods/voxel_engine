@@ -1,23 +1,20 @@
 package com.niz.factories;
 
 import com.artemis.World;
-import com.artemis.systems.DrawSystem;
 import com.artemis.systems.EntitySystem;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectMap.Entries;
 import com.badlogic.gdx.utils.ObjectMap.Entry;
-import com.badlogic.gdx.utils.ObjectMap.Values;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 public class SystemDefinition{
 	private static final String TAG = "system definition";
 	transient public ObjectMap<String, Class<? extends EntitySystem>> systemClasses = new ObjectMap<String, Class<? extends EntitySystem>>();
-	transient public ObjectMap<String, Class<? extends DrawSystem>> drawSystemClasses = new ObjectMap<String, Class<? extends DrawSystem>>();
+	transient public ObjectMap<String, Class<? extends EntitySystem>> drawSystemClasses = new ObjectMap<String, Class<? extends EntitySystem>>();
 
 	public Array<String> systems = new Array<String>(), drawSystems = new Array<String>();
     private Json json;
@@ -27,7 +24,7 @@ public class SystemDefinition{
 		systemClasses .put(name, class1);
         json.addClassTag(name, class1);
 	}
-	public void setDrawSystem(Class<? extends DrawSystem> class1) {
+	public void setDrawSystem(Class<? extends EntitySystem> class1) {
         String name = ClassReflection.getSimpleName(class1);
         drawSystemClasses.put(name, class1);
         json.addClassTag(name, class1);
@@ -51,9 +48,9 @@ public class SystemDefinition{
 		}
 		
 		for (String s : drawSystems){
-			DrawSystem dsys = null;
+            EntitySystem dsys = null;
 			try {
-				dsys = (DrawSystem) ClassReflection.getConstructor(getDrawSystemClass(s)).newInstance();
+				dsys = (EntitySystem) ClassReflection.getConstructor(getDrawSystemClass(s)).newInstance();
 			} catch (ReflectionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -82,12 +79,12 @@ public class SystemDefinition{
 		//return null;
 	}
 	
-	private Class<? extends DrawSystem> getDrawSystemClass(String sys) {
-		Entries<String, Class<? extends DrawSystem>> diter = drawSystemClasses.entries();
+	private Class<? extends EntitySystem> getDrawSystemClass(String sys) {
+		Entries<String, Class<? extends EntitySystem>> diter = drawSystemClasses.entries();
 		while (diter.hasNext()){
-			Entry<String, Class<? extends DrawSystem>> e = diter.next();
+			Entry<String, Class<? extends EntitySystem>> e = diter.next();
 			if (e.key.equals(sys)){
-				return (Class<? extends DrawSystem>) e.value;
+				return (Class<? extends EntitySystem>) e.value;
 			} else {
 				//Gdx.app.log(TAG, "unequal " + e.key + "  !=  "+sys);
 			}
@@ -104,9 +101,9 @@ public class SystemDefinition{
 		}
 		
 		drawSystems.clear();
-		Entries<String, Class<? extends DrawSystem>> diter = drawSystemClasses.entries();
+		Entries<String, Class<? extends EntitySystem>> diter = drawSystemClasses.entries();
 		while (diter.hasNext()){
-			Entry<String, Class<? extends DrawSystem>> c = diter.next();
+			Entry<String, Class<? extends EntitySystem>> c = diter.next();
 			drawSystems.add(c.key);
 		}
 	}

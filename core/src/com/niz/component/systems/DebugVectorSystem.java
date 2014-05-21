@@ -3,14 +3,14 @@ package com.niz.component.systems;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
-import com.artemis.systems.DrawSystem;
+import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.niz.ShapeBatch;
 import com.niz.component.DebugVector;
 
-public class DebugVectorSystem extends DrawSystem {
+public class DebugVectorSystem extends EntitySystem {
 
 	private static final String TAG = "debug position system";
 	//private ComponentMapper<Position> posM;

@@ -1,13 +1,7 @@
 package blogspot.software_and_algorithms.stern_library.geometry;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /* Copyright (c) 2012 Kevin L. Stern
  * 

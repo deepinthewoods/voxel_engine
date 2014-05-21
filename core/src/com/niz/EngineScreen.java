@@ -6,7 +6,6 @@ import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -16,7 +15,6 @@ import com.badlogic.gdx.utils.Array;
 import com.niz.component.AABBBody;
 import com.niz.component.ActionComponent;
 import com.niz.component.Move;
-import com.niz.component.systems.CameraSystem;
 import com.niz.factories.GameFactory;
 import com.niz.factories.GeneralFactory;
 

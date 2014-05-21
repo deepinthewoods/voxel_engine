@@ -1,14 +1,10 @@
 package com.niz.actions;
 
-import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
-
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pools;
-import com.niz.component.Physics;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.niz.component.Position;
 
 

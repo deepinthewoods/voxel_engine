@@ -1,15 +1,12 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
-
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.ObjectMap;
 
 public class MeshBatcher{
 	public Array<Array<Mesh>> meshes;

@@ -17,21 +17,15 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.niz.component.Position;
-import com.niz.factories.AssetDefinition;
-import com.niz.factories.GeneralFactory;
 
 public class VoxelWorld implements RenderableProvider {
 	public final int CHUNK_SIZE_X;

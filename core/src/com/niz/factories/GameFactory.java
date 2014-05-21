@@ -6,11 +6,8 @@ import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,11 +18,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.niz.EngineScreen;
-import com.niz.ShapeBatch;
 import com.niz.component.systems.*;
 
 public abstract class GameFactory {
@@ -122,12 +117,7 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
 
 	Array<Component> components = new Array<Component>();
 	public void save(World world){
-		Array<Entity> es = world.getEntityManager().getEntities();
-		for (Entity e : es){
-			e.getComponents(components);
-			//write components
-			
-		}
+
 	}
 
 	public void initMenu(final World world, final Skin skin, final Stage stage, final AssetManager assets, final float timestep) {

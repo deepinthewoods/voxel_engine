@@ -5,11 +5,7 @@ import com.artemis.Component;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.badlogic.gdx.math.Vector3;
-import com.niz.component.CameraInfluencer;
-import com.niz.component.Position;
-import com.niz.component.RollingAverage;
-import com.niz.component.VelocityPredictor;
-import com.niz.component.VelocityRollingAverage;
+import com.niz.component.*;
 import com.niz.observer.Observer;
 import com.niz.observer.Subject.Event;
 

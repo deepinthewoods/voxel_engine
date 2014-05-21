@@ -1,16 +1,18 @@
 package com.artemis.systems;
 
-import com.artemis.Aspect;
 import com.artemis.Entity;
 import com.artemis.EntityObserver;
+import com.artemis.Filter;
 import com.artemis.World;
-import com.artemis.utils.SafeArray;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Bits;
+import com.badlogic.gdx.utils.ObjectIntMap;
 
 /**
- * The most raw entity system. It should not typically be used, but you can create your own
- * entity system handling by extending this. It is recommended that you use the other provided
- * entity system implementations.
+ * The most raw entity system. It should not typically be used, but you
+ * can create your own entity system handling by extending this.
+ * It is recommended that you use the other provided entity system
+ * implementations.
  * 
  * @author Arni Arent
  *
@@ -18,33 +20,30 @@ import com.badlogic.gdx.utils.*;
 public abstract class EntitySystem implements EntityObserver {
     protected final int systemIndex;
 
-    protected transient World world;
+    protected World world;
 
-    protected transient Array<Entity> actives;
+    protected Array<Entity> actives;
 
-    protected transient Aspect aspect;
-
-    protected transient Bits allSet;
-    protected transient Bits exclusionSet;
-    protected transient Bits oneSet;
+    protected Filter filter;
 
     protected boolean passive;
 
-    protected boolean dummy;
-	
+    protected boolean dummySystem;
 
     /**
-     * Creates an entity system that uses the specified aspect as a matcher against entities.
-     * @param aspect to match against entities
+     * Creates an entity system that uses the specified filter
+     * as a matcher against entities.
+     * 
+     * @param filter to match against entities
      */
-    public EntitySystem(Aspect aspect) {
-        actives = new SafeArray<Entity>();
-        this.aspect = aspect;
-        allSet = aspect.getAllSet();
-        exclusionSet = aspect.getExclusionSet();
-        oneSet = aspect.getOneSet();
+    public EntitySystem(Filter filter) {
+        actives = new Array<Entity>();
+        this.filter = filter;
         systemIndex = SystemIndexManager.getIndexFor(this.getClass());
-        dummy = allSet.isEmpty() && oneSet.isEmpty(); // This system can't possibly be interested in any entity, so it must be "dummy"
+
+        // This system can't possibly be interested in any entity,
+        // so it must be "dummy system"
+        dummySystem = filter.allSet.isEmpty() && filter.anySet.isEmpty();
     }
 
     /**
@@ -53,16 +52,11 @@ public abstract class EntitySystem implements EntityObserver {
     protected void begin() {
     }
 
+    /**
+     * Process all entities that are targeted by this system.
+     */
     public final void process() {
         if(checkProcessing()) {
-            // clean up entities that have been removed by other systems
-            for (int i = 0; i < actives.size; i++) {
-                Entity entity = actives.get(i);
-                if (!entity.isActive()) {
-                    actives.removeIndex(i);
-                    i--;
-                }
-            }
             begin();
             processEntities(actives);
             end();
@@ -97,13 +91,17 @@ public abstract class EntitySystem implements EntityObserver {
     public void initialize() {};
 
     /**
-     * Called if the system has received a entity it is interested in, e.g. created or a component was added to it.
+     * Called if the system has received a entity it is interested in,
+     * e.g. created or a component was added to it.
+     * 
      * @param e the entity that was added to this system.
      */
     protected void inserted(Entity e) {};
 
     /**
-     * Called if a entity was removed from this system, e.g. deleted or had one of it's components removed.
+     * Called if a entity was removed from this system, e.g. deleted
+     * or had one of it's components removed.
+     * 
      * @param e the entity that was removed from this system.
      */
     protected void removed(Entity e) {};
@@ -113,7 +111,7 @@ public abstract class EntitySystem implements EntityObserver {
      * @param e entity to check
      */
     protected final void check(Entity e) {
-        if(dummy) {
+        if(dummySystem) {
             return;
         }
 
@@ -122,9 +120,9 @@ public abstract class EntitySystem implements EntityObserver {
 
         Bits componentBits = e.getComponentBits();
 
-        // Check if the entity possesses ALL of the components defined in the aspect.
-        if(!allSet.isEmpty()) {
-            for (int i = allSet.nextSetBit(0); i >= 0; i = allSet.nextSetBit(i+1)) {
+        // Check if the entity possesses ALL of the components defined in the filter.
+        if(!filter.allSet.isEmpty()) {
+            for (int i = filter.allSet.nextSetBit(0); i >= 0; i = filter.allSet.nextSetBit(i+1)) {
                 if(!componentBits.get(i)) {
                     interested = false;
                     break;
@@ -132,14 +130,16 @@ public abstract class EntitySystem implements EntityObserver {
             }
         }
 
-        // Check if the entity possesses ANY of the exclusion components, if it does then the system is not interested.
-        if(interested && !exclusionSet.isEmpty()) {
-            interested = !exclusionSet.intersects(componentBits);
+        // Check if the entity possesses ANY of the components in the anySet.
+        // If so, the system is interested.
+        if(interested && !filter.anySet.isEmpty()) {
+            interested = filter.anySet.intersects(componentBits);
         }
 
-        // Check if the entity possesses ANY of the components in the oneSet. If so, the system is interested.
-        if(interested && !oneSet.isEmpty()) {
-            interested = oneSet.intersects(componentBits);
+        // Check if the entity possesses ANY of the exclusion components,
+        // if it does then the system is not interested.
+        if(interested && !filter.exclusionSet.isEmpty()) {
+            interested = !filter.exclusionSet.intersects(componentBits);
         }
 
         if (interested && !contains) {
@@ -149,12 +149,22 @@ public abstract class EntitySystem implements EntityObserver {
         }
     }
 
+    /**
+     * Remove entity from the system.
+     * 
+     * @param e Entity to remove.
+     */
     protected void removeFromSystem(Entity e) {
         actives.removeValue(e, true);
         e.getSystemBits().clear(systemIndex);
         removed(e);
     }
 
+    /**
+     * Inserts entity into the system.
+     * 
+     * @param e Entity to insert.
+     */
     protected void insertToSystem(Entity e) {
         actives.add(e);
         e.getSystemBits().set(systemIndex);
@@ -230,15 +240,5 @@ public abstract class EntitySystem implements EntityObserver {
             return index;
         }
     }
-    
-   /* @Override
-	public void write(Json json) {
-    	
-	}
-
-	@Override
-	public void read(Json json, JsonValue jsonData) {
-		
-	};*/
 
 }

@@ -3,34 +3,34 @@ package com.artemis;
 import com.artemis.managers.ComponentManager;
 import com.artemis.managers.EntityManager;
 import com.artemis.managers.Manager;
-import com.artemis.systems.DrawSystem;
 import com.artemis.systems.EntitySystem;
-import com.artemis.systems.InputSystem;
-import com.artemis.systems.event.EventSystem;
+import com.artemis.systems.event.EventDeliverySystem;
 import com.artemis.systems.event.SystemEvent;
-import com.artemis.utils.SafeArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
-import com.niz.ShapeBatch;
 
 /**
  * The primary instance for the framework. It contains all the managers.
- * 
+ *
  * You must use this to create, delete and retrieve entities.
- * 
+ *
  * It is also important to set the delta each game loop iteration, and initialize before game loop.
- * 
+ *
  * @author Arni Arent
- * 
+ *
  */
 public class World implements Disposable {
+
+    /**
+     * Only used internally to maintain clean code.
+     */
+    protected static interface Performer {
+        void perform(EntityObserver observer, Entity e);
+    }
+
     protected EntityManager em;
     protected ComponentManager cm;
 
@@ -47,26 +47,26 @@ public class World implements Disposable {
     protected Performer enablePerformer;
     protected Performer disablePerformer;
 
-    protected ObjectMap<Class<? extends Manager>, Manager> managers;
-    protected Array<Manager> managersArray;
+    protected Array<Manager> managers;
 
-    protected ObjectMap<Class<?>, EntitySystem> systems;
-    protected Array<EventSystem> eventSystems;
-    protected Array<EntitySystem> systemsArray;
-    protected Array<DrawSystem> drawSystemsArray;
-    protected InputSystem inputSystem;
-
+    protected EventDeliverySystem eventSystem;
+    protected Array<EntitySystem> systems;
+    protected Array<EntitySystem> drawSystemsArray;
     public World() {
         this(new ComponentManager(), new EntityManager());
     }
 
+    /**
+     * Create a world with a specified component and entity
+     * manager.
+     *
+     * @param cm ComponentManager to use.
+     * @param em EntityManager to use.
+     */
     public World(ComponentManager cm, EntityManager em) {
-        managers = new ObjectMap<Class<? extends Manager>, Manager>();
-        managersArray = new SafeArray<Manager>();
-
-        systems = new ObjectMap<Class<?>, EntitySystem>();
-        systemsArray = new SafeArray<EntitySystem>();
-        drawSystemsArray = new SafeArray<DrawSystem>();
+        managers = new Array<Manager>();
+        systems = new Array<EntitySystem>();
+        drawSystemsArray = new Array<EntitySystem>();
 
         added = new ObjectSet<Entity>();
         changed = new ObjectSet<Entity>();
@@ -110,37 +110,33 @@ public class World implements Disposable {
 
         this.em = em;
         setManager(em);
-
-        this.eventSystems = new Array<EventSystem>();
     }
 
 
     /**
-     * Makes sure all managers systems are initialized in the order they were added.
+     * Makes sure all managers systems are initialized
+     * in the order they were added.
      */
     public void initialize() {
-        for (int i = 0; i < managersArray.size; i++) {
-            managersArray.get(i).initialize();
+        // Can't use iterators here because initialize often calls
+        // getSystem or getManager
+        for (int i = 0; i < managers.size; i++) {
+            managers.get(i).initialize();
         }
 
-        for (int i = 0; i < systemsArray.size; i++) {
-            systemsArray.get(i).initialize();
+        if (eventSystem != null) {
+            eventSystem.initialize();
         }
-    }
-    
-    public void initializeDraw(){
-    	for (int i = 0; i < drawSystemsArray.size; i++) {
-            drawSystemsArray.get(i).initialize();
 
-
+        for (int i = 0; i < systems.size; i++) {
+            systems.get(i).initialize();
         }
     }
 
 
     /**
      * Returns a manager that takes care of all the entities in the world.
-     * entities of this world.
-     * 
+     *
      * @return entity manager.
      */
     public EntityManager getEntityManager() {
@@ -149,7 +145,7 @@ public class World implements Disposable {
 
     /**
      * Returns a manager that takes care of all the components in the world.
-     * 
+     *
      * @return component manager.
      */
     public ComponentManager getComponentManager() {
@@ -159,26 +155,31 @@ public class World implements Disposable {
     /**
      * Add a manager into this world. It can be retrieved later.
      * World will notify this manager of changes to entity.
-     * 
+     *
      * @param manager to be added
      */
     public <T extends Manager> T setManager(T manager) {
-        managers.put(manager.getClass(), manager);
-        managersArray.add(manager);
+        managers.add(manager);
         manager.setWorld(this);
         return manager;
     }
 
     /**
      * Returns a manager of the specified type.
-     * 
+     *
      * @param <T>
      * @param managerType
      *            class type of the manager
      * @return the manager
      */
+    @SuppressWarnings("unchecked")
     public <T extends Manager> T getManager(Class<T> managerType) {
-        return managerType.cast(managers.get(managerType));
+        for (Manager manager : managers) {
+            if (manager.getClass().equals(managerType)) {
+                return (T) manager;
+            }
+        }
+        return null;
     }
 
     /**
@@ -186,16 +187,12 @@ public class World implements Disposable {
      * @param manager to delete.
      */
     public void deleteManager(Manager manager) {
-        managers.remove(manager.getClass());
-        managersArray.removeValue(manager, true);
+        managers.removeValue(manager, true);
     }
-
-
-
 
     /**
      * Time since last game loop.
-     * 
+     *
      * @return delta time since last game loop.
      */
     public float getDelta() {
@@ -204,18 +201,16 @@ public class World implements Disposable {
 
     /**
      * You must specify the delta for the game here.
-     * 
+     *
      * @param delta time since last game loop.
      */
     public void setDelta(float delta) {
         this.delta = delta;
     }
 
-
-
     /**
      * Adds a entity to this world.
-     * 
+     *
      * @param e entity
      */
     public void addEntity(Entity e) {
@@ -226,7 +221,7 @@ public class World implements Disposable {
      * Ensure all systems are notified of changes to this entity.
      * If you're adding a component to an entity after it's been
      * added to the world, then you need to invoke this method.
-     * 
+     *
      * @param e entity
      */
     public void changedEntity(Entity e) {
@@ -235,12 +230,16 @@ public class World implements Disposable {
 
     /**
      * Delete the entity from the world.
-     * 
+     *
      * @param e entity
      */
     public void deleteEntity(Entity e) {
         if (!deleted.contains(e)) {
             deleted.add(e);
+        }
+
+        if (added.contains(e)) {
+            added.remove(e);
         }
     }
 
@@ -263,8 +262,9 @@ public class World implements Disposable {
 
     /**
      * Create and return a new or reused entity instance.
-     * Will NOT add the entity to the world, use World.addEntity(Entity) for that.
-     * 
+     * Will NOT add the entity to the world, use World.addEntity(Entity)
+     * for that.
+     *
      * @return entity
      */
     public Entity createEntity() {
@@ -281,8 +281,9 @@ public class World implements Disposable {
     }
 
     /**
-     * Creates an instance of an event of a specified type. The event needs to be posted to
-     * the world in order to be propagated to listeners.
+     * Creates an instance of an event of a specified type. The event
+     * needs to be posted to the world in order to be propagated to listeners.
+     *
      * @param type Type of event to create.
      * @return Event of specified type.
      */
@@ -292,7 +293,7 @@ public class World implements Disposable {
 
     /**
      * Get a entity having the specified id.
-     * 
+     *
      * @param entityId
      * @return entity
      */
@@ -302,98 +303,80 @@ public class World implements Disposable {
 
     /**
      * Post event to all event systems.
-     * 
+     *
      * @param sendingSystem
      * @param event
      */
     public void postEvent(EntitySystem sendingSystem, SystemEvent event) {
-        for (EventSystem eventSystem : eventSystems) {
+        if (eventSystem != null) {
             eventSystem.postEvent(sendingSystem, event);
         }
     }
 
     /**
      * Retrieve events from all systems. The set ensures that events are not repeated.
-     * 
+     *
      * @param pollingSystem System that is requesting the events.
      * @param type Type of events requested.
      * @param events Event set to populate with events
      */
     public <T extends SystemEvent> void getEvents(EntitySystem pollingSystem, Class<T> type, Array<T> events) {
         events.clear();
-        for (EventSystem eventSystem : eventSystems) {
+        if (eventSystem != null) {
             eventSystem.getEvents(pollingSystem, type, events);
         }
     }
 
     /**
      * Gives you all the systems in this world for possible iteration.
-     * 
+     *
      * @return all entity systems in world.
      */
     public Array<EntitySystem> getSystems() {
-        return systemsArray;
+        return systems;
+    }
+
+    /**
+     * Returns the event system, or null if not set.
+     *
+     * @return Event System for the world.
+     */
+    public EventDeliverySystem getEventDeliverySystem() {
+        return eventSystem;
+    }
+
+    public void setEventDeliverySystem(EventDeliverySystem eventSystem) {
+        this.eventSystem = eventSystem;
     }
 
     /**
      * Adds a system to this world that will be processed by World.process()
-     * 
+     *
      * @param system the system to add.
      * @return the added system.
      */
     public <T extends EntitySystem> T setSystem(T system) {
         system.setWorld(this);
 
-        systems.put(system.getClass(), system);
-        systemsArray.add(system);
-        if (system instanceof EventSystem) {
-            eventSystems.add((EventSystem)system);
+        if (system instanceof EventDeliverySystem) {
+            eventSystem = (EventDeliverySystem) system;
+        } else {
+            systems.add(system);
         }
 
         return system;
     }
-    
-    public <T extends DrawSystem> T setDrawSystem(T system) {
-       // system.setWorld(this);
-    	setSystem(system, true);
-       // drawSystems.put(system.getClass(), system);
-        drawSystemsArray.add(system);
-       // if (system instanceof EventSystem) {
-        //    eventSystems.add((EventSystem)system);
-        //}
 
-        return system;
-    }
-    protected InputMultiplexer inputMux = new InputMultiplexer();
-    public <T extends InputSystem> T setInputSystem (T sys) {
-		setSystem(sys);
-		inputSystem = sys;
-		inputMux.addProcessor(sys);
-		Gdx.input.setInputProcessor(inputMux);
-		return sys;
-	}
-    
-    public InputMultiplexer getInputMux(){
-    	return inputMux;
-    }
-
-	/**
+    /**
      * Will add a system to this world.
-     * 
+     *
      * @param system the system to add.
      * @param passive wether or not this system will be processed by World.process()
      * @return the added system.
      */
     public <T extends EntitySystem> T setSystem(T system, boolean passive) {
-        system.setWorld(this);
+        setSystem(system);
         system.setPassive(passive);
-
-        systems.put(system.getClass(), system);
-        systemsArray.add(system);
-        if (system instanceof EventSystem) {
-            eventSystems.add((EventSystem)system);
-        }
-
         return system;
     }
 
@@ -402,38 +385,58 @@ public class World implements Disposable {
      * @param system to be deleted from world.
      */
     public void deleteSystem(EntitySystem system) {
-        systems.remove(system.getClass());
-        systemsArray.removeValue(system, true);
-        if (system instanceof EventSystem) {
-            eventSystems.removeValue((EventSystem)system, true);
+        if (system instanceof EventDeliverySystem) {
+            eventSystem = null;
+        } else {
+            systems.removeValue(system, true);
         }
     }
 
+    /**
+     * Notify systems of changes to the specified entity.
+     *
+     * @param performer The performer that notifies the systems.
+     * @param e Entity that has been affected.
+     */
     protected void notifySystems(Performer performer, Entity e) {
-        for(int i = 0, s=systemsArray.size; s > i; i++) {
-            performer.perform(systemsArray.get(i), e);
+        for(int i = 0; i < systems.size; i++) {
+            performer.perform(systems.get(i), e);
         }
     }
 
+    /**
+     * Notify managers of changes to the specified entity.
+     *
+     * @param performer The performer that notifies the managers.
+     * @param e Entity that has been affected.
+     */
     protected void notifyManagers(Performer performer, Entity e) {
-        for(int a = 0; managersArray.size > a; a++) {
-            performer.perform(managersArray.get(a), e);
+        for(Manager manager : managers) {
+            performer.perform(manager, e);
         }
     }
 
     /**
      * Retrieve a system for specified system type.
-     * 
+     *
      * @param type type of system.
      * @return instance of the system in this world.
      */
+    @SuppressWarnings("unchecked")
     public <T extends EntitySystem> T getSystem(Class<T> type) {
-        return type.cast(systems.get(type));
+        for (int i = 0; i < systems.size; i++) {
+            EntitySystem system = systems.get(i);
+            if (system.getClass().equals(type)) {
+                return (T) system;
+            }
+        }
+        return null;
     }
 
 
     /**
      * Performs an action on each entity.
+     *
      * @param entities
      * @param performer
      */
@@ -461,40 +464,28 @@ public class World implements Disposable {
         cm.clean();
         em.clean();
 
-        for(int i = 0; systemsArray.size > i; i++) {
-            EntitySystem system = systemsArray.get(i);
+        if (eventSystem != null) {
+            eventSystem.update();
+        }
+
+        for(int i = 0; i < systems.size; i++) {
+            EntitySystem system = systems.get(i);
             if(!system.isPassive()) {
                 system.process();
             }
         }
     }
 
-    public void draw(float dt){
-    	this.setDelta(dt);
-    	for(int i = 0; drawSystemsArray.size > i; i++) {
-            DrawSystem system = drawSystemsArray.get(i);
-           // if(!system.isPassive()) {
-            	
-                system.process();
-            //}
-        }
-    }
 
     /**
-     * Retrieves a ComponentMapper instance for fast retrieval of components from entities.
-     * 
+     * Retrieves a ComponentMapper instance for fast retrieval of
+     * components from entities.
+     *
      * @param type of component to get mapper for.
      * @return mapper for specified component type.
      */
     public <T extends Component> ComponentMapper<T> getMapper(Class<T> type) {
         return cm.getMapper(type);
-    }
-
-    /*
-     * Only used internally to maintain clean code.
-     */
-    protected interface Performer {
-        void perform(EntityObserver observer, Entity e);
     }
 
     @Override
@@ -508,19 +499,55 @@ public class World implements Disposable {
         enable.clear();
         disable.clear();
 
-        for (Manager manager : managersArray) {
+        for (Manager manager : managers) {
             manager.dispose();
         }
+
         managers.clear();
-        managersArray.clear();
-
         systems.clear();
-        systemsArray.clear();
 
-        for (EventSystem eventSystem : eventSystems) {
+        if (eventSystem != null) {
             eventSystem.dispose();
+            eventSystem = null;
         }
-        eventSystems.clear();
+    }
+
+
+    public void initializeDraw(){
+        for (int i = 0; i < drawSystemsArray.size; i++) {
+            drawSystemsArray.get(i).initialize();
+
+
+        }
+    }
+    public void draw(float dt){
+        this.setDelta(dt);
+        for(int i = 0; drawSystemsArray.size > i; i++) {
+            EntitySystem system = drawSystemsArray.get(i);
+            // if(!system.isPassive()) {
+
+            system.process();
+            //}
+        }
+    }
+
+    public <T extends EntitySystem> T setDrawSystem(T system) {
+        // system.setWorld(this);
+        setSystem(system, true);
+        // drawSystems.put(system.getClass(), system);
+        drawSystemsArray.add(system);
+        // if (system instanceof EventSystem) {
+        //    eventSystems.add((EventSystem)system);
+        //}
+
+        return system;
+    }
+
+    protected InputMultiplexer inputMux = new InputMultiplexer();
+
+
+    public InputMultiplexer getInputMux(){
+        return inputMux;
     }
 
 }

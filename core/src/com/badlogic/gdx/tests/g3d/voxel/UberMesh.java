@@ -1,7 +1,6 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttributes;
 
 public class UberMesh{
 

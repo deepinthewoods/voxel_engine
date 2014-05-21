@@ -3,8 +3,7 @@ package com.niz.component.systems;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
-import com.artemis.systems.DrawSystem;
-import com.badlogic.gdx.Gdx;
+import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -15,7 +14,7 @@ import com.niz.component.ModelInfo;
 import com.niz.component.Move;
 import com.niz.component.Position;
 
-public class ModelRenderingSystem extends DrawSystem{
+public class ModelRenderingSystem extends EntitySystem {
 	private static final String TAG = "ModelRenderingSystem";
     transient ComponentMapper<ModelInfo> miMap;
     transient ComponentMapper<Position> posMap;

@@ -1,14 +1,12 @@
 package com.artemis;
 
-import java.util.BitSet;
-import java.util.UUID;
-
 import com.artemis.managers.ComponentManager;
 import com.artemis.managers.EntityManager;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Pool.Poolable;
-import com.badlogic.gdx.utils.Pools;
+import com.niz.component.Position;
+import com.niz.component.VelocityRollingAverage;
 
 /**
  * The entity class. Cannot be instantiated outside the framework, you must
@@ -18,7 +16,6 @@ import com.badlogic.gdx.utils.Pools;
  * 
  */
 public final class Entity implements Poolable {
-    protected UUID uuid;
 
     /**
      * The internal id for this entity within the framework. No other entity
@@ -33,6 +30,11 @@ public final class Entity implements Poolable {
     protected EntityManager entityManager;
     protected ComponentManager componentManager;
 
+    /**
+     * Create an entity for the specified world with the specified id.
+     * @param world World this entity belongs to.
+     * @param id Entity's id.
+     */
     public Entity(World world, int id) {
         this.world = world;
         this.id = id;
@@ -40,20 +42,18 @@ public final class Entity implements Poolable {
         this.componentManager = world.getComponentManager();
         systemBits = new Bits();
         componentBits = new Bits();
-        uuid = UUID.randomUUID();
     }
 
     /**
-     * Returns a BitSet instance containing bits of the components the entity possesses.
-     * @return
+     * @return Returns a BitSet instance containing bits of the components the entity possesses.
+     * 
      */
     public Bits getComponentBits() {
         return componentBits;
     }
 
     /**
-     * Returns a BitSet instance containing bits of the components the entity possesses.
-     * @return
+     * @return Returns a BitSet instance containing bits of the components the entity possesses.
      */
     public Bits getSystemBits() {
         return systemBits;
@@ -67,7 +67,6 @@ public final class Entity implements Poolable {
     public void reset() {
         systemBits.clear();
         componentBits.clear();
-        uuid = UUID.randomUUID();
         id = 0;
     }
 
@@ -124,7 +123,7 @@ public final class Entity implements Poolable {
      * @return if it's active.
      */
     public boolean isActive() {
-        return entityManager.isActive(id);
+        return entityManager.entities.get(id) != null;
     }
 
     /**
@@ -137,15 +136,7 @@ public final class Entity implements Poolable {
     public boolean isEnabled() {
         return entityManager.isEnabled(id);
     }
-    
-    /**for backwards-compatibility
-     * @param type
-     * @return
-     */
-    @Deprecated
-    public <T extends Component> T get(Class<T> type) {
-        return getComponent(type);
-    }
+
     /**
      * Slower retrieval of components from this entity. Minimize usage of this,
      * but is fine to use e.g. when creating new entities and setting data in
@@ -162,21 +153,36 @@ public final class Entity implements Poolable {
     }
 
     /**
-     * Returns an array of all components this entity has.
-     * You need to reset the bag yourself if you intend to fill it more than once.
+     * Populates provided Array with this Entity's components.
      * 
-     * @param array the bag to put the components into.
-     * @return the fillBag with the components in.
+     * WARNING: This is an efficient way to access entitie's components.
+     * Use with care. ComponentMapper is a faster and more efficient way to
+     * access components.
+     * 
+     * @param array to put the components into.
      */
     public void getComponents(Array<Component> array) {
         componentManager.getComponents(this, array);
     }
 
     /**
+     * Returns an array of Entity components. This is a generated array,
+     * and modifying it will not have an effect on components belonging
+     * to this entity.
+     * 
+     * WARNING: This is an efficient way to access entitie's components.
+     * Use with care. ComponentMapper is a faster and more efficient way to
+     * access components.
+     */
+    public Array<Component> getComponents() {
+        return componentManager.getComponents(this);
+    }
+
+    /**
      * Refresh all changes to components for this entity. After adding or
      * removing components, you must call this method. It will update all
-     * relevant systems. It is typical to call this after adding components to a
-     * newly created entity.
+     * relevant systems. It is typical to call this after adding components to
+     * a newly created entity.
      */
     public void addToWorld() {
         world.addEntity(this);
@@ -213,15 +219,6 @@ public final class Entity implements Poolable {
     }
 
     /**
-     * Get the UUID for this entity.
-     * This UUID is unique per entity (re-used entities get a new UUID).
-     * @return uuid instance for this entity.
-     */
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    /**
      * Returns the world this entity belongs to.
      * @return world of entity.
      */
@@ -242,11 +239,13 @@ public final class Entity implements Poolable {
         return id;
     }
 
-	public<T extends Component> T add(Class<T> class1) {
-		T c = Pools.obtain(class1);
-		addComponent(c);
-		return c;
-	}
+    public <T extends Component> T add(Class<T> clas) {
+        T c = world.createComponent(clas);
+        addComponent(c);
+        return c;
+    }
 
-	
+    public <T extends Component> T get(Class<T> clas) {
+        return getComponent(clas);
+    }
 }

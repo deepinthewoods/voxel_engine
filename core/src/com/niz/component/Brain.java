@@ -4,7 +4,6 @@ import com.artemis.Component;
 import com.artemis.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.IntArray;
 
 public class Brain implements Component {
 	private Vector3 target = new Vector3(), shortTarget = new Vector3();

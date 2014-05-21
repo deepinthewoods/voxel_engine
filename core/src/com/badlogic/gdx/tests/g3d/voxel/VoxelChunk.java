@@ -17,12 +17,10 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher.VoxelFace;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class VoxelChunk {
 	public static final int VERTEX_SIZE = 4;

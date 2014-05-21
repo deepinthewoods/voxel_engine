@@ -1,31 +1,35 @@
 package com.artemis.managers;
 
-import java.util.BitSet;
-
 import com.artemis.Entity;
 import com.artemis.utils.IdentifierPool;
 import com.artemis.utils.SafeArray;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Pool;
 
-public class EntityManager extends Manager {
-    protected Array<Entity> entities;
-    protected Array<Entity> deletedEntities;
-    protected Bits disabled;
+import java.util.BitSet;
 
-    protected int active;
-    protected long added;
-    protected long created;
-    protected long deleted;
+/**
+ * A class that is responsible for managing the life cycle of entities.
+ * Used for internal purposes. Should not be accessed directly.
+ *
+ */
+public class EntityManager extends Manager {
+    public Array<Entity> entities;
+    public Array<Entity> deletedEntities;
+    public BitSet disabled;
+
+    public int active;
+    public long added;
+    public long created;
+    public long deleted;
 
     protected IdentifierPool identifierPool;
     protected Pool<Entity> entityPool;
 
     public EntityManager() {
         entities = new SafeArray<Entity>();
-        deletedEntities = new SafeArray<Entity>();
-        disabled = new Bits();
+        deletedEntities = new Array<Entity>();
+        disabled = new BitSet();
         identifierPool = new IdentifierPool();
         entityPool = new Pool<Entity>() {
 
@@ -62,6 +66,9 @@ public class EntityManager extends Manager {
         };
     }
 
+    /**
+     * @return Returns an instance of an entity.
+     */
     public Entity createEntityInstance() {
         created++;
         return entityPool.obtain();
@@ -89,10 +96,12 @@ public class EntityManager extends Manager {
         deletedEntities.add(e);
     }
 
+    /**
+     * Cleans up deleted entities.
+     */
     public void clean() {
         if(deletedEntities.size > 0) {
-            for(int i = 0; deletedEntities.size > i; i++) {
-                Entity e = deletedEntities.get(i);
+            for (Entity e : deletedEntities) {
                 entities.set(e.id, null);
                 disabled.clear(e.id);
                 active--;
@@ -108,7 +117,7 @@ public class EntityManager extends Manager {
      * Check if this entity is active.
      * Active means the entity is being actively processed.
      * 
-     * @param entityId
+     * @param entityId Id of the entity to check.
      * @return true if active, false if not.
      */
     public boolean isActive(int entityId) {
@@ -118,7 +127,7 @@ public class EntityManager extends Manager {
     /**
      * Check if the specified entityId is enabled.
      * 
-     * @param entityId
+     * @param entityId Id of the entity to check.
      * @return true if the entity is enabled, false if it is disabled.
      */
     public boolean isEnabled(int entityId) {
@@ -128,8 +137,8 @@ public class EntityManager extends Manager {
     /**
      * Get a entity with this id.
      * 
-     * @param entityId
-     * @return the entity
+     * @param entityId Id of the entity to return
+     * @return Enity of specified id or null if it does not exist.
      */
     public Entity getEntity(int entityId) {
         return entities.get(entityId);
@@ -181,9 +190,5 @@ public class EntityManager extends Manager {
         created = 0;
         deleted = 0;
         identifierPool.dispose();
-    }
-    
-    public Array<Entity> getEntities(){
-    	return entities;
     }
 }

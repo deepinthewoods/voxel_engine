@@ -1,7 +1,6 @@
 package com.niz.component;
 
 import com.artemis.Component;
-import com.artemis.Entity;
 import com.niz.actions.ActionList;
 
 

@@ -3,14 +3,14 @@ package com.niz.component.systems;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
-import com.artemis.systems.DrawSystem;
+import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.utils.Array;
 import com.niz.ShapeBatch;
 import com.niz.actions.AStand;
 import com.niz.component.ActionComponent;
 import com.niz.component.Player;
 
-public class TargetLineRenderingSystem extends DrawSystem {
+public class TargetLineRenderingSystem extends EntitySystem {
 
 	//private ShapeBatch batch;
 	private ComponentMapper<ActionComponent> actionMap;

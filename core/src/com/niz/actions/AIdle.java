@@ -1,13 +1,8 @@
 package com.niz.actions;
 
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
-import com.niz.component.Body;
-import com.niz.component.ModelInfo;
-import com.niz.component.Move;
-import com.niz.component.Physics;
-import com.niz.component.Position;
+import com.niz.component.*;
 
 public class AIdle extends Action {
 

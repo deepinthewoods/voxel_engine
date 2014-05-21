@@ -1,13 +1,14 @@
 package com.artemis.systems;
 
-import com.artemis.Aspect;
 import com.artemis.Entity;
+import com.artemis.Filter;
 import com.badlogic.gdx.utils.Array;
 
 /**
- * This system has an empty aspect so it processes no entities, but it still gets invoked.
- * You can use this system if you need to execute some game logic and not have to concern
- * yourself about aspects or entities.
+ * This system has an empty filter so it processes no entities,
+ * but it still gets invoked. You can use this system if you need
+ * to execute some game logic and not have to concern
+ * yourself about filters or entities.
  * 
  * @author Arni Arent
  *
@@ -15,7 +16,7 @@ import com.badlogic.gdx.utils.Array;
 public abstract class VoidEntitySystem extends EntitySystem {
 
     public VoidEntitySystem() {
-        super(Aspect.getEmpty());
+        super(Filter.getEmpty());
     }
 
     @Override
@@ -23,5 +24,8 @@ public abstract class VoidEntitySystem extends EntitySystem {
         processSystem();
     }
 
+    /**
+     * Processes the system.
+     */
     protected abstract void processSystem();
 }

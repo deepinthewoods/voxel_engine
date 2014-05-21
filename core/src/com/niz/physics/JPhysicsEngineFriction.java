@@ -1,6 +1,5 @@
 package com.niz.physics;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 
 public class JPhysicsEngineFriction extends JPhysicsEngine {

@@ -1,7 +1,5 @@
 package com.niz.actions;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 
 public class DoublyLinkedList {

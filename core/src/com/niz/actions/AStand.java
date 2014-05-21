@@ -4,11 +4,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.component.Brain;
-import com.niz.component.ModelInfo;
-import com.niz.component.Move;
-import com.niz.component.Physics;
-import com.niz.component.Position;
+import com.niz.component.*;
 
 public class AStand extends Action {
 	//private static final float MIN_RUN_DIST = 0.0852f;

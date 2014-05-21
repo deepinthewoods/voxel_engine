@@ -1,11 +1,8 @@
 package com.niz.ui;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 
 public class VectorInputButton extends InputButton{

@@ -2,7 +2,6 @@ package com.niz.actions;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.component.AABBBody;
 import com.niz.component.Move;

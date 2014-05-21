@@ -1,23 +1,22 @@
 package com.artemis.systems;
 
-import com.artemis.Aspect;
 import com.artemis.Entity;
+import com.artemis.Filter;
 import com.badlogic.gdx.utils.Array;
 
 /**
  * If you need to process entities at a certain interval then use this.
- * A typical usage would be to regenerate ammo or health at certain intervals, no need
- * to do that every game loop, but perhaps every 100 ms. or every second.
+ * A typical usage would be to regenerate ammo or health at certain intervals,
+ * no need to do that every game loop, but perhaps every 100 ms. or every second.
  * 
  * @author Arni Arent
  *
  */
 public abstract class IntervalEntityProcessingSystem extends IntervalEntitySystem {
 
-    public IntervalEntityProcessingSystem(Aspect aspect, float interval) {
-        super(aspect, interval);
+    public IntervalEntityProcessingSystem(Filter filter, float interval) {
+        super(filter, interval);
     }
-
 
     /**
      * Process a entity this system is interested in.

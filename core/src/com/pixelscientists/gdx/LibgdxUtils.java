@@ -21,19 +21,15 @@
  */
 package com.pixelscientists.gdx;
 
-import java.util.Random;
-
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.utils.Logger;
 import com.pixelscientists.gdx.splash.SplashScreen;
+
+import java.util.Random;
 
 /**
  * This is the main class of the game itself. It offers access to the

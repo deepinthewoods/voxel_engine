@@ -4,10 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.component.PositionRollingAverage;
 import com.niz.component.RollingAverage;
 
 public abstract class RollingAverageSystem extends EntityProcessingSystem {
