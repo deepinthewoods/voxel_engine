@@ -191,7 +191,9 @@ public class GreedyMesher implements Mesher {
 
 
 		public final void vertex(int i, int light) {
-			vertex [i] = light;
+
+            vertex [i] = light;
+
 		}
 
 
@@ -214,8 +216,6 @@ public class GreedyMesher implements Mesher {
     			for (int k = 0; k < CHUNK_WIDTH+2; k++) {
     	
     				lightCache[i][j][k] = 0;
-    				
-    				
     				
     	}}}
     	

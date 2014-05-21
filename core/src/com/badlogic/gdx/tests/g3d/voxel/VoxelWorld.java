@@ -104,7 +104,9 @@ public class VoxelWorld implements RenderableProvider {
        
 	}
 
-	
+	public void set(Vector3 p, byte voxel){
+        set(p.x, p.y, p.z, voxel);
+    }
 
 	public void set(float x, float y, float z, byte voxel) {
 		int ix = (int)x;

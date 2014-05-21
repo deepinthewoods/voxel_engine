@@ -43,7 +43,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class VoxelRenderingSystem extends DrawSystem{
 	private static final String TAG = "voxel rendering system";
-    private ModelBatch modelBatch;
+    private transient ModelBatch modelBatch;
     private Camera camera;
 
 
@@ -87,11 +87,9 @@ public class VoxelRenderingSystem extends DrawSystem{
         modelBatch = world.getSystem(GraphicsSystem.class).modelBatch;
         camera = world.getSystem(CameraSystem.class).camera;
         VoxelSystem voxS = world.getSystem(VoxelSystem.class);
-        if (voxS != null)
-            voxelWorld = voxS.voxelWorld;
-        else {
-            voxelWorld = world.getSystem(EditVoxelSystem.class).voxelWorld;
-        }
+
+        voxelWorld = voxS.voxelWorld;
+
 
 
         Texture voxelTexture = world.getSystem(AssetsSystem.class).assets.get("data/tiles.png", Texture.class);

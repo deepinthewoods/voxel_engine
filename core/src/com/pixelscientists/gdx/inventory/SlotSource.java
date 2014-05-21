@@ -26,6 +26,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
@@ -72,21 +73,29 @@ public class SlotSource extends Source {
 	}
 
 	@Override
-	public void dragStop(InputEvent event, float x, float y, int pointer, Payload payload, Target target) {
-		Slot payloadSlot = (Slot) payload.getObject();
-		if (target != null) {
-			Slot targetSlot = ((SlotActor) target.getActor()).getSlot();
-			if (targetSlot.getItem() == payloadSlot.getItem() || targetSlot.getItem() == null) {
-				targetSlot.add(payloadSlot.getItem(), payloadSlot.getAmount());
-			} else {
-				Item targetType = targetSlot.getItem();
-				int targetAmount = targetSlot.getAmount();
-				targetSlot.take(targetAmount);
-				targetSlot.add(payloadSlot.getItem(), payloadSlot.getAmount());
-				sourceSlot.add(targetType, targetAmount);
-			}
-		} else {
-			sourceSlot.add(payloadSlot.getItem(), payloadSlot.getAmount());
-		}
-	}
+    public void dragStop(InputEvent event,
+
+                         float x,
+                         float y,
+                         int pointer,
+                         DragAndDrop.Payload payload,
+                         DragAndDrop.Target target){
+        Slot payloadSlot = (Slot) payload.getObject();
+        if (target != null) {
+            Slot targetSlot = ((SlotActor) target.getActor()).getSlot();
+            if (targetSlot.getItem() == payloadSlot.getItem() || targetSlot.getItem() == null) {
+                targetSlot.add(payloadSlot.getItem(), payloadSlot.getAmount());
+            } else {
+                Item targetType = targetSlot.getItem();
+                int targetAmount = targetSlot.getAmount();
+                targetSlot.take(targetAmount);
+                targetSlot.add(payloadSlot.getItem(), payloadSlot.getAmount());
+                sourceSlot.add(targetType, targetAmount);
+            }
+        } else {
+            sourceSlot.add(payloadSlot.getItem(), payloadSlot.getAmount());
+        }
+
+    }
+
 }

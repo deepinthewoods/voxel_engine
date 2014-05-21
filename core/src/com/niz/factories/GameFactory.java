@@ -21,14 +21,92 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
+import com.niz.EngineScreen;
 import com.niz.ShapeBatch;
+import com.niz.component.systems.*;
 
 public abstract class GameFactory {
+    private static final String path = "data/";
+    private AssetDefinition ass;
+    private SystemDefinition systemDef;
+    protected Entity player;
+    public void assets(World world, AssetManager assets) {
 
-public abstract void assets(World world, AssetManager assets) ;
+        FileHandle file = Gdx.files.internal(path+"assets.ini");
 
-public abstract void systems(float timeStep, World world, AssetManager assets, FileHandle file);
+        Json json = new Json();
 
+        JsonValue value;
+
+        json.addClassTag("assets", AssetDefinition.class);
+        ass = json.fromJson(AssetDefinition.class, file);//new AssetDefinition();//
+        assets.load("data/tiles.atlas", TextureAtlas.class);
+
+        ass.process(world, assets);
+
+
+        player = world.createEntity();
+        EngineScreen.player = player;
+    }
+    public void systems(float timeStep, World world, AssetManager assets, FileHandle file) {
+        ass.postProcess(assets);
+
+
+
+
+        world.setDelta(timeStep);
+
+
+        Json json = new Json();
+
+        //String s = json.toJson(ass);
+
+
+        //funct.execute(world);
+
+        //systemDef = new SystemDefinition();
+        systemDef = json.fromJson(SystemDefinition.class, file);
+        systemDef.setJson(json);
+        systemDef.setSystem(CameraSystem.class);
+        systemDef.setSystem(GraphicsSystem.class);
+
+        systemDef.setSystem( PhysicsSystem.class );
+        systemDef.setSystem( MovementSystem.class);
+        systemDef.setSystem( AABBBodySystem.class);
+        systemDef.setSystem( BucketedSystem.class);
+        systemDef.setSystem( ActionSystem.class);
+        systemDef.setSystem( MovementSystem.class);
+
+
+        systemDef.setSystem(VoxelSystem.class);
+        //systemDef.setSystem(EditVoxelSystem.class);
+
+
+        systemDef.setSystem( PositionRollingAverageSystem.class);
+        systemDef.setSystem( VelocityRollingAverageSystem.class);
+        systemDef.setSystem(VelocityPredictionSystem.class);
+        systemDef.setDrawSystem(VoxelRenderingSystem.class);
+
+
+        systemDef.setDrawSystem(ModelRenderingSystem.class );
+        systemDef.setSystem(BrainSystem.class);
+        systemDef.setDrawSystem( DebugVectorSystem.class);
+        systemDef.setDrawSystem( DebugPositionSystem.class);
+
+
+        systemDef.setSystem(CameraControllerSystem.class);
+        systemDef.setSystem( CameraInfluenceSystem.class);
+        systemDef.setSystem( PositionLimiterSystem.class);
+
+        //systemDef.preWrite();
+        systemDef.procesesSystems(world);
+        world.setSystem(new AssetsSystem(assets));
+
+
+    }
 public abstract void newGame(World world, Stage stage);
 
 public abstract void load(World world);
@@ -89,7 +167,11 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
                 newGame.removeListener(this);
             }
         });
-        final Sprite btnSprite = assets.get("data/tiles.png", TextureAtlas.class).createSprite("button");
+        final Sprite btnSprite = assets.get("data/tiles.atlas", TextureAtlas.class).createSprite("button");
+        final Sprite btnSpriteSelected = assets.get("data/tiles.atlas", TextureAtlas.class).createSprite("buttonselected");
+
+        //if (btnSprite == null) throw new GdxRuntimeException("nulll");
+
         final Button editorBtn = new Button(new Label("Editor", skin), skin);
         editorBtn.addListener(new ClickListener(){
             @Override
@@ -116,7 +198,7 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
 
                                             @Override
                                             public boolean act(float delta) {
-                                                editor(world, stage, skin, btnSprite);
+                                                editor(world, stage, skin, btnSprite, btnSpriteSelected);
                                                 return true;
                                             }
 
@@ -148,5 +230,5 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
 
 
 
-    protected abstract void editor(World world, Stage stage, Skin skin, Sprite sprite);
+    protected abstract void editor(World world, Stage stage, Skin skin, Sprite sprite, Sprite spritesel);
 }

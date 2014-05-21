@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 
 public class MeshBatcher{
@@ -178,6 +179,7 @@ public class MeshBatcher{
     public void addVertices(Vector3[] vertices, int[] colorArray, int[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height) {
         for (int i = 0; i < 4; i++){
             Vector3 v = vertices[i];
+            if (colorArray[i] > 15) throw new GdxRuntimeException("light error "+colorArray[i]);
             float c = GreedyMesher.lightValues[colorArray[i]];//highlightColors[i];//
 
             //Gdx.app.log(TAG, "verts"+width+"  "+height);

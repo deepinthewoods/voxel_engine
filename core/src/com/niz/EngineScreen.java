@@ -88,7 +88,7 @@ public class EngineScreen implements Screen{
 
 		factory.assets(world, assets);
 		
-		factory.initMenu(world, skin, stage, assets, 1f);
+
 		//worldTest.create(camera);
 		font = new BitmapFont();
 	}
@@ -99,6 +99,7 @@ public class EngineScreen implements Screen{
 	public void render(float delta) {		
 		if(!assetsLoaded && assets.update()) {
 			//factory.init(timeStep, world, assets);
+            factory.initMenu(world, skin, stage, assets, 1f);
 			assetsLoaded = true;
 		}
 		if (assets.getProgress() < 1f){

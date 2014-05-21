@@ -13,8 +13,8 @@ import com.badlogic.gdx.utils.Array;
  */
 public class ComponentMapper<A extends Component> {
 
-    private Class<A> classType;
-    private Array<Component> components;
+    private transient Class<A> classType;
+    private transient Array<Component> components;
 
     public ComponentMapper(Class<A> type, World world) {
         components = world.getComponentManager().getComponents(type);

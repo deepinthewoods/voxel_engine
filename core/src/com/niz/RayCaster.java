@@ -23,7 +23,7 @@ public class RayCaster{
 		trace(src.x, src.y, src.z, dst);
 	}
 	public void trace(float x, float y, float z, Vector3 dst) {
-		trace(x,y,z,dst);
+		trace(x,y,z,dst.x, dst.y, dst.z);
 	}
 		
 	public void trace(float x, float y, float z, float dstX, float dstY, float dstZ) {
@@ -180,6 +180,6 @@ public class RayCaster{
 		return true;
 	}
 
-	
-	
+
+
 }

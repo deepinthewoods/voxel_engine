@@ -17,9 +17,9 @@ import com.niz.component.Position;
 
 public class ModelRenderingSystem extends DrawSystem{
 	private static final String TAG = "ModelRenderingSystem";
-	ComponentMapper<ModelInfo> miMap;
-	ComponentMapper<Position> posMap;
-	ComponentMapper<Move> moveMap;
+    transient ComponentMapper<ModelInfo> miMap;
+    transient ComponentMapper<Position> posMap;
+    transient ComponentMapper<Move> moveMap;
     private ModelBatch modelBatch;
     private Environment env;
     private Camera camera;

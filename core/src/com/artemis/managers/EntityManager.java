@@ -6,12 +6,13 @@ import com.artemis.Entity;
 import com.artemis.utils.IdentifierPool;
 import com.artemis.utils.SafeArray;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Pool;
 
 public class EntityManager extends Manager {
     protected Array<Entity> entities;
     protected Array<Entity> deletedEntities;
-    protected BitSet disabled;
+    protected Bits disabled;
 
     protected int active;
     protected long added;
@@ -24,7 +25,7 @@ public class EntityManager extends Manager {
     public EntityManager() {
         entities = new SafeArray<Entity>();
         deletedEntities = new SafeArray<Entity>();
-        disabled = new BitSet();
+        disabled = new Bits();
         identifierPool = new IdentifierPool();
         entityPool = new Pool<Entity>() {
 

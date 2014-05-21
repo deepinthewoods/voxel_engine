@@ -6,8 +6,10 @@ import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -22,10 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
@@ -37,24 +36,12 @@ import com.badlogic.gdx.utils.Pools;
 import com.niz.ColorPicker;
 import com.niz.ColorPickerButton;
 import com.niz.EngineScreen;
+import com.niz.RayCaster;
 import com.niz.actions.AJump;
 import com.niz.actions.AStand;
 import com.niz.actions.ActionList;
 import com.niz.blocks.TopBottomBlock;
-import com.niz.component.AABBBody;
-import com.niz.component.ActionComponent;
-import com.niz.component.Brain;
-import com.niz.component.CameraController;
-import com.niz.component.CameraInfluencer;
-import com.niz.component.DebugVector;
-import com.niz.component.ModelInfo;
-import com.niz.component.Move;
-import com.niz.component.Physics;
-import com.niz.component.Player;
-import com.niz.component.Position;
-import com.niz.component.PositionRollingAverage;
-import com.niz.component.VelocityPredictor;
-import com.niz.component.VelocityRollingAverage;
+import com.niz.component.*;
 import com.niz.component.systems.*;
 
 public class GeneralFactory extends GameFactory{
@@ -62,211 +49,38 @@ public class GeneralFactory extends GameFactory{
 
 	private static final String TAG = "General Factory";
 
-	private static final String path = "data/";
-	
+
 	//VoxelSystem voxelSys;
 	//PlatformerInputSystem inputSys;
 
-	private Entity player;
-	
+
 	Actor dragger, clicker;
 	
 	Vector3 tmp = new Vector3(), tmp2 = new Vector3();
 
 	private CameraControllerSystem cameraSystem;
 
-	private AssetDefinition ass;
-	private SystemDefinition systemDef;
+
 	
-	@Override
-	public void assets(World world, AssetManager assets) {
-		
-		FileHandle file = Gdx.files.internal(path+"assets.ini");
-
-		Json json = new Json();
-		
-		JsonValue value;
-
-		json.addClassTag("assets", AssetDefinition.class);
-		ass = json.fromJson(AssetDefinition.class, file);//new AssetDefinition();//
-		ass.process(world, assets);
-		
-		
-		//String jtext = json.toJson(ass);
-
-		//file.writeString(json.prettyPrint(jtext), false);
-		//Gdx.app.log(TAG, "strings"+jtext);
-
-		player = world.createEntity();
-		EngineScreen.player = player;
-	}
-
-	@Override
-	public void systems(float timeStep, World world, AssetManager assets, FileHandle file) {
-		ass.postProcess(assets);
-		//TextureRegion[][] tiles = new TextureRegion(assets.get("data/tiles.png", Texture.class)).split(16, 16);
-		//BlockDefinition[] defs = getBlockDefs(tiles);
-		//Pixmap fades = assets.get("data/fades.png", Pixmap.class);
-		playerModel(assets);
 
 
 
-		world.setDelta(timeStep);
 
 
-		Json json = new Json();
-
-		//String s = json.toJson(ass);
-				
-
-		//funct.execute(world);
-				
-		//systemDef = new SystemDefinition();
-		systemDef = json.fromJson(SystemDefinition.class, file);
-		systemDef.setJson(json);
-		systemDef.setSystem(CameraSystem.class);
-		systemDef.setSystem(GraphicsSystem.class);
-				
-		systemDef.setSystem( PhysicsSystem.class );
-		systemDef.setSystem( MovementSystem.class);
-		systemDef.setSystem( AABBBodySystem.class);
-		systemDef.setSystem( BucketedSystem.class);
-		systemDef.setSystem( ActionSystem.class);
-		systemDef.setSystem( MovementSystem.class);
-		
-		
-		systemDef.setSystem(VoxelSystem.class);
-        systemDef.setSystem(EditVoxelSystem.class);
-
-
-        systemDef.setSystem( PositionRollingAverageSystem.class);
-		systemDef.setSystem( VelocityRollingAverageSystem.class);
-		systemDef.setSystem(VelocityPredictionSystem.class);
-		systemDef.setDrawSystem(VoxelRenderingSystem.class);
-		
-
-		systemDef.setDrawSystem(ModelRenderingSystem.class );
-		systemDef.setSystem(BrainSystem.class);
-		systemDef.setDrawSystem( DebugVectorSystem.class);
-		systemDef.setDrawSystem( DebugPositionSystem.class);
-
-		
-		systemDef.setSystem(CameraControllerSystem.class);
-		systemDef.setSystem( CameraInfluenceSystem.class);
-		systemDef.setSystem( PositionLimiterSystem.class);
-
-		//systemDef.preWrite();
-		systemDef.procesesSystems(world);
-        world.setSystem(new AssetsSystem(assets));
-
-        //world.getSystem(CameraSystem.class).camera = cam;
-		//json = new Json();
-		//String s = json.toJson(world.getSystems());
-		//file.writeString(json.prettyPrint(s), false);
-		//Gdx.app.log(TAG, json.prettyPrint(s));
-       // VoxelSystem vw = world.getSystem(VoxelSystem.class);
-      //  Gdx.app.log(TAG, "shader "+ vw);
-		
-	}
 	@Override
 	public void newGame(World world, Stage stage) {
 		//Gdx.app.log(TAG, "NEW GAME");
 		
 		VoxelSystem voxel = world.getSystem(VoxelSystem.class);
 		setDefaultMap(voxel.voxelWorld);
+        AssetsSystem as = world.getSystem(AssetsSystem.class);
 
-		
-		/*
-		 
-		 create : player
-		 player.add : Position
-		 player.position : x,y,z
-		 player.add: Physics
-		 player.add : AABBBody
-		 player.add : Brain
-		 player.brain.shortTarget : 
-		 player.add : Move
-		 player.move.jumpStringth : 1.5f
-		 player.add : ActionList
-		 player.actions.add : AStand
-		 player.add : ModelInfo
-		 player.modelInfo : !ANIMCONTROLLER
-		 player.add : Player
-		 
-		 parsers/commands
-		 
-		 
-		 subject.( e.add / comp name).( c.add / field )	:	field=value(float or int?) / add = name of C
-		 
-		 add : c.name
-		 c.add special case
-		 c.field : value
-		 c.v.set : 3 floats
-		 
-		Entity e = null;
-		switch (words[0]){
-			create:
-			entityname: 
-					e = world.getEntityByName(words[0]):
-					switch (words[1]){
-						add: name (params)
-						componentname:
-								Component c = get(name);
-								switch (words[2])
-									field: float or int
-									vector: 3 floats
-									set:various e,float,int
-									add:various e, float, int
-					}
-		}
-		
-		commands needed 
-		e.addComponent(name)
-		e.getComponent().setField(name, f); -> e.getComponent().setVector(name, xyz);
-		
-		e.getComponent().customCommand(String command, String params);
-		
-		lists needed for ui
-			allComponents for add
-			fieldsOnComponent for field set
-			custom commands on this Component
-		
-		--first list-- 
-			add E
-			entitynames
-			
-		--add E--
-			input name
-		
-		--entity--
-			add C
-			e.current component names
-			
-		--add C--
-			all possible components (mark e.current components )
-			
-		--clicked on add C name--
-			command
-			
-		--e current component name--
-			fields
-			custom commands
-			
-		--fields (depends on type)--
-			input value
-			command
-			
-		--c.custom commands
-			verb and field inputs
 
-		LIST
-		E/C/custom
-	
-	EntityCommand -> add C   , select C
-	ComponentCommand -> set field    , custom commands
-	CustomCommand -> create E
+        playerModel(as.assets);
 
-		 */
+
+        stage.addActor(dragger);
+
         VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
 
 
@@ -292,8 +106,7 @@ public class GeneralFactory extends GameFactory{
 
 		e.add(Player.class);
 		e.add(CameraInfluencer.class);
-		stage.addActor(dragger);
-		
+
 		
 		
 		e.add(PositionRollingAverage.class).size = 2;//rolling average of position
@@ -302,29 +115,12 @@ public class GeneralFactory extends GameFactory{
 		e.add(VelocityRollingAverage.class).size = 100;
 
 		e.add(DebugVector.class).add(e.get(VelocityRollingAverage.class).result, Color.CYAN);
-		//posAcc.add(DebugVector.class).add(posAcc.get(Position.class).pos, Color.CYAN);
-		//posAcc.add(DebugPosition.class);
-		
-		/*
-		Entity velocityAcc = world.createEntity();
-		velocityAcc.add(Position.class);
-		velocityAcc.add(VelocityPredictor.class).set(e, 1220);
-		velocityAcc.get(VelocityPredictor.class).y = false;
-		
-		velocityAcc.add(PositionRollingAverage.class);//.set(velocityAcc.get(VelocityPredictor.class).vel, 500);
-		//velocityAcc.add(DebugPosition.class);
-		//velocityAcc.add(DebugVector.class)
-		//.add(velocityAcc.get(VelocityPredictor.class).vel, Color.RED)
-		//.add(velocityAcc.get(Position.class).pos, Color.ORANGE);
-		*/
-		//world.addEntity(velocityAcc);
+
 		
 		Entity camC = world.createEntity();
 		camC.add(CameraController.class);
 		camC.add(Position.class);
-		
-		//camC.add(CameraInfluencer.class);
-		
+
 	
 		world.addEntity(camC);
 		
@@ -466,6 +262,7 @@ public class GeneralFactory extends GameFactory{
 	}
 
 	public static  BlockDefinition[] getBlockDefs(TextureRegion[][] tiles) {
+
         Gdx.app.log(TAG, "BLOCK DEFS");
 		BlockDefinition[] defs = new BlockDefinition[32];
 		defs[0] = new BlockDefinition(tiles, 0)
@@ -515,14 +312,18 @@ public class GeneralFactory extends GameFactory{
 	}
 
     @Override
-    protected void editor(World world, final Stage stage, final Skin skin, Sprite sprite) {
+    protected void editor(final World world, final Stage stage, final Skin skin, Sprite sprite, Sprite spritesel) {
         //color picker
-        Gdx.app.log(TAG, "editor");
+        VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
+
+        final ButtonGroup btnGr = new ButtonGroup();
+        //Gdx.app.log(TAG, "editor"+(sprite == null));
         for (int i = 0; i < 8; i++)
         {
-            final ColorPickerButton colorA = new ColorPickerButton(skin, sprite, i*2);
-            final ColorPickerButton colorB = new ColorPickerButton(skin, sprite, i*2+1);
-
+            final ColorPickerButton colorA = new ColorPickerButton(skin, sprite, spritesel, i*2);
+            final ColorPickerButton colorB = new ColorPickerButton(skin, sprite, spritesel, i*2+1);
+            btnGr.add(colorA);
+            btnGr.add(colorB);
             colorA.addListener(new ActorGestureListener(){
                 public boolean longPress(Actor actor,
                                          float x,
@@ -545,14 +346,101 @@ public class GeneralFactory extends GameFactory{
         }
 
         paletteTable.left();
+
+        Actor touchActor = new Actor();
+        touchActor.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        touchActor.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event,
+                                float x,
+                                float y){
+                //raycast
+                Camera camera = world.getSystem(CameraSystem.class).camera;
+                VoxelWorld vw = world.getSystem(VoxelSystem.class).voxelWorld;
+                event.getStageX();
+                src.set(x,y,0);
+                dst.set(x,y,1);
+                camera.unproject(src);
+                camera.unproject(dst);
+                Gdx.app.log(TAG, "trace from "+src+" to "+dst);
+
+                ray.trace(src, dst);
+                while (ray.hasNext){
+                    ray.next();
+                    if (vw.get(ray.x, ray.y, ray.z) != 0 || ray.x <= 0 || ray.y <= 0 || ray.z <= 0){
+                        tmp.set(ray.x, ray.y, ray.z);
+                        tmp.add(BlockDefinition.normals[6+ray.face]);
+                        vw.set(tmp, (byte)((ColorPickerButton)(btnGr.getChecked())).colorIndex);
+                        Gdx.app.log(TAG, "set"+tmp);
+
+                        break;
+                    }
+                    Gdx.app.log(TAG, "trace "+ray.x+","+ray.y+","+ray.z);
+                }
+                //if hits block or floor place block
+
+            }
+        });
+
+        stage.addActor(touchActor);
         stage.addActor(paletteTable);
+        VoxelWorld vw = world.getSystem(VoxelSystem.class).voxelWorld;
+
+        for (int x = 0; x < 15; x++)
+            for(int y = 0; y < 15; y++)
+                for (int z = 0; z < 15; z++)
+                    vw.set(x,y,z,(byte)1);
+
         //save/load btns
         //default chunk
         //new btn(selectable size)
+
+
+        Entity e = player;
+        world.addEntity(e);
+
+        Position pos = e.add(Position.class);
+        pos.pos.set(0f, 5, .5f);
+
+        e.add(Brain.class).getShortTarget().set(100000, 0, 0);
+
+        Move move = e.add(Move.class);
+        move.jumpStrength = 1.5f;
+        ActionList actionList = e.add(ActionComponent.class).action;
+
+
+
+        //ModelInfo mod = e.add(ModelInfo.class);
+        //AnimationController animController = new AnimationController(playerModel);
+        //mod.set(playerModel, animController );
+
+
+        e.add(Player.class);
+        e.add(CameraInfluencer.class);
+
+        e.add(PositionRollingAverage.class).size = 2;//rolling average of position
+        e.add(VelocityPredictor.class).scale = 240f;
+        e.get(VelocityPredictor.class).y = false;
+        e.add(VelocityRollingAverage.class).size = 100;
+
+        e.add(DebugVector.class).add(e.get(VelocityRollingAverage.class).result, Color.CYAN);
+
+
+        Entity camC = world.createEntity();
+        camC.add(CameraController.class);
+        camC.add(Position.class);
+
+        world.addEntity(camC);
+
+        Entity tester = world.createEntity();
+        tester.add(Position.class).pos.set(0,0,1);
+        tester.add(DebugPosition.class);
+        world.addEntity(tester);
+
     }
-
+    RayCaster ray = new RayCaster();
     Table paletteTable = new Table();
-
+    Vector3 src = new Vector3(), dst = new Vector3();
     public static ColorPicker colorPicker;
     Button okBtn, cancelBtn;
     public static ColorPickerButton currentSelectedColor;
@@ -571,17 +459,21 @@ public class GeneralFactory extends GameFactory{
                                     float x,
                                     float y){
 
-                    currentSelectedColor.color.set(colorPicker.getSelectedColor());
-                    stage.clear();
+                    currentSelectedColor.setColor(colorPicker.getSelectedColor());
+                    stage.getActors().removeValue(selectTable, true);
+
+
                     stage.addActor(paletteTable);
                 }
             });
-            cancelBtn.addListener(new ClickListener(){
+            cancelBtn.addListener(new ClickListener() {
                 public void clicked(InputEvent event,
-                     float x,
-                     float y) {
+                                    float x,
+                                    float y) {
 
-                    stage.clear();
+                    stage.getActors().removeValue(selectTable, true);
+
+
                     stage.addActor(paletteTable);
 
                 }

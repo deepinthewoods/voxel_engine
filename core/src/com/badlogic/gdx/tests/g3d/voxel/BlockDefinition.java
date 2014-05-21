@@ -11,8 +11,8 @@ public abstract class BlockDefinition {
 	public static final int TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3, FRONT = 4, BACK = 5;
 	private int tileIndex;
 	private float u, v, u2, v2;
-	public int dayLightLoss = 16;
-	public byte lightLoss = 16;
+	public int dayLightLoss = 15;
+	public byte lightLoss = 15;
 	public boolean isSolid = true;
 	public int aoValue;
 	public int lightValue;

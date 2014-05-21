@@ -1,17 +1,11 @@
 package com.artemis.systems;
 
-import java.util.BitSet;
-
 import com.artemis.Aspect;
 import com.artemis.Entity;
 import com.artemis.EntityObserver;
 import com.artemis.World;
 import com.artemis.utils.SafeArray;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.Json.Serializable;
-import com.badlogic.gdx.utils.ObjectIntMap;
+import com.badlogic.gdx.utils.*;
 
 /**
  * The most raw entity system. It should not typically be used, but you can create your own
@@ -30,9 +24,9 @@ public abstract class EntitySystem implements EntityObserver {
 
     protected transient Aspect aspect;
 
-    protected transient BitSet allSet;
-    protected transient BitSet exclusionSet;
-    protected transient BitSet oneSet;
+    protected transient Bits allSet;
+    protected transient Bits exclusionSet;
+    protected transient Bits oneSet;
 
     protected boolean passive;
 
@@ -126,7 +120,7 @@ public abstract class EntitySystem implements EntityObserver {
         boolean contains = e.getSystemBits().get(systemIndex);
         boolean interested = true; // possibly interested, let's try to prove it wrong.
 
-        BitSet componentBits = e.getComponentBits();
+        Bits componentBits = e.getComponentBits();
 
         // Check if the entity possesses ALL of the components defined in the aspect.
         if(!allSet.isEmpty()) {

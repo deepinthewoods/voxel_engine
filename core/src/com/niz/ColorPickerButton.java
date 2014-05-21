@@ -11,19 +11,19 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
  * Created by niz on 18/05/2014.
  */
 public class ColorPickerButton extends Button {
-    public Color color = new Color();
+
     public int colorIndex;
-    public ColorPickerButton(Skin skin, Sprite sprite, int i) {
+    public ColorPickerButton(Skin skin, Sprite sprite, Sprite spritesel, int i) {
 
         super(new ButtonStyle(
                 new SpriteDrawable(sprite)
                 , new SpriteDrawable(sprite)
-                , new SpriteDrawable(sprite)
+                , new SpriteDrawable(spritesel)
 
         ));
        // super();
         add(new Label("" + i, skin));
-        colorIndex = i;
-        this.setColor(Color.WHITE);
+        colorIndex = i+1;
+
     }
 }

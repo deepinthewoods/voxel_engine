@@ -6,10 +6,9 @@ import java.util.UUID;
 import com.artemis.managers.ComponentManager;
 import com.artemis.managers.EntityManager;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.component.ModelInfo;
-import com.niz.component.Position;
 
 /**
  * The entity class. Cannot be instantiated outside the framework, you must
@@ -27,8 +26,8 @@ public final class Entity implements Poolable {
      * acquire this ID if the previous entity was deleted.
      */
     public int id;
-    protected BitSet componentBits;
-    protected BitSet systemBits;
+    protected Bits componentBits;
+    protected Bits systemBits;
 
     protected World world;
     protected EntityManager entityManager;
@@ -39,8 +38,8 @@ public final class Entity implements Poolable {
         this.id = id;
         this.entityManager = world.getEntityManager();
         this.componentManager = world.getComponentManager();
-        systemBits = new BitSet();
-        componentBits = new BitSet();
+        systemBits = new Bits();
+        componentBits = new Bits();
         uuid = UUID.randomUUID();
     }
 
@@ -48,7 +47,7 @@ public final class Entity implements Poolable {
      * Returns a BitSet instance containing bits of the components the entity possesses.
      * @return
      */
-    public BitSet getComponentBits() {
+    public Bits getComponentBits() {
         return componentBits;
     }
 
@@ -56,7 +55,7 @@ public final class Entity implements Poolable {
      * Returns a BitSet instance containing bits of the components the entity possesses.
      * @return
      */
-    public BitSet getSystemBits() {
+    public Bits getSystemBits() {
         return systemBits;
     }
 

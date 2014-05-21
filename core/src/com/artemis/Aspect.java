@@ -3,6 +3,7 @@ package com.artemis;
 import java.util.BitSet;
 
 import com.artemis.managers.ComponentManager;
+import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.ObjectMap;
 
 /**
@@ -29,26 +30,26 @@ import com.badlogic.gdx.utils.ObjectMap;
  */
 public class Aspect {
 
-    private BitSet allSet;
-    private BitSet exclusionSet;
-    private BitSet oneSet;
+    private Bits allSet;
+    private Bits exclusionSet;
+    private Bits oneSet;
     public static ObjectMap<Class<? extends Component>, Class<? extends Component>> components = new ObjectMap<Class<? extends Component>, Class<? extends Component>>();
     
     private Aspect() {
-        this.allSet = new BitSet();
-        this.exclusionSet = new BitSet();
-        this.oneSet = new BitSet();
+        this.allSet = new Bits();
+        this.exclusionSet = new Bits();
+        this.oneSet = new Bits();
     }
 
-    public BitSet getAllSet() {
+    public Bits getAllSet() {
         return allSet;
     }
 
-    public BitSet getExclusionSet() {
+    public Bits getExclusionSet() {
         return exclusionSet;
     }
 
-    public BitSet getOneSet() {
+    public Bits getOneSet() {
         return oneSet;
     }
 

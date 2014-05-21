@@ -20,7 +20,6 @@ public class CameraInfluenceSystem extends EntitySystem{
 
 	public CameraInfluenceSystem() {
 		super(Aspect.getAspectForAll(CameraInfluencer.class));
-		// TODO Auto-generated constructor stub
 	}
 
 	Vector3 tmpV = new Vector3(), tot = new Vector3();
