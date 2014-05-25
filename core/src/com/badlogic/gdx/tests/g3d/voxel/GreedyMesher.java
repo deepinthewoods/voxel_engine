@@ -39,7 +39,7 @@ public class GreedyMesher implements Mesher {
      * might have larger voxels � and there�s a multiplication of the vertex coordinates
      * below to account for this.
      */
-    private static final int VOXEL_SIZE = 1;
+    protected static final int VOXEL_SIZE = 1;
  
     /*
      * These are the chunk dimensions � it may not be the case in every voxel engine that
@@ -59,8 +59,8 @@ public class GreedyMesher implements Mesher {
      * then attributes like sunlight, artificial light which face per face or even per vertex.
      */
     private final VoxelFace [][][][] voxels = new VoxelFace [CHUNK_WIDTH+1][CHUNK_HEIGHT+1][CHUNK_WIDTH+1][6];
-    
-	private MeshBatcher meshBatch;
+
+    protected MeshBatcher meshBatch;
  
     /*
      * These are just constants to keep track of which face we�re dealing with � their actual
@@ -139,9 +139,9 @@ public class GreedyMesher implements Mesher {
         public boolean transparent;
         public int type;
         public int side;
-		public float u , u2, v, v2;
+		public float u, v;
 		float[] c = new float[4];
-		private int[] vertex = new int[4];
+		protected int[] vertex = new int[4];
 		
         public boolean equals(final VoxelFace face) { 
         	boolean result = face.transparent == this.transparent && 

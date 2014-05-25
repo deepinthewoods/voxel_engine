@@ -8,7 +8,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -36,12 +36,9 @@ import com.niz.RayCaster;
 import com.niz.actions.AJump;
 import com.niz.actions.AStand;
 import com.niz.actions.ActionList;
-import com.niz.blocks.TopBottomBlock;
+import com.niz.blocks.EmptyBlockDefinition;
 import com.niz.component.*;
-import com.niz.component.systems.AssetsSystem;
-import com.niz.component.systems.CameraControllerSystem;
-import com.niz.component.systems.CameraSystem;
-import com.niz.component.systems.VoxelSystem;
+import com.niz.component.systems.*;
 
 public class GeneralFactory extends GameFactory{
 	public static final float VIEWPORT_SIZE = 20;
@@ -75,12 +72,12 @@ public class GeneralFactory extends GameFactory{
         AssetsSystem as = world.getSystem(AssetsSystem.class);
 
 
-        playerModel(as.assets);
+        playerModel(as);
 
 
         stage.addActor(dragger);
 
-        VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
+        VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
 
 
         Entity e = player;
@@ -115,7 +112,7 @@ public class GeneralFactory extends GameFactory{
 
 		e.add(DebugVector.class).add(e.get(VelocityRollingAverage.class).result, Color.CYAN);
 
-		
+
 		Entity camC = world.createEntity();
 		camC.add(CameraController.class);
 		camC.add(Position.class);
@@ -148,7 +145,7 @@ public class GeneralFactory extends GameFactory{
 	
 	
 	ModelInstance playerModel;
-	private void playerModel(AssetManager assets){
+	private void playerModel(AssetsSystem assets){
 	String[][] skin = {
 				
 				{
@@ -173,7 +170,7 @@ public class GeneralFactory extends GameFactory{
 		
 		for (int i = 0,  prog = 0; i < skin.length; i++)
 			prog = addTo(prog, all, skin[i]);
-		playerModel = new ModelInstance(assets.get("data/humanmodel.g3db", Model.class)
+		playerModel = new ModelInstance(assets.getModel("humanmodel")
 				, all
 				);
 		
@@ -181,7 +178,7 @@ public class GeneralFactory extends GameFactory{
 		AnimationController playerAnimController = new AnimationController(playerModel);
 		
 		
-		ModelInstance zombieModel = new ModelInstance(assets.get("data/humanmodel.g3db", Model.class)
+		ModelInstance zombieModel = new ModelInstance(assets.getModel("humanmodel")
 				, all
 				);
 		colors = new Color[]{
@@ -260,11 +257,14 @@ public class GeneralFactory extends GameFactory{
 
 	}
 
-	public static  BlockDefinition[] getBlockDefs(TextureRegion[][] tiles) {
+	public static  BlockDefinition[] getBlockDefs(World world) {
+        AssetsSystem assets = world.getSystem(AssetsSystem.class);
+        TextureAtlas tiles = assets.getTextureAtlas("tiles");
+
 
         Gdx.app.log(TAG, "BLOCK DEFS");
-		BlockDefinition[] defs = new BlockDefinition[32];
-		defs[0] = new BlockDefinition(tiles, 0)
+		BlockDefinition[] defs = new BlockDefinition[256];
+		defs[0] = new BlockDefinition(tiles.findRegion("air"), 0)
 		{
 
 			@Override
@@ -281,7 +281,7 @@ public class GeneralFactory extends GameFactory{
 			//BlockDefinition.add(i, defs[i]);
 		//}
 		
-		defs[1] = new BlockDefinition(tiles, 1){
+		defs[1] = new BlockDefinition(tiles.findRegion("dirt"), 1){
 
 			@Override
 			public void onUpdate(int x, int y, int z, VoxelWorld world) {
@@ -289,9 +289,15 @@ public class GeneralFactory extends GameFactory{
 			
 		};
 		
-		defs[10] = new TopBottomBlock(tiles, 8, 1, 10);
+		//defs[10] = new TopBottomBlock(tiles, 8, 1, 10);
 		
-		
+
+        for (int i = 0; i < 256; i++){
+            if (defs[i] == null){
+                defs[i] = new EmptyBlockDefinition(tiles.findRegion("empty"), i);
+            }
+        }
+
 		return defs;
 	}
 
@@ -313,8 +319,9 @@ public class GeneralFactory extends GameFactory{
     @Override
     protected void editor(final World world, final Stage stage, final Skin skin, Sprite sprite, Sprite spritesel) {
         //color picker
-        VoxelChunk.defs = GeneralFactory.getBlockDefs(AssetDefinition.getTexture("tiles").split(16, 16));
+        VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
 
+        final Color[] blockColors = world.getSystem(EditVoxelSystem.class).blockColors;
         final ButtonGroup btnGr = new ButtonGroup();
         //Gdx.app.log(TAG, "editor"+(sprite == null));
         for (int i = 0; i < 8; i++)
@@ -327,7 +334,7 @@ public class GeneralFactory extends GameFactory{
                 public boolean longPress(Actor actor,
                                          float x,
                                          float y){
-                    openColorSelectionScreen(colorA, stage, skin);
+                    openColorSelectionScreen(colorA, stage, skin, blockColors);
                     return true;
                 }
             });
@@ -335,19 +342,20 @@ public class GeneralFactory extends GameFactory{
                 public boolean longPress(Actor actor,
                                          float x,
                                          float y){
-                    openColorSelectionScreen(colorB, stage, skin);
+                    openColorSelectionScreen(colorB, stage, skin, blockColors);
                     return true;
                 }
             });
-            paletteTable.add(colorA);
-            paletteTable.add(colorB);
+            paletteTable.add(colorA).left();
+            paletteTable.add(colorB).left();
             paletteTable.row();
         }
 
-        paletteTable.left();
+        //paletteTable.top();
 
         Actor touchActor = new Actor();
         touchActor.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
         touchActor.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event,
@@ -355,20 +363,20 @@ public class GeneralFactory extends GameFactory{
                                 float y){
                 //raycast
                 Camera camera = world.getSystem(CameraSystem.class).camera;
-                VoxelWorld vw = world.getSystem(VoxelSystem.class).voxelWorld;
-                event.getStageX();
-                src.set(x,y,0);
-                dst.set(x,y,1);
+                VoxelWorld vw = world.getSystemOrSuperClass(VoxelSystem.class).voxelWorld;
+                float sx = event.getStageX(), sy = event.getStageY();
+                src.set(sx,sy,0);
+                dst.set(sx,sy,1);
                 camera.unproject(src);
                 camera.unproject(dst);
-                Gdx.app.log(TAG, "trace from "+src+" to "+dst);
+                Gdx.app.log(TAG, "trace " +sx+","+sy+ " from "+src+" to "+dst);
 
                 ray.trace(src, dst);
                 while (ray.hasNext){
                     ray.next();
-                    if (vw.get(ray.x, ray.y, ray.z) != 0 || ray.x <= 0 || ray.y <= 0 || ray.z <= 0){
+                    if (vw.get(ray.x, ray.y, ray.z) != 0 ){
                         tmp.set(ray.x, ray.y, ray.z);
-                        tmp.add(BlockDefinition.normals[6+ray.face]);
+                        tmp.add(BlockDefinition.normals[ray.face]);
                         vw.set(tmp, (byte)((ColorPickerButton)(btnGr.getChecked())).colorIndex);
                         Gdx.app.log(TAG, "set"+tmp);
 
@@ -382,11 +390,13 @@ public class GeneralFactory extends GameFactory{
         });
 
         stage.addActor(touchActor);
+        paletteTable.setFillParent(true);
+        paletteTable.left();
         stage.addActor(paletteTable);
-        VoxelWorld vw = world.getSystem(VoxelSystem.class).voxelWorld;
+        VoxelWorld vw = world.getSystemOrSuperClass(VoxelSystem.class).voxelWorld;
 
         for (int x = 0; x < 15; x++)
-            for(int y = 0; y < 15; y++)
+            for(int y = 0; y < 2; y++)
                 for (int z = 0; z < 15; z++)
                     vw.set(x,y,z,(byte)1);
 
@@ -426,15 +436,12 @@ public class GeneralFactory extends GameFactory{
 
 
         Entity camC = world.createEntity();
-        camC.add(CameraController.class);
-        camC.add(Position.class);
+       // camC.add(CameraController.class);
+        //camC.add(Position.class);
 
         world.addEntity(camC);
 
-        Entity tester = world.createEntity();
-        tester.add(Position.class).pos.set(0,0,1);
-        tester.add(DebugPosition.class);
-        world.addEntity(tester);
+
 
     }
     RayCaster ray = new RayCaster();
@@ -445,7 +452,7 @@ public class GeneralFactory extends GameFactory{
     public static ColorPickerButton currentSelectedColor;
     Table selectTable = new Table();
 
-    private void openColorSelectionScreen(ColorPickerButton actor, final Stage stage, Skin skin) {
+    private void openColorSelectionScreen(ColorPickerButton actor, final Stage stage, Skin skin, final Color[] blockColors) {
         Gdx.app.log(TAG, "sdfjksdfjksdfjk");
         if (colorPicker == null){
             colorPicker = new ColorPicker(skin);
@@ -458,7 +465,7 @@ public class GeneralFactory extends GameFactory{
                                     float x,
                                     float y){
 
-                    currentSelectedColor.setColor(colorPicker.getSelectedColor());
+                    currentSelectedColor.setColor(colorPicker.getSelectedColor(), blockColors);
                     stage.getActors().removeValue(selectTable, true);
 
 

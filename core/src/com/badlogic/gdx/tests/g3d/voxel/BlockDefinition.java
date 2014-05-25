@@ -9,8 +9,8 @@ public abstract class BlockDefinition {
 	public static float tile_size_px = 16;
 	//protected static int tile_side_length = 8;
 	public static final int TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3, FRONT = 4, BACK = 5;
-	private int tileIndex;
-	private float u, v, u2, v2;
+	public int tileIndex;
+	private float u, v;
 	public int dayLightLoss = 15;
 	public byte lightLoss = 15;
 	public boolean isSolid = true;
@@ -21,16 +21,16 @@ public abstract class BlockDefinition {
 	public BlockDefinition(){
 		
 	}
-	public BlockDefinition(TextureRegion[][] tiles, int tIndex){
+	public BlockDefinition(TextureRegion region, int tIndex){
 		tileIndex = tIndex;
-		int tileIndexX = tileIndex % tiles[0].length;
-		int tileIndexY = tileIndex / tiles[0].length;
-		TextureRegion region =  tiles[tileIndexY][tileIndexX];
+		//int tileIndexX = tileIndex % tiles[0].length;
+		//int tileIndexY = tileIndex / tiles[0].length;
+		//TextureRegion region =  tiles[tileIndexY][tileIndexX];
 		//Gdx.app.log("index:"+tileIndex+"block def", "tx"+tileIndexX+"  ty"+tileIndexY);
 		u = region.getU();
 		v = region.getV();
-		u2 = region.getU2();
-		v2 = region.getV2();
+		//u2 = region.getU2();
+		//v2 = region.getV2();
 		
 	}
 	
@@ -49,8 +49,8 @@ public abstract class BlockDefinition {
 		//Gdx.app.log("Block def", "UVs"+u+v+u2+v2);
 		uvs[0] = u;
 		uvs[1] = v;
-		uvs[2] = u2;
-		uvs[3] = v2;
+		//uvs[2] = u2;
+		//uvs[3] = v2;
 		return uvs;
 	}
 	/*public static BlockDefinition get(byte block) {
@@ -302,9 +302,9 @@ public abstract class BlockDefinition {
 	private void getUVs(VoxelFace face) {
 		getUVs(face.side);
 		face.u = u;
-		face.u2 = u2;
+		//face.u2 = u2;
 		face.v = v;
-		face.v2 = v2;
+		//face.v2 = v2;
 	}
 	
 	

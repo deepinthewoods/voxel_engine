@@ -59,9 +59,30 @@ wood
   orig: 16, 16
   offset: 0, 0
   index: -1
-button
+air
   rotate: false
   xy: 1, 1
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+buttonselected
+  rotate: false
+  xy: 1, 1
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+empty
+  rotate: false
+  xy: 1, 1
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+button
+  rotate: false
+  xy: 145, 19
   size: 8, 8
   orig: 8, 8
   offset: 0, 0

@@ -9,6 +9,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
@@ -75,7 +76,8 @@ public class EngineScreen implements Screen{
 		
 		skin = new Skin(Gdx.files.internal("data/skin/Holo-dark-mdpi.json"));
 		stage = new Stage();
-		spriteBatch = stage.getSpriteBatch();
+		spriteBatch = new SpriteBatch();
+        //stage.getSpriteBatch().getProjectionMatrix().setToOrtho2D(0,0,w,h);
 		//spriteBatch = new SpriteBatch();
 		world = new World();
 		world.getInputMux().addProcessor(stage);
@@ -118,12 +120,12 @@ public class EngineScreen implements Screen{
 		Gdx.gl.glClearColor(0.1f, 0.1f, .5f, 1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
-		stage.draw();
+
 		//Camera camera = world.getSystem(CameraSystem.class).camera;
 
 		world.draw(delta);
 
-		
+        stage.draw();
 		spriteBatch.begin();
 		Array<Component> array = new Array<Component>();
 		player.getComponents(array );

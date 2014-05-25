@@ -40,6 +40,10 @@ public class VoxelSystem extends EntitySystem {
 
 	}
 
+    public VoxelSystem(Aspect aspect){
+        super(aspect);
+    }
+
     transient Vector3 tmp = new Vector3();
 	
 	

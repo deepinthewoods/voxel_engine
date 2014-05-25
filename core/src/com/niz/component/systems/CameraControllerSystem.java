@@ -25,7 +25,7 @@ public class CameraControllerSystem extends EntitySystem implements Observer{
 	private transient Camera camera;
 	private ComponentMapper<Position> positionM;
 	public transient Vector3 prevPosition;
-	private ComponentMapper<AABBBody> bodyM;
+	//private ComponentMapper<AABBBody> bodyM;
 	private transient Vector3 newPos;
 	
 	
@@ -45,7 +45,7 @@ public class CameraControllerSystem extends EntitySystem implements Observer{
 			newPos = null;
 		}
 		//if (pos.dst2(prevPosition) > 10){
-		AABBBody body = bodyM.get(e);
+		//AABBBody body = bodyM.get(e);
 		//if (body.onGround){
 		camera.position.y -= prevPosition.y - pos.y;
 		prevPosition.y = pos.y;
@@ -63,7 +63,7 @@ public class CameraControllerSystem extends EntitySystem implements Observer{
 	@Override
 	public void initialize(){
 		positionM = world.getMapper(Position.class);
-		bodyM = world.getMapper(AABBBody.class);
+		//bodyM = world.getMapper(AABBBody.class);
 		camera = world.getSystem(CameraSystem.class).camera;
 		world.getSystem(CameraInfluenceSystem.class).notifyPositionChanged.add(this);
 		//Entity e = 

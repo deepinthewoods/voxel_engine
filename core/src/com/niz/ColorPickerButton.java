@@ -1,5 +1,6 @@
 package com.niz;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -23,6 +24,12 @@ public class ColorPickerButton extends Button {
        // super();
         add(new Label("" + i, skin));
         colorIndex = i+1;
+
+    }
+
+    public void setColor(Color selectedColor, Color[] blockColors) {
+        setColor(selectedColor);
+        blockColors[colorIndex].set(selectedColor);
 
     }
 }

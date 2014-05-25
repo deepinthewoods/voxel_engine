@@ -24,7 +24,7 @@ import com.niz.EngineScreen;
 import com.niz.component.systems.*;
 
 public abstract class GameFactory {
-    private static final String path = "data/";
+    public static final String path = "data/";
     private AssetDefinition ass;
     private SystemDefinition systemDef;
     protected Entity player;
@@ -38,7 +38,7 @@ public abstract class GameFactory {
 
         json.addClassTag("assets", AssetDefinition.class);
         ass = json.fromJson(AssetDefinition.class, file);//new AssetDefinition();//
-        assets.load("data/tiles.atlas", TextureAtlas.class);
+        //assets.load("data/tiles.pack", TextureAtlas.class);
 
         ass.process(world, assets);
 
@@ -77,7 +77,7 @@ public abstract class GameFactory {
 
 
         systemDef.setSystem(VoxelSystem.class);
-        //systemDef.setSystem(EditVoxelSystem.class);
+        systemDef.setSystem(EditVoxelSystem.class);
 
 
         systemDef.setSystem( PositionRollingAverageSystem.class);
@@ -157,8 +157,9 @@ public void init(float timeStep, World world, AssetManager assets, FileHandle fi
                 newGame.removeListener(this);
             }
         });
-        final Sprite btnSprite = assets.get("data/tiles.atlas", TextureAtlas.class).createSprite("button");
-        final Sprite btnSpriteSelected = assets.get("data/tiles.atlas", TextureAtlas.class).createSprite("buttonselected");
+        TextureAtlas atlas = assets.get(path+"tiles.pack", TextureAtlas.class);
+        final Sprite btnSprite = atlas.createSprite("button");
+        final Sprite btnSpriteSelected = atlas.createSprite("buttonselected");
 
         //if (btnSprite == null) throw new GdxRuntimeException("nulll");
 

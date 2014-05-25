@@ -3,10 +3,12 @@ package com.badlogic.gdx.tests.g3d.voxel;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 /**
@@ -14,9 +16,16 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
  */
 public class VoxelShader implements Shader {
     private static final String TAG ="voxel shader" ;
+    private final Texture voxelTexture;
     private ShaderProgram program;
     private Camera camera;
     private RenderContext context;
+    private Vector2 tileSize = new Vector2();
+    public VoxelShader(Texture voxelTexture) {
+        this.voxelTexture = voxelTexture;
+        tileSize.set(1f/voxelTexture.getWidth(), 1f/voxelTexture.getHeight());//1 pixel
+        tileSize.scl(16);
+    }
 
     @Override
     public void init() {
@@ -42,8 +51,10 @@ public class VoxelShader implements Shader {
     public void begin(Camera camera, RenderContext context) {
         this.camera = camera;
         this.context = context;
+        voxelTexture.bind();
         program.begin();
         program.setUniformMatrix("u_projViewTrans", camera.combined);
+        program.setUniformf("u_tileSizeXY", tileSize);
         context.setDepthTest(GL20.GL_LEQUAL);
         context.setDepthMask(true);
         context.setCullFace(GL20.GL_BACK);

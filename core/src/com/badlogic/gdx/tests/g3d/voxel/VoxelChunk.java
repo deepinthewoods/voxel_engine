@@ -515,6 +515,9 @@ public class VoxelChunk {
 
 					for (int faceID = 0; faceID < 6; faceID++){
 						VoxelFace face = faces[x][y][z][faceID];
+                        if (faceID < 0){
+
+                        }
 						face.set(def, faceID, b);
 					}
 					//light totals for verts

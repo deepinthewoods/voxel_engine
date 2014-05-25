@@ -40,6 +40,7 @@ public class VoxelRenderingSystem extends EntitySystem {
 
 
     private VoxelWorld voxelWorld;
+    private Texture voxelTexture;
 
 
     public VoxelRenderingSystem() {
@@ -57,8 +58,6 @@ public class VoxelRenderingSystem extends EntitySystem {
        // Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         Shader shader = voxelWorld.getShader();
-        Texture voxelTexture = world.getSystem(AssetsSystem.class).assets.get("data/tiles.png", Texture.class);
-        voxelTexture.bind();
         modelBatch.begin(camera);
 
         modelBatch.render(voxelWorld);
@@ -75,20 +74,20 @@ public class VoxelRenderingSystem extends EntitySystem {
         GraphicsSystem grap = world.getSystem(GraphicsSystem.class);
         modelBatch = world.getSystem(GraphicsSystem.class).modelBatch;
         camera = world.getSystem(CameraSystem.class).camera;
-        VoxelSystem voxS = world.getSystem(VoxelSystem.class);
+        VoxelSystem voxS = world.getSystemOrSuperClass(VoxelSystem.class);
+        voxelTexture = world.getSystem(AssetsSystem.class).getTexture("tiles");
 
         voxelWorld = voxS.voxelWorld;
 
 
 
-        Texture voxelTexture = world.getSystem(AssetsSystem.class).assets.get("data/tiles.png", Texture.class);
         Material material = new Material( new ColorAttribute(ColorAttribute.Diffuse,  1f, 1f, 1f, 1)
                 , new TextureAttribute(TextureAttribute.Diffuse, voxelTexture)
         );
         voxelWorld.setMaterial(material);
 
 
-        Shader shader = new VoxelShader();
+        Shader shader = new VoxelShader(voxelTexture);
         shader.init();
         voxelWorld.setShader(shader);
 

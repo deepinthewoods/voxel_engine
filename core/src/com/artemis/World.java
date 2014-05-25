@@ -550,4 +550,21 @@ public class World implements Disposable {
         return inputMux;
     }
 
+    /**
+     * Retrieve a system for specified system type.
+     *
+     * @param type type of system.
+     * @return instance of the system in this world.
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends EntitySystem> T getSystemOrSuperClass(Class<T> type) {
+        for (int i = 0; i < systems.size; i++) {
+            EntitySystem system = systems.get(i);
+            if (type.isAssignableFrom(system.getClass())) {
+                return (T) system;
+            }
+        }
+        return null;
+    }
+
 }
