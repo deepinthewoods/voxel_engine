@@ -21,25 +21,27 @@ public class AssetDefinition{
 	public static IntMap<Pixmap> pixmapMap = new IntMap<Pixmap>();
     public static IntMap<TextureAtlas> atlasMap = new IntMap<TextureAtlas>();
 	
-	public void process(World world, AssetManager assets) {
+	public void process(World world, AssetManager assets, String path) {
 		
 		for (String s : textures){
-			assets.load("data/"+s+".png", Texture.class);
+			assets.load(path+s+".png", Texture.class);
 		}
 		for (String s : pixmaps){
-			assets.load("data/"+s+".png", Pixmap.class);
+			assets.load(path+s+".png", Pixmap.class);
 		}
 		for (String s : models){
-			assets.load("data/"+s+".g3db", Model.class);
+			assets.load(path+s+".g3db", Model.class);
 		}
         for (String s : atlasses){
-            assets.load("data/"+s+".pack", TextureAtlas.class);
+            assets.load(path+s+".pack", TextureAtlas.class);
         }
 		
 		//assets.load("data/tiles.png", Texture.class);
 		//assets.load("data/fades.png", Pixmap.class);
 		//assets.load("data/humanmodel.g3db", Model.class);
 	}
+    /*
+    @Deprecated
 	public void postProcess(AssetManager assets){
 		for (String s : textures){
 			Texture t = assets.get("data/"+s+".png", Texture.class);
@@ -91,5 +93,5 @@ public class AssetDefinition{
         if (r == null) {throw new GdxRuntimeException("atlas not found"+string);}
         return r;
     }
-	
+	*/
 }

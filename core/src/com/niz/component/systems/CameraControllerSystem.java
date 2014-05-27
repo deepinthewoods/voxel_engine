@@ -52,7 +52,10 @@ public class CameraControllerSystem extends EntitySystem implements Observer{
 		
 		camera.position.x -= prevPosition.x - pos.x;
 		prevPosition.x = pos.x;
-		
+
+        camera.position.z -= prevPosition.z - pos.z;
+        prevPosition.z = pos.z;
+
 		camera.update();
 		//Gdx.app.log(TAG, "cam move"+camera.position);
 		
@@ -66,6 +69,7 @@ public class CameraControllerSystem extends EntitySystem implements Observer{
 		//bodyM = world.getMapper(AABBBody.class);
 		camera = world.getSystem(CameraSystem.class).camera;
 		world.getSystem(CameraInfluenceSystem.class).notifyPositionChanged.add(this);
+
 		//Entity e = 
 		//prevPosition.set(positionM.get(e));
 	}

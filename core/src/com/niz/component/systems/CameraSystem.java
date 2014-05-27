@@ -20,7 +20,9 @@ public transient Camera camera;
 
 @Override
 protected void processEntities(Array<Entity> entities) {
-	camera.update();
+
+    camera.update();
+    //Gdx.app.log(TAG, "camera"+camera.position);
 }
 @Override
 public void initialize(){
@@ -28,8 +30,7 @@ public void initialize(){
 	//camera = new OrthographicCamera(20f,15f);
 	camera.near = 0.5f;
 	camera.far = 1000f;
-	camera.position.set(0,16,16);
-	camera.rotate(50, -1, 0, 0);
+
 	camera.update();
 }
 }

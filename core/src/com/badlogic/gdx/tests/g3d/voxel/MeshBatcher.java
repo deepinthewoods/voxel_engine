@@ -4,6 +4,7 @@ package com.badlogic.gdx.tests.g3d.voxel;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -16,7 +17,12 @@ public class MeshBatcher{
 	//StaticIntervalTreeInt<IntervalInt> smallChunksTree;
 	private static final String TAG = "mesh batcher";
 	public static final float[] highlightColors = {Color.RED.toFloatBits(), Color.GREEN.toFloatBits(), Color.BLUE.toFloatBits(), Color.CYAN.toFloatBits()};
-	public MeshBatcher(int vertexSize, int indexSize, int levels) {
+    public static float whiteTextureU, whiteTextureV;
+
+    public MeshBatcher(int vertexSize, int indexSize, int levels, TextureRegion white) {
+        whiteTextureU = white.getU();
+        whiteTextureV = white.getV();
+
 		cachedVerts = new float[vertexSize];
 		cachedIndexes = new short[indexSize];
 		levelMaxSize = new int[levels];
@@ -249,8 +255,9 @@ public class MeshBatcher{
             Vector3 v = vertices[i];
             if (colorArray[i] > 15) throw new GdxRuntimeException("light error "+colorArray[i]);
             float c;// = GreedyMesher.lightValues[colorArray[i]];//highlightColors[i];//
-            float delta = colorArray[i]/16f;
-            tmpC.set( blockColors[voxel.def.tileIndex]).lerp(Color.BLACK, delta);
+            float delta = colorArray[i]/15f;
+            if (delta > 1f) delta = 1f;
+            tmpC.set(Color.BLACK).lerp(blockColors[voxel.def.tileIndex], delta);
             c = tmpC.toFloatBits();
             //Gdx.app.log(TAG, "verts"+width+"  "+height);
             cachedVerts[cacheProgress++] = v.x;
@@ -300,8 +307,8 @@ public class MeshBatcher{
             }
 
 
-            cachedVerts[cacheProgress++] = voxel.u;
-            cachedVerts[cacheProgress++] = voxel.v;
+            cachedVerts[cacheProgress++] = whiteTextureU;
+            cachedVerts[cacheProgress++] = whiteTextureV;
 
         }
 

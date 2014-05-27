@@ -1,4 +1,4 @@
-package com.niz;
+package com.niz.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;

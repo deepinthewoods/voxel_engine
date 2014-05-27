@@ -3,63 +3,70 @@ tiles.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-dirt
+air
   rotate: false
   xy: 1, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-grassside
+dirt
   rotate: false
   xy: 19, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-grasstop
+grassside
   rotate: false
   xy: 37, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-leaf
+grasstop
   rotate: false
   xy: 55, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-sand
+leaf
   rotate: false
   xy: 73, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-sandstone
+sand
   rotate: false
   xy: 91, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-stone
+sandstone
   rotate: false
   xy: 109, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-wood
+stone
   rotate: false
   xy: 127, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-air
+wood
+  rotate: false
+  xy: 145, 11
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+button
   rotate: false
   xy: 1, 1
   size: 8, 8
@@ -68,21 +75,14 @@ air
   index: -1
 buttonselected
   rotate: false
-  xy: 1, 1
+  xy: 163, 19
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
 empty
   rotate: false
-  xy: 1, 1
-  size: 8, 8
-  orig: 8, 8
-  offset: 0, 0
-  index: -1
-button
-  rotate: false
-  xy: 145, 19
+  xy: 11, 1
   size: 8, 8
   orig: 8, 8
   offset: 0, 0

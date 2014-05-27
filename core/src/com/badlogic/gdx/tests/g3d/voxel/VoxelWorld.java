@@ -253,21 +253,11 @@ public class VoxelWorld implements RenderableProvider {
 
     //make mesh closest to position
     public void makeMesh(Vector3 position) {
-        float dist = 1000000000;
-        VoxelChunk closest = null;
-        for(int i = 0; i < chunks.length; i++) {
-            VoxelChunk chunk = chunks[i];
-            //Mesh mesh = meshes[i];
-            if (dirty[i] && chunk.offset.dst2(position) < dist) {
-                dist = chunk.offset.dst2(position);
-                closest = chunk;
 
-            }
-        }
+        VoxelChunk closest = getClosestDirtyChunk(position);
+
         if (closest != null){
             mesher.calculateVertices(closest, this, batch);
-            //numVertices[i] = numVerts / 4 * 6 ;
-            //mesh.setVertices(vertices, 0, numVerts * VoxelChunk.VERTEX_SIZE);
             dirty[closest.index] = false;
         }
 

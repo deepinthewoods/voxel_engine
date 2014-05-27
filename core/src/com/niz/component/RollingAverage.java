@@ -15,7 +15,7 @@ public abstract class RollingAverage implements Component {
 
 	public int size = 1;
 
-	public Vector3 result = new Vector3();;
+	public Vector3 result = new Vector3();
 	
 	
 	@Override

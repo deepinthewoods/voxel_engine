@@ -1,4 +1,4 @@
-package com.niz;
+package com.niz.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -22,8 +22,8 @@ public class ColorPickerButton extends Button {
 
         ));
        // super();
-        add(new Label("" + i, skin));
         colorIndex = i+1;
+        add(new Label("" + colorIndex, skin));
 
     }
 

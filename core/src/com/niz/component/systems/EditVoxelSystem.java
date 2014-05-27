@@ -12,18 +12,18 @@ import com.niz.component.Position;
 public class EditVoxelSystem extends VoxelSystem {
 
 
-    public final Color[] blockColors;
+    public final Color[] BLOCK_COLORS;
 
     public EditVoxelSystem() {
 		super(Aspect.getAspectForAll(Player.class, Position.class));
-        blockColors = new Color[256];
+        BLOCK_COLORS = new Color[256];
         for (int i = 0; i < 256; i++){
-            blockColors[i] = new Color();
+            BLOCK_COLORS[i] = new Color(Color.WHITE);
         }
-		int x = 12, y = 2, z = 2;
-		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
+		int x = 1, y = 1, z = 1;
+		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13, white);
 		voxelWorld = new VoxelWorld(x, y, z,
-				new EditGreedyMesher(batch, blockColors)
+				new EditGreedyMesher(batch, BLOCK_COLORS)
 				//new SimpleMesher(VoxelWorld.CHUNK_SIZE_X, VoxelWorld.CHUNK_SIZE_Y, VoxelWorld.CHUNK_SIZE_Z)
 				, batch
                 , 16, 16

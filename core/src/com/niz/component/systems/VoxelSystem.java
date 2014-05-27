@@ -6,6 +6,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher;
@@ -24,12 +25,12 @@ public class VoxelSystem extends EntitySystem {
     private ComponentMapper<Position> posM;
     //private BlockDefinition[] defs;
 	//private TextureRegion[] tiles;
-
+    public static TextureRegion white;
 	public VoxelSystem() {
 		super(Aspect.getAspectForAll(Player.class, Position.class));
 
 		int x = 12, y = 2, z = 2;
-		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
+		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13, white);
 		voxelWorld = new VoxelWorld(x, y, z,
 				new GreedyMesher(batch)
 				//new SimpleMesher(VoxelWorld.CHUNK_SIZE_X, VoxelWorld.CHUNK_SIZE_Y, VoxelWorld.CHUNK_SIZE_Z)

@@ -5,7 +5,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher.VoxelFace;
 
 public abstract class BlockDefinition {
-	protected float[] uvs = new float[4];
+    public static Vector3[] reflectedNormals = new Vector3[6];
+    protected float[] uvs = new float[4];
 	public static float tile_size_px = 16;
 	//protected static int tile_side_length = 8;
 	public static final int TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3, FRONT = 4, BACK = 5;
@@ -205,6 +206,7 @@ public abstract class BlockDefinition {
 		normals[BlockDefinition.BACK] = new Vector3(0,0,-1);
 		
 		for (int i = 0; i < 6; i++){
+            reflectedNormals[i] = new Vector3(normals[i]);
 			normals[i].scl(.00001f);
 			normals[i+6] = new Vector3(normals[i]).scl(-1);
 		}

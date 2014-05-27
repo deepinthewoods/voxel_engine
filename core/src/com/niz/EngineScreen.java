@@ -58,14 +58,14 @@ public class EngineScreen implements Screen{
 	public static float accumulator, timeStep = 1f/128f, minTimeStep = 1f/15f;
 	protected GameFactory factory;
 	protected AssetManager assets;
-	private boolean assetsLoaded;
+	//private boolean assetsLoaded;
 	//private ModelBatch modelBatch;
 
 	private Skin skin;
 	private Stage stage;
 	private BitmapFont font;
 	//private Environment env;
-	public static Entity player;
+	//public static Entity player;
 	public static int tick;
 	public NizMain game;
 	
@@ -82,12 +82,12 @@ public class EngineScreen implements Screen{
 		world = new World();
 		world.getInputMux().addProcessor(stage);
 		assets = new AssetManager();
-		assetsLoaded = false;
+		//assetsLoaded = false;
 		
 		factory = new GeneralFactory();
 
-		factory.assets(world, assets);
-		
+		//factory.assets(world, assets);
+        factory.initMenu(world, skin, stage, assets, 1f);
 
 		//worldTest.create(camera);
 		font = new BitmapFont();
@@ -97,10 +97,10 @@ public class EngineScreen implements Screen{
 
 	@Override
 	public void render(float delta) {		
-		if(!assetsLoaded && assets.update()) {
+		if(!assets.update()) {
 			//factory.init(timeStep, world, assets);
-            factory.initMenu(world, skin, stage, assets, 1f);
-			assetsLoaded = true;
+
+			return;
 		}
 		if (assets.getProgress() < 1f){
 			//Gdx.app.log(TAG, "progress"+assets.getProgress());
@@ -126,8 +126,9 @@ public class EngineScreen implements Screen{
 		world.draw(delta);
 
         stage.draw();
+
 		spriteBatch.begin();
-		Array<Component> array = new Array<Component>();
+		/*Array<Component> array = new Array<Component>();
 		player.getComponents(array );
 		for (int i = 0; i < array.size; i++)
 		font.draw(spriteBatch, array.get(i).getClass().getSimpleName()
@@ -153,7 +154,7 @@ public class EngineScreen implements Screen{
 			.action.actions.getRoot().getNext().getClass().getSimpleName()
 			//player.get(AABBBody.class).onWall
 			, 280, 20);
-	
+	*/
 		spriteBatch.end();
 
 	}

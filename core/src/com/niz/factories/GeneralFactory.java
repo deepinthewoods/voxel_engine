@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
@@ -29,8 +28,8 @@ import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.ColorPicker;
-import com.niz.ColorPickerButton;
+import com.niz.ui.ColorPicker;
+import com.niz.ui.ColorPickerButton;
 import com.niz.EngineScreen;
 import com.niz.RayCaster;
 import com.niz.actions.AJump;
@@ -63,7 +62,7 @@ public class GeneralFactory extends GameFactory{
 
 
 
-	@Override
+
 	public void newGame(World world, Stage stage) {
 		//Gdx.app.log(TAG, "NEW GAME");
 		
@@ -80,7 +79,7 @@ public class GeneralFactory extends GameFactory{
         VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
 
 
-        Entity e = player;
+        Entity e = world.createEntity();
 		world.addEntity(e);
 		
 		Position pos = e.add(Position.class);
@@ -124,9 +123,10 @@ public class GeneralFactory extends GameFactory{
 		tester.add(Position.class).pos.set(0,0,1);
 		//tester.add(DebugPosition.class);
 		world.addEntity(tester);
-		
-		
-		
+
+        Camera camera = world.getSystem(CameraSystem.class).camera;
+        camera.position.set(0,16,16);
+        camera.rotate(50, -1, 0, 0);
 		
 		
 	}
@@ -136,11 +136,7 @@ public class GeneralFactory extends GameFactory{
 		return false;
 	}
 
-	@Override
-	public void load(World world) {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	
 	
@@ -301,208 +297,15 @@ public class GeneralFactory extends GameFactory{
 		return defs;
 	}
 
-	@Override
-	public void initMenu(final World world, Skin skin, Stage stage, AssetManager assets, float timestep) {
-		super.initMenu(world, skin, stage, assets, timestep);
-		dragger = new Actor();
-		dragger.setSize(100000, 100000);
-		clicker = new Actor();
-		clicker.setSize(100000, 100000);
-		//table.setFillParent(true);
-		//dragTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		
-		setInput(dragger, clicker, player);
-		//Group group = (Group) stage.getActors().get(0);
-		//stage.addActor(dragger);
-	}
-
-    @Override
-    protected void editor(final World world, final Stage stage, final Skin skin, Sprite sprite, Sprite spritesel) {
-        //color picker
-        VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
-
-        final Color[] blockColors = world.getSystem(EditVoxelSystem.class).blockColors;
-        final ButtonGroup btnGr = new ButtonGroup();
-        //Gdx.app.log(TAG, "editor"+(sprite == null));
-        for (int i = 0; i < 8; i++)
-        {
-            final ColorPickerButton colorA = new ColorPickerButton(skin, sprite, spritesel, i*2);
-            final ColorPickerButton colorB = new ColorPickerButton(skin, sprite, spritesel, i*2+1);
-            btnGr.add(colorA);
-            btnGr.add(colorB);
-            colorA.addListener(new ActorGestureListener(){
-                public boolean longPress(Actor actor,
-                                         float x,
-                                         float y){
-                    openColorSelectionScreen(colorA, stage, skin, blockColors);
-                    return true;
-                }
-            });
-            colorB.addListener(new ActorGestureListener(){
-                public boolean longPress(Actor actor,
-                                         float x,
-                                         float y){
-                    openColorSelectionScreen(colorB, stage, skin, blockColors);
-                    return true;
-                }
-            });
-            paletteTable.add(colorA).left();
-            paletteTable.add(colorB).left();
-            paletteTable.row();
-        }
-
-        //paletteTable.top();
-
-        Actor touchActor = new Actor();
-        touchActor.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-        touchActor.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event,
-                                float x,
-                                float y){
-                //raycast
-                Camera camera = world.getSystem(CameraSystem.class).camera;
-                VoxelWorld vw = world.getSystemOrSuperClass(VoxelSystem.class).voxelWorld;
-                float sx = event.getStageX(), sy = event.getStageY();
-                src.set(sx,sy,0);
-                dst.set(sx,sy,1);
-                camera.unproject(src);
-                camera.unproject(dst);
-                Gdx.app.log(TAG, "trace " +sx+","+sy+ " from "+src+" to "+dst);
-
-                ray.trace(src, dst);
-                while (ray.hasNext){
-                    ray.next();
-                    if (vw.get(ray.x, ray.y, ray.z) != 0 ){
-                        tmp.set(ray.x, ray.y, ray.z);
-                        tmp.add(BlockDefinition.normals[ray.face]);
-                        vw.set(tmp, (byte)((ColorPickerButton)(btnGr.getChecked())).colorIndex);
-                        Gdx.app.log(TAG, "set"+tmp);
-
-                        break;
-                    }
-                    Gdx.app.log(TAG, "trace "+ray.x+","+ray.y+","+ray.z);
-                }
-                //if hits block or floor place block
-
-            }
-        });
-
-        stage.addActor(touchActor);
-        paletteTable.setFillParent(true);
-        paletteTable.left();
-        stage.addActor(paletteTable);
-        VoxelWorld vw = world.getSystemOrSuperClass(VoxelSystem.class).voxelWorld;
-
-        for (int x = 0; x < 15; x++)
-            for(int y = 0; y < 2; y++)
-                for (int z = 0; z < 15; z++)
-                    vw.set(x,y,z,(byte)1);
-
-        //save/load btns
-        //default chunk
-        //new btn(selectable size)
-
-
-        Entity e = player;
-        world.addEntity(e);
-
-        Position pos = e.add(Position.class);
-        pos.pos.set(0f, 5, .5f);
-
-        e.add(Brain.class).getShortTarget().set(100000, 0, 0);
-
-        Move move = e.add(Move.class);
-        move.jumpStrength = 1.5f;
-        ActionList actionList = e.add(ActionComponent.class).action;
-
-
-
-        //ModelInfo mod = e.add(ModelInfo.class);
-        //AnimationController animController = new AnimationController(playerModel);
-        //mod.set(playerModel, animController );
-
-
-        e.add(Player.class);
-        e.add(CameraInfluencer.class);
-
-        e.add(PositionRollingAverage.class).size = 2;//rolling average of position
-        e.add(VelocityPredictor.class).scale = 240f;
-        e.get(VelocityPredictor.class).y = false;
-        e.add(VelocityRollingAverage.class).size = 100;
-
-        e.add(DebugVector.class).add(e.get(VelocityRollingAverage.class).result, Color.CYAN);
-
-
-        Entity camC = world.createEntity();
-       // camC.add(CameraController.class);
-        //camC.add(Position.class);
-
-        world.addEntity(camC);
-
-
-
-    }
-    RayCaster ray = new RayCaster();
-    Table paletteTable = new Table();
-    Vector3 src = new Vector3(), dst = new Vector3();
-    public static ColorPicker colorPicker;
-    Button okBtn, cancelBtn;
-    public static ColorPickerButton currentSelectedColor;
-    Table selectTable = new Table();
-
-    private void openColorSelectionScreen(ColorPickerButton actor, final Stage stage, Skin skin, final Color[] blockColors) {
-        Gdx.app.log(TAG, "sdfjksdfjksdfjk");
-        if (colorPicker == null){
-            colorPicker = new ColorPicker(skin);
-            okBtn = new Button(skin);
-            okBtn.add(new Label("Ok", skin));
-            cancelBtn = new Button(skin);
-            cancelBtn.add(new Label("Cancel", skin));
-            okBtn.addListener(new ClickListener(){
-                public void clicked(InputEvent event,
-                                    float x,
-                                    float y){
-
-                    currentSelectedColor.setColor(colorPicker.getSelectedColor(), blockColors);
-                    stage.getActors().removeValue(selectTable, true);
-
-
-                    stage.addActor(paletteTable);
-                }
-            });
-            cancelBtn.addListener(new ClickListener() {
-                public void clicked(InputEvent event,
-                                    float x,
-                                    float y) {
-
-                    stage.getActors().removeValue(selectTable, true);
-
-
-                    stage.addActor(paletteTable);
-
-                }
-            });
-
-            selectTable.setFillParent(true);
-            selectTable.add(colorPicker);
-            selectTable.row();
-            selectTable.add(okBtn);
-            selectTable.add(cancelBtn);
-
-
-        }
-
-        currentSelectedColor = actor;
 
 
 
 
-        stage.addActor(selectTable);
-    }
+
+
 
     public void setInput(Actor dragger, Actor clicker, final Entity player){
+
 		dragger.addListener(new InputListener(){
 			/*@Override
 			public void drag (InputEvent event, float x, float y, int pointer) {

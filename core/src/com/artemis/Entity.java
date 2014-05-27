@@ -4,6 +4,8 @@ import com.artemis.managers.ComponentManager;
 import com.artemis.managers.EntityManager;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Bits;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.niz.component.Position;
 import com.niz.component.VelocityRollingAverage;
@@ -248,4 +250,6 @@ public final class Entity implements Poolable {
     public <T extends Component> T get(Class<T> clas) {
         return getComponent(clas);
     }
+
+
 }
