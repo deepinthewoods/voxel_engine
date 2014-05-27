@@ -12,16 +12,16 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.IntMap;
 
 public class AssetDefinition{
-	public String[] textures = {"tiles"}
-	, pixmaps = {"fades"} , models = {"humanmodel"}, atlasses = {"tiles"};
+	public String[] textures
+	, pixmaps  , models , atlasses ;
 	public int foo = 4;
 	
-	public static IntMap<TextureRegion> textureMap = new IntMap<TextureRegion>();
+	public static IntMap<Texture> textureMap = new IntMap<Texture>();
 	public static IntMap<Model> modelMap = new IntMap<Model>();
 	public static IntMap<Pixmap> pixmapMap = new IntMap<Pixmap>();
     public static IntMap<TextureAtlas> atlasMap = new IntMap<TextureAtlas>();
-	
-	public void process(World world, AssetManager assets, String path) {
+	public String path;
+	public void process(World world, AssetManager assets) {
 		
 		for (String s : textures){
 			assets.load(path+s+".png", Texture.class);
@@ -40,31 +40,32 @@ public class AssetDefinition{
 		//assets.load("data/fades.png", Pixmap.class);
 		//assets.load("data/humanmodel.g3db", Model.class);
 	}
-    /*
-    @Deprecated
-	public void postProcess(AssetManager assets){
+
+
+	public void postProcess(AssetManager assets, AssetDefinition ass){
+        Gdx.app.log("assets", "post process");
 		for (String s : textures){
-			Texture t = assets.get("data/"+s+".png", Texture.class);
-			textureMap.put(key(s), new TextureRegion(t));
+			Texture t = assets.get(path+s+".png", Texture.class);
+			ass.textureMap.put(key(s), t);
 			Gdx.app.log("assets", "put "+s);
 
 		}
 		for (String s : pixmaps){
-			Pixmap t = assets.get("data/"+s+".png", Pixmap.class);
-			pixmapMap.put(key(s), t);
+			Pixmap t = assets.get(path+s+".png", Pixmap.class);
+			ass.pixmapMap.put(key(s), t);
 			Gdx.app.log("assets", "put "+s);
 
 		}
 		for (String s : models){
-			Model t = assets.get("data/"+s+".g3db", Model.class);
-			modelMap.put(key(s), t);
+			Model t = assets.get(path+s+".g3db", Model.class);
+			ass.modelMap.put(key(s), t);
 			Gdx.app.log("assets", "put "+s);
 
 		}
 
         for (String s : atlasses){
-            TextureAtlas t = assets.get("data/"+s+".pack", TextureAtlas.class);
-            atlasMap.put(key(s), t);
+            TextureAtlas t = assets.get(path+s+".pack", TextureAtlas.class);
+            ass.atlasMap.put(key(s), t);
             Gdx.app.log("assets", "put "+s);
 
         }
@@ -72,8 +73,8 @@ public class AssetDefinition{
 	private static int key(String s) {
 		return s.hashCode();
 	}
-	public static TextureRegion getTexture(String string) {//"tiles"
-		TextureRegion r = textureMap.get(key(string));
+	public static Texture getTexture(String string) {//"tiles"
+		Texture r = textureMap.get(key(string));
         if (r == null) {throw new GdxRuntimeException("texture not found"+string);}
 		return r;
 	}
@@ -93,5 +94,6 @@ public class AssetDefinition{
         if (r == null) {throw new GdxRuntimeException("atlas not found"+string);}
         return r;
     }
-	*/
+
+
 }

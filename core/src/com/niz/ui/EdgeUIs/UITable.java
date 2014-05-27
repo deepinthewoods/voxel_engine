@@ -1,35 +1,39 @@
-package com.niz.ui;
+package com.niz.ui.EdgeUIs;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.niz.ui.EdgeUIs.EdgeUI;
+import com.niz.ui.elements.UIElement;
 
 /**
  * Created by niz on 26/05/2014.
  * one edge of an edgeUI
  */
-public class UITable extends Table{
-    private transient int side;
-    private Table minTable, maxTable;
+public class UITable{
+    //private transient int side;
+    private transient Table minTable, maxTable;
     public UIElement[] min, max;
-    public UITable(Table min, Table max, int side){
-        minTable = min;
-        maxTable = max;
-        this.side = side;
+    transient Table table = new Table();
+    public UITable(){
+        minTable = new Table();
+        maxTable = new Table();
+
     }
 
     public void minimize(int configuration) {
-        clear();
+
 
     }
     public void init(Skin skin){
         for (UIElement e : min){
             e.init(skin);
         }
+        if (max != null)
         for (UIElement e : max){
             e.init(skin);
         }
     }
-    public void addTo(Table table, boolean maximized){
+    public void addTo(EdgeUI edgeUI, boolean maximized, boolean expand){
         for (UIElement e : min){
             e.addTo(table);
         }
@@ -38,11 +42,15 @@ public class UITable extends Table{
         for (UIElement e : max){
             e.addTo(table);
         }
+        if (expand)
+            edgeUI.table.add(table).expand();
+        else
+            edgeUI.table.add(table);
     }
 
     public void maximize(int configuration) {
-        clear();
 
-
+        table.clear();
     }
+
 }

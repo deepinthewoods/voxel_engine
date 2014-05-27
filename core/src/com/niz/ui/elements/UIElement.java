@@ -1,5 +1,6 @@
-package com.niz.ui;
+package com.niz.ui.elements;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -14,6 +15,7 @@ import com.niz.observer.Subjects;
  */
 public abstract class UIElement {
 
+    private static final String TAG = "UI element";
     private String[] recieve;//Subjects to listen to, and refresh on onNotify
     private String[] send;//Subject to notify
     transient Subject[] subjects;
@@ -47,8 +49,8 @@ public abstract class UIElement {
     protected abstract void onInit(Skin skin);
 
     public void addTo(Table table){
-        if (actor == null) return;
-        table.add(actor);
+        table.add(actor).expand();
+        //Gdx.app.log(TAG, "add");
     }
 
 

@@ -1,6 +1,5 @@
 package com.niz.ui.EdgeUIs;
 
-import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -15,23 +14,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
-import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.niz.RayCaster;
-import com.niz.actions.ActionList;
 import com.niz.blocks.EmptyBlockDefinition;
-import com.niz.component.*;
 import com.niz.component.systems.CameraSystem;
 import com.niz.component.systems.EditVoxelSystem;
 import com.niz.component.systems.VoxelSystem;
-import com.niz.factories.GeneralFactory;
 import com.niz.ui.ColorPicker;
 import com.niz.ui.ColorPickerButton;
 
 /**
  * Created by niz on 26/05/2014.
  */
-public class EditorUI {
+public class EditorUI extends EdgeUI {
 
 
     private static final String TAG = "editor ui";

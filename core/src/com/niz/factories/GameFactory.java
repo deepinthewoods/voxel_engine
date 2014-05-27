@@ -6,8 +6,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.scenes.scene2d.Action;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -18,25 +16,28 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
 import com.niz.component.systems.*;
+import com.niz.ui.EdgeUIs.EdgeUI;
+import com.niz.ui.EdgeUIs.TestUI;
 
 public abstract class GameFactory {
     public static final String path = "data/";
-    private AssetDefinition ass;
     private SystemDefinition systemDef;
+    AssetsSystem assetsSys;// = new AssetsSystem(assets);
+
     //protected Entity player;
+    Json json = new Json();
     public void assets(World world, AssetManager assets, FileHandle file) {
-        Json json = new Json();
+
         json.addClassTag("assets", AssetDefinition.class);
-        ass = json.fromJson(AssetDefinition.class, file);//new AssetDefinition();//
-
-        ass.process(world, assets, file.path());
-
+        AssetDefinition ass = json.fromJson(AssetDefinition.class, file);//new AssetDefinition();//
+        ass.path = file.parent().path()+"/";
+        ass.process(world, assets);
+        assetsSys.addDef(ass);
     }
-    public void systems(float timeStep, World world, AssetManager assets, FileHandle file) {
+    private void systems(float timeStep, World world, AssetManager assets, FileHandle file) {
         //ass.postProcess(assets);
-        AssetsSystem assetsSys = new AssetsSystem(assets);
+
         world.setSystem(assetsSys);
         TextureAtlas tiles = assetsSys.getTextureAtlas("tiles");
         VoxelSystem.white = tiles.findRegion("air");
@@ -94,6 +95,8 @@ public void init(World world, AssetManager assets, FileHandle file){
 	
 	world.initialize();
 	world.initializeDraw();
+
+
 }
 
 	Array<Component> components = new Array<Component>();
@@ -103,6 +106,7 @@ public void init(World world, AssetManager assets, FileHandle file){
 
 	public void initMenu(final World world, final Skin skin, final Stage stage, final AssetManager assets, final float timestep) {
 		//Group group = new WidgetGroup();
+        assetsSys = new AssetsSystem(assets);
 		Gdx.input.setInputProcessor(stage);
 		final Table table = new Table();
 		//final Button newGame = new Button(new Label("New", skin), skin);
@@ -116,8 +120,8 @@ public void init(World world, AssetManager assets, FileHandle file){
         getHandles(dirHandle, handles, 0, table, skin, assets, world);
 
         table.setFillParent(true);
+        table.layout();
         stage.addActor(table);
-
 		/*
         TextureAtlas atlas = assets.get(path+"tiles.pack", TextureAtlas.class);
         final Sprite btnSprite = atlas.createSprite("button");
@@ -184,7 +188,7 @@ public void init(World world, AssetManager assets, FileHandle file){
                         Gdx.app.log("Loop", "is button!"+f.name());
                         if (allowedButtons.contains(f.parent().name(), false)){
                             Gdx.app.log("Loop", "button allowed "+f.parent().name());
-                            table.add(createMenuButton(f.parent().name(), f, skin, assets, world));
+                            table.add(createMenuButton(f.parent().name(), f, skin, assets, world, table));
                         } else {
                             Gdx.app.log("Loop", "button not allowed " + f.parent().name());
 
@@ -197,28 +201,30 @@ public void init(World world, AssetManager assets, FileHandle file){
         }
     }
 
-    private Button createMenuButton(String name, final FileHandle f, Skin skin, final AssetManager assets, final World world) {
+    private Button createMenuButton(String name, final FileHandle f, final Skin skin, final AssetManager assets, final World world, final Table table) {
         if (skin == null) throw new GdxRuntimeException("null");
         final Button button  = new Button(new Label(name, skin), skin);
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
 
-                button.addAction(
+                //assets
+                assets(world, assets, f.sibling("assets.ini"));
+                while (!assets.update());
+                //wait for assets to be loaded
+                assetsSys.processDefinitions();
 
-                                new Action() {
 
-                                    @Override
-                                    public boolean act(float delta) {
-
-                                        init(world, assets, f);
-                                        //init(timestep, world, assets, file);
-                                        return true;
-                                    }
-
-                                }
-
-                );
+                init(world, assets, f);
+                //init(timestep, world, assets, file);
+                table.clear();
+                EdgeUI ui = new TestUI();
+                Stage stage = table.getStage();
+                if (stage == null) throw new GdxRuntimeException("null stage");
+                ui.init(skin, stage);
+                String s = json.prettyPrint(ui);
+                Gdx.files.external(f.parent().path()+"/ui.ini").writeString(s, false);
+                Gdx.app.log("gamefactory", s);
 
             }
         });
