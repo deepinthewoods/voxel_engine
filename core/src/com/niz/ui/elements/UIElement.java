@@ -16,21 +16,22 @@ import com.niz.observer.Subjects;
 public abstract class UIElement {
 
     private static final String TAG = "UI element";
-    private String[] recieve;//Subjects to listen to, and refresh on onNotify
-    private String[] send;//Subject to notify
-    transient Subject[] subjects;
-    public Observer[] observers;
+    protected String[] recieve;//Subjects to listen to, and refresh on onNotify
+    protected String[] send;//Subject to notify
+    protected transient Subject[] subjects;
+    protected Observer[] observers;
     protected transient Actor actor;
     
     public UIElement(){
 
     }
     public void init(Skin skin){
-        onInit(skin);
+
         if (recieve != null)
             for (int i = 0; i < recieve.length; i++){
                 //create Observers
                 Observer o = observers[i];
+                if (o == null) continue;
                 Subject sub = Subjects.get(recieve[i]);
                 sub.add(o);
             }
@@ -40,6 +41,7 @@ public abstract class UIElement {
                 subjects[i] = Subjects.get(send[i]);
             }
         }
+        onInit(skin);
     }
 
     /*
@@ -49,7 +51,7 @@ public abstract class UIElement {
     protected abstract void onInit(Skin skin);
 
     public void addTo(Table table){
-        table.add(actor).expand();
+        table.add(actor);
         //Gdx.app.log(TAG, "add");
     }
 

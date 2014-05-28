@@ -6,4 +6,7 @@
 	<entry-point class='com.niz.client.HtmlLauncher' />
 	
 	<set-configuration-property name="gdx.assetpath" value="../android/assets" />
+    <extend-configuration-property name="gdx.reflect.include" value="com.niz.component" />
+    <extend-configuration-property name="gdx.reflect.include" value="com.niz.component.systems" />
+
 </module>
