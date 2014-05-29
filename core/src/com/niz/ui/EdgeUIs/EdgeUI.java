@@ -1,9 +1,9 @@
 package com.niz.ui.EdgeUIs;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.niz.component.systems.AssetsSystem;
 
 /**
  * Created by niz on 26/05/2014.
@@ -47,12 +47,12 @@ public class EdgeUI{
         table.setFillParent(true);
     }
 
-    public void init(Skin skin, Stage stage){
+    public void init(Skin skin, Stage stage, AssetsSystem assets){
         stage.clear();
         for (int y = 0, i = 0; y < 3; y++){
             for (int x = 0; x < 3; x++, i++){
                 if (sides[i] != null){
-                    sides[i].init(skin);
+                    sides[i].init(skin, assets);
                     sides[i].addTo(this, false, i==4?true:false);
 
                     //Gdx.app.log(TAG, "side");

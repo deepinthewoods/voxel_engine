@@ -2,7 +2,7 @@ package com.niz.ui.EdgeUIs;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.niz.ui.EdgeUIs.EdgeUI;
+import com.niz.component.systems.AssetsSystem;
 import com.niz.ui.elements.UIElement;
 
 /**
@@ -24,13 +24,13 @@ public class UITable{
 
 
     }
-    public void init(Skin skin){
+    public void init(Skin skin, AssetsSystem assetsSys){
         for (UIElement e : min){
-            e.init(skin);
+            e.init(skin, assetsSys);
         }
         if (max != null)
         for (UIElement e : max){
-            e.init(skin);
+            e.init(skin, assetsSys);
         }
     }
     public void addTo(EdgeUI edgeUI, boolean maximized, boolean expand){

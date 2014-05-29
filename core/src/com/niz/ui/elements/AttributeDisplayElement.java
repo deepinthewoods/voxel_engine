@@ -1,13 +1,11 @@
 package com.niz.ui.elements;
 
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.niz.Hash;
 import com.niz.Strings;
-import com.niz.observer.Observer;
+import com.niz.component.systems.AssetsSystem;
+import com.niz.observer.AutoObserver;
 import com.niz.ui.AttributeObserver;
 
 /**
@@ -20,19 +18,22 @@ public class AttributeDisplayElement extends UIElement {
     private transient AttributeObserver obs;
 
     public AttributeDisplayElement(){
-        recieve = new String[]{"stats"};
-        observers = new Observer[1];
-        observers[0] = new AttributeObserver();
+
+        observers = new AutoObserver[1];
+        AttributeObserver o = new AttributeObserver();
+        observers[0] = o;
+        observers[0].from = "playerAttributes";
+        o.attributeName = "Strength";
     }
 
     @Override
-    protected void onInit(Skin skin) {
+    protected void onInit(Skin skin, AssetsSystem assets) {
         obs = (AttributeObserver) observers[0];
         //statHash = Hash.hash(stat);
         //Button b = new Button(skin);
         Table g = new Table();
         actor = g;
-        g.add(new Label(obs.attributeName + ": ", skin));
+        g.add(new Label(obs.attributeName + ":", skin));
 
         valueLabel = new Label("", skin){
             @Override

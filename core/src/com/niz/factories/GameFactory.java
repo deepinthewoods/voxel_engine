@@ -221,7 +221,7 @@ public void init(World world, AssetManager assets, FileHandle file){
                 EdgeUI ui = new TestUI();
                 Stage stage = table.getStage();
                 if (stage == null) throw new GdxRuntimeException("null stage");
-                ui.init(skin, stage);
+                ui.init(skin, stage, world.getSystem(AssetsSystem.class));
                 String s = json.prettyPrint(ui);
                 Gdx.files.external(f.parent().path()+"/ui.ini").writeString(s, false);
                 Gdx.app.log("gamefactory", s);

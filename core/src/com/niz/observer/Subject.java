@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class Subject {
 	private Array<Observer> observers = new Array<Observer>();
-	public enum Event {TEST, POSITION_CHANGE, ACCUMULATE_INFLUENCE};
+	public enum Event {TEST, POSITION_CHANGE, BUTTON_PRESSED, SLIDER_PRESSED, ACCUMULATE_INFLUENCE};
 	public void add(Observer obs){
 		observers.add(obs);
 	}

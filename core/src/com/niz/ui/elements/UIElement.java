@@ -1,10 +1,10 @@
 package com.niz.ui.elements;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.niz.observer.Observer;
+import com.niz.component.systems.AssetsSystem;
+import com.niz.observer.AutoObserver;
 import com.niz.observer.Subject;
 import com.niz.observer.Subjects;
 
@@ -16,23 +16,23 @@ import com.niz.observer.Subjects;
 public abstract class UIElement {
 
     private static final String TAG = "UI element";
-    protected String[] recieve;//Subjects to listen to, and refresh on onNotify
+    //protected String[] recieve;//Subjects to listen to, and refresh on onNotify
     protected String[] send;//Subject to notify
     protected transient Subject[] subjects;
-    protected Observer[] observers;
+    protected AutoObserver[] observers;
     protected transient Actor actor;
     
     public UIElement(){
 
     }
-    public void init(Skin skin){
+    public void init(Skin skin, AssetsSystem assets){
 
-        if (recieve != null)
-            for (int i = 0; i < recieve.length; i++){
+        if (observers != null)
+            for (int i = 0; i < observers.length; i++){
                 //create Observers
-                Observer o = observers[i];
+                AutoObserver o = observers[i];
                 if (o == null) continue;
-                Subject sub = Subjects.get(recieve[i]);
+                Subject sub = Subjects.get(o.from);
                 sub.add(o);
             }
         if (send != null) {
@@ -41,14 +41,14 @@ public abstract class UIElement {
                 subjects[i] = Subjects.get(send[i]);
             }
         }
-        onInit(skin);
+        onInit(skin, assets);
     }
 
     /*
     for making the actor
 
      */
-    protected abstract void onInit(Skin skin);
+    protected abstract void onInit(Skin skin, AssetsSystem assets);
 
     public void addTo(Table table){
         table.add(actor);
