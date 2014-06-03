@@ -248,15 +248,15 @@ public class GreedyMesher implements Mesher {
 				
 				for(int x = 0; x < CHUNK_WIDTH; x++) {
     				//for (int faceID = 0; faceID < 6; faceID++){
-    				int light00 = lightCache[x+2][y+3][z+2]/4
+    				int light00 = lightCache[x+2][y+2][z+2]/4
                             , light01 = light00, light10 = light00
                             , light11 = light00
                             , lightTop00 = light00, lightTop01 = light00
                             , lightTop10 = light00, lightTop11 = light00;
+                    int lightLower = lightCache[x+2][y+1][z+2]/4;
 
                     if ((maskTop>>(x+1)& 1 )> 0 ){
                         voxels[x][y][z][TOP].transparent = true;
-
                     }
 
                     if ((maskBottom>>(x+1)& 1 )> 0 ){
@@ -283,36 +283,36 @@ public class GreedyMesher implements Mesher {
     				//00
     				voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
     				voxels[x][y+1][z][EAST].vertex(1,lightTop10);
-    				voxels[x][y+1][z][TOP].vertex(3,light00);
+    				voxels[x][y+1][z][BOTTOM].vertex(3,light00);
     				//01
     				voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
     				voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-    				voxels[x][y+1][z+1][TOP].vertex(1,light01);
+    				voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
     				//10
     				voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
     				voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-    				voxels[x+1][y+1][z][TOP].vertex(2,light10);
+    				voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
     				//11
     				voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
     				voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-    				voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+    				voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
     				
     				//00
     				voxels[x][y][z][NORTH].vertex(3,light01);
     				voxels[x][y][z][EAST].vertex(3,light10);
-    				voxels[x][y][z][BOTTOM].vertex(3,lightTop00);
+    				voxels[x][y][z][TOP].vertex(3,lightTop00);
     				//01
     				voxels[x][y][z+1][SOUTH].vertex(3,light00);
     				voxels[x][y][z+1][EAST].vertex(2,light11);
-    				voxels[x][y][z+1][BOTTOM].vertex(1,lightTop01);
+    				voxels[x][y][z+1][TOP].vertex(1,lightTop01);
     				//10
     				voxels[x+1][y][z][NORTH].vertex(1,light11);
     				voxels[x+1][y][z][WEST].vertex(3,light00);
-    				voxels[x+1][y][z][BOTTOM].vertex(2,lightTop10);
+    				voxels[x+1][y][z][TOP].vertex(2,lightTop10);
     				//11
     				voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
     				voxels[x+1][y][z+1][WEST].vertex(2,light01);
-    				voxels[x+1][y][z+1][BOTTOM].vertex(0,lightTop11);
+    				voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
     				
     				
     				
@@ -327,7 +327,7 @@ public class GreedyMesher implements Mesher {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+3][z+2]/4
+                    int light00 = lightCache[x+2][y+2][z+2]/4
                             , light01 = light00, light10 = light00
                             , light11 = light00
                             , lightTop00 = light00, lightTop01 = light00
@@ -335,19 +335,19 @@ public class GreedyMesher implements Mesher {
                     //00
                     voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
                     voxels[x][y+1][z][EAST].vertex(1,lightTop10);
-                    voxels[x][y+1][z][TOP].vertex(3,light00);
+                    voxels[x][y+1][z][BOTTOM].vertex(3,light00);
                     //01
                     voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
                     voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-                    voxels[x][y+1][z+1][TOP].vertex(1,light01);
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
                     //10
                     voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
                     voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-                    voxels[x+1][y+1][z][TOP].vertex(2,light10);
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
                     //11
                     voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
                     voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
 
 
                 }}}//}
@@ -356,7 +356,7 @@ public class GreedyMesher implements Mesher {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+3][z+2]/4
+                    int light00 = lightCache[x+2][y+2][z+2]/4
                             , light01 = light00, light10 = light00
                             , light11 = light00
                             , lightTop00 = light00, lightTop01 = light00
@@ -365,21 +365,21 @@ public class GreedyMesher implements Mesher {
                     //10
                     voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
                     voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-                    voxels[x+1][y+1][z][TOP].vertex(2,light10);
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
                     //11
                     voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
                     voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
 
 
                     //10
                     voxels[x+1][y][z][NORTH].vertex(1,light11);
                     voxels[x+1][y][z][WEST].vertex(3,light00);
-                    voxels[x+1][y][z][BOTTOM].vertex(2,lightTop10);
+                    voxels[x+1][y][z][TOP].vertex(2,lightTop10);
                     //11
                     voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
                     voxels[x+1][y][z+1][WEST].vertex(2,light01);
-                    voxels[x+1][y][z+1][BOTTOM].vertex(0,lightTop11);
+                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
 
                 }}}//}
 
@@ -388,7 +388,7 @@ public class GreedyMesher implements Mesher {
             for(int z = -1; z < 0; z++) {
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+3][z+2]/4
+                    int light00 = lightCache[x+2][y+2][z+2]/4
                             , light01 = light00, light10 = light00
                             , light11 = light00
                             , lightTop00 = light00, lightTop01 = light00
@@ -397,23 +397,23 @@ public class GreedyMesher implements Mesher {
                     //01
                     voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
                     voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-                    voxels[x][y+1][z+1][TOP].vertex(1,light01);
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
 
                     //11
                     voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
                     voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
 
 
                     //01
                     voxels[x][y][z+1][SOUTH].vertex(3,light00);
                     voxels[x][y][z+1][EAST].vertex(2,light11);
-                    voxels[x][y][z+1][BOTTOM].vertex(1,lightTop01);
+                    voxels[x][y][z+1][TOP].vertex(1,lightTop01);
 
                     //11
                     voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
                     voxels[x+1][y][z+1][WEST].vertex(2,light01);
-                    voxels[x+1][y][z+1][BOTTOM].vertex(0,lightTop11);
+                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
                 }}}//}
 
         //0 diagonal x
@@ -421,7 +421,7 @@ public class GreedyMesher implements Mesher {
             for(int z = -1; z < 0; z++) {
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+3][z+2]/4
+                    int light00 = lightCache[x+2][y+2][z+2]/4
                             , light01 = light00, light10 = light00
                             , light11 = light00
                             , lightTop00 = light00, lightTop01 = light00
@@ -432,12 +432,12 @@ public class GreedyMesher implements Mesher {
                     //01
                     voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
                     voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-                    voxels[x][y+1][z+1][TOP].vertex(1,light01);
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
 
                     //11
                     voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
                     voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
 
                     //00
 
@@ -448,7 +448,7 @@ public class GreedyMesher implements Mesher {
             for(int z = -1; z < 0; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+3][z+2]/4
+                    int light00 = lightCache[x+2][y+2][z+2]/4
                             , light01 = light00, light10 = light00
                             , light11 = light00
                             , lightTop00 = light00, lightTop01 = light00
@@ -457,13 +457,13 @@ public class GreedyMesher implements Mesher {
                     //11
                     voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
                     voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
 
 
                     //11
                     voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
                     voxels[x+1][y][z+1][WEST].vertex(2,light01);
-                    voxels[x+1][y][z+1][BOTTOM].vertex(0,lightTop11);
+                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
 
 
                 }}}//}
@@ -473,7 +473,7 @@ public class GreedyMesher implements Mesher {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+3][z+2]/4
+                    int light00 = lightCache[x+2][y+2][z+2]/4
                             , light01 = light00, light10 = light00
                             , light11 = light00
                             , lightTop00 = light00, lightTop01 = light00
@@ -481,11 +481,11 @@ public class GreedyMesher implements Mesher {
                     //10
                     voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
                     voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-                    voxels[x+1][y+1][z][TOP].vertex(2,light10);
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
                     //11
                     voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
                     voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][TOP].vertex(0,light11);
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
 
 
                 }}}//}
