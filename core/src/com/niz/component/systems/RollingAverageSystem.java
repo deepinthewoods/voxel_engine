@@ -14,14 +14,13 @@ public abstract class RollingAverageSystem extends EntityProcessingSystem {
 	protected ComponentMapper<? extends RollingAverage> raM;
 
 	/**
-	 * uses Position to create a rolling aversge, stored in RollingAverage.result
+	 * uses Vector3s to create a rolling aversge, stored in RollingAverage.result
 	 */
 	public RollingAverageSystem(Aspect aspect) {
 		super(aspect);
 	}
 	public abstract Vector3 getTarget(Entity e);
-		
-	
+
 	@Override
 	protected void process(Entity e) {
 		RollingAverage av = raM.get(e);

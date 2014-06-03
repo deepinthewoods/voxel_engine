@@ -1,5 +1,6 @@
 package com.niz.ui.elements;
 
+import com.artemis.World;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -12,12 +13,12 @@ import com.niz.ui.AttributeObserver;
 /**
  * Created by niz on 27/05/2014.
  */
-public class AttributeBarElement extends UIElement {
+public class AttributeBar extends UIElement {
     //public String stat;
    // private transient int statHash;
     private transient AttributeObserver obs;
 
-    public AttributeBarElement(){
+    public AttributeBar(){
 
         observers = new AutoObserver[1];
         AttributeObserver o = new AttributeObserver();
@@ -27,7 +28,7 @@ public class AttributeBarElement extends UIElement {
     }
 
     @Override
-    protected void onInit(Skin skin, AssetsSystem assets) {
+    protected void onInit(Skin skin, AssetsSystem assets, World world) {
         obs = (AttributeObserver) observers[0];
         //statHash = Hash.hash(stat);
         //Button b = new Button(skin);

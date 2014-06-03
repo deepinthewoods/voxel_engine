@@ -5,7 +5,7 @@ import com.artemis.Component;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.badlogic.gdx.math.Vector3;
-import com.niz.component.CameraInfluencer;
+import com.niz.component.CameraPositionInfluencer;
 import com.niz.component.Position;
 import com.niz.component.PositionRollingAverage;
 import com.niz.observer.Observer;
@@ -31,15 +31,15 @@ public class PositionRollingAverageSystem extends RollingAverageSystem implement
 		
 		posM = world.getMapper(Position.class);
 		raM = world.getMapper(PositionRollingAverage.class);
-		CameraInfluenceSystem infSys = world.getSystem(CameraInfluenceSystem.class);
-		infSys.notifyAccumulateInfluence.add(this);
+		CameraPositionInfluenceSystem infSys = world.getSystem(CameraPositionInfluenceSystem.class);
+		infSys.notifyAccumulateInfluencePosition.add(this);
 	}
 
 
 
 	@Override
 	public void onNotify(Entity e, Event event, Component c) {
-		CameraInfluencer inf = (CameraInfluencer) c;
+		CameraPositionInfluencer inf = (CameraPositionInfluencer) c;
 		PositionRollingAverage av = (PositionRollingAverage) raM.get(e);
 		if (av != null){
 			inf.values.add(av.result);

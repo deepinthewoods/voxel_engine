@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
-public class CameraInfluencer implements Component {
+public class CameraPositionInfluencer implements Component {
 
 	//public float weight;
 	public FloatArray weights = new FloatArray();

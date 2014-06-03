@@ -21,7 +21,7 @@ public class EditVoxelSystem extends VoxelSystem {
             BLOCK_COLORS[i] = new Color(Color.WHITE);
         }
 		int x = 1, y = 1, z = 1;
-		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13, white);
+		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
 		voxelWorld = new VoxelWorld(x, y, z,
 				new EditGreedyMesher(batch, BLOCK_COLORS)
 				//new SimpleMesher(VoxelWorld.CHUNK_SIZE_X, VoxelWorld.CHUNK_SIZE_Y, VoxelWorld.CHUNK_SIZE_Z)

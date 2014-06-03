@@ -19,9 +19,8 @@ public class MeshBatcher{
 	public static final float[] highlightColors = {Color.RED.toFloatBits(), Color.GREEN.toFloatBits(), Color.BLUE.toFloatBits(), Color.CYAN.toFloatBits()};
     public static float whiteTextureU, whiteTextureV;
 
-    public MeshBatcher(int vertexSize, int indexSize, int levels, TextureRegion white) {
-        whiteTextureU = white.getU();
-        whiteTextureV = white.getV();
+    public MeshBatcher(int vertexSize, int indexSize, int levels) {
+
 
 		cachedVerts = new float[vertexSize];
 		cachedIndexes = new short[indexSize];

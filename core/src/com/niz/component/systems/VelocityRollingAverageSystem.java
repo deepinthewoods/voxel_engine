@@ -13,7 +13,7 @@ public class VelocityRollingAverageSystem extends RollingAverageSystem implement
 
 	private static final String TAG = "velocity prediction system";
 	private ComponentMapper<VelocityPredictor> velM;
-	private ComponentMapper<CameraInfluencer> infM;
+	private ComponentMapper<CameraPositionInfluencer> infM;
 	private ComponentMapper<Position> posM;
 	
 	
@@ -38,9 +38,9 @@ public class VelocityRollingAverageSystem extends RollingAverageSystem implement
 		
 		raM = world.getMapper(VelocityRollingAverage.class);
 		velM = world.getMapper(VelocityPredictor.class);
-		infM = world.getMapper(CameraInfluencer.class);
+		infM = world.getMapper(CameraPositionInfluencer.class);
 		posM = world.getMapper(Position.class);
-		world.getSystem(CameraInfluenceSystem.class).notifyAccumulateInfluence.add(this);
+		world.getSystem(CameraPositionInfluenceSystem.class).notifyAccumulateInfluencePosition.add(this);
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class VelocityRollingAverageSystem extends RollingAverageSystem implement
 	@Override
 	public void onNotify(Entity e, Event event, Component c) {
 		//Gdx.app.log(TAG, "notified");
-		CameraInfluencer inf = (CameraInfluencer) c;
+		CameraPositionInfluencer inf = (CameraPositionInfluencer) c;
 		RollingAverage av = (RollingAverage) raM.get(e);
 		if (av != null){
 			inf.values.add(av.result.add(posM.get(e).pos));

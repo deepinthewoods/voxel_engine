@@ -1,5 +1,6 @@
 package com.niz.ui.elements;
 
+import com.artemis.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -7,6 +8,7 @@ import com.niz.component.systems.AssetsSystem;
 import com.niz.observer.AutoObserver;
 import com.niz.observer.Subject;
 import com.niz.observer.Subjects;
+import com.niz.ui.edgeUI.UITable;
 
 /**
  * Created by niz on 27/05/2014.
@@ -21,12 +23,13 @@ public abstract class UIElement {
     protected transient Subject[] subjects;
     protected AutoObserver[] observers;
     protected transient Actor actor;
-    
+    protected transient UITable parent;
+
     public UIElement(){
 
     }
-    public void init(Skin skin, AssetsSystem assets){
-
+    public void init(Skin skin, AssetsSystem assets, World world, UITable parent){
+        this.parent = parent;
         if (observers != null)
             for (int i = 0; i < observers.length; i++){
                 //create Observers
@@ -41,18 +44,17 @@ public abstract class UIElement {
                 subjects[i] = Subjects.get(send[i]);
             }
         }
-        onInit(skin, assets);
+        onInit(skin, assets, world);
     }
 
     /*
     for making the actor
 
      */
-    protected abstract void onInit(Skin skin, AssetsSystem assets);
+    protected abstract void onInit(Skin skin, AssetsSystem assets, World world);
 
     public void addTo(Table table){
         table.add(actor);
-        //Gdx.app.log(TAG, "add");
     }
 
 

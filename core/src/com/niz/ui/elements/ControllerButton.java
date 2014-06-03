@@ -1,6 +1,7 @@
 package com.niz.ui.elements;
 
 import com.artemis.Component;
+import com.artemis.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -25,7 +26,7 @@ public class ControllerButton extends UIElement{
     }
 
     @Override
-    protected void onInit(Skin skin, AssetsSystem assets) {
+    protected void onInit(Skin skin, AssetsSystem assets, World world) {
         Button b = new Button(skin){
             @Override
             public void act(float delta){

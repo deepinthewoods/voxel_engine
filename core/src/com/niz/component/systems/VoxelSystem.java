@@ -6,6 +6,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
@@ -25,12 +26,12 @@ public class VoxelSystem extends EntitySystem {
     private ComponentMapper<Position> posM;
     //private BlockDefinition[] defs;
 	//private TextureRegion[] tiles;
-    public static TextureRegion white;
+    //public static TextureRegion white;
 	public VoxelSystem() {
 		super(Aspect.getAspectForAll(Player.class, Position.class));
 
 		int x = 12, y = 2, z = 2;
-		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13, white);
+		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
 		voxelWorld = new VoxelWorld(x, y, z,
 				new GreedyMesher(batch)
 				//new SimpleMesher(VoxelWorld.CHUNK_SIZE_X, VoxelWorld.CHUNK_SIZE_Y, VoxelWorld.CHUNK_SIZE_Z)
@@ -60,7 +61,11 @@ public class VoxelSystem extends EntitySystem {
     @Override
     public void initialize(){
         posM = world.getMapper(Position.class);
-
+        AssetsSystem assetsSys = world.getSystem(AssetsSystem.class);
+        TextureAtlas tiles = assetsSys.getTextureAtlas("tiles");
+        TextureAtlas.AtlasRegion white = tiles.findRegion("air");
+        MeshBatcher.whiteTextureU = white.getU();
+        MeshBatcher.whiteTextureV = white.getV();
     }
 
 }

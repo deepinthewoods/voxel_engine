@@ -74,7 +74,7 @@ public class EngineScreen implements Screen{
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 		
-		skin = new Skin(Gdx.files.internal("data/skin/Holo-dark-mdpi.json"));
+		skin = new Skin(Gdx.files.internal("data/uiskin.json"));
 		stage = new Stage();
 		spriteBatch = new SpriteBatch();
         //stage.getSpriteBatch().getProjectionMatrix().setToOrtho2D(0,0,w,h);

@@ -1,5 +1,6 @@
 package com.niz.ui.elements;
 
+import com.artemis.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -11,13 +12,13 @@ import com.niz.ui.AttributeObserver;
 /**
  * Created by niz on 27/05/2014.
  */
-public class AttributeDisplayElement extends UIElement {
+public class AttributeDisplay extends UIElement {
     //public String stat;
     private transient Label valueLabel;
    // private transient int statHash;
     private transient AttributeObserver obs;
 
-    public AttributeDisplayElement(){
+    public AttributeDisplay(){
 
         observers = new AutoObserver[1];
         AttributeObserver o = new AttributeObserver();
@@ -27,7 +28,7 @@ public class AttributeDisplayElement extends UIElement {
     }
 
     @Override
-    protected void onInit(Skin skin, AssetsSystem assets) {
+    protected void onInit(Skin skin, AssetsSystem assets, World world) {
         obs = (AttributeObserver) observers[0];
         //statHash = Hash.hash(stat);
         //Button b = new Button(skin);

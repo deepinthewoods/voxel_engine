@@ -4,10 +4,8 @@ package com.niz.factories;
 import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -21,17 +19,12 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.ui.ColorPicker;
-import com.niz.ui.ColorPickerButton;
+
 import com.niz.EngineScreen;
-import com.niz.RayCaster;
 import com.niz.actions.AJump;
 import com.niz.actions.AStand;
 import com.niz.actions.ActionList;
@@ -63,73 +56,7 @@ public class GeneralFactory extends GameFactory{
 
 
 
-	public void newGame(World world, Stage stage) {
-		//Gdx.app.log(TAG, "NEW GAME");
-		
-		VoxelSystem voxel = world.getSystem(VoxelSystem.class);
-		setDefaultMap(voxel.voxelWorld);
-        AssetsSystem as = world.getSystem(AssetsSystem.class);
 
-
-        playerModel(as);
-
-
-        stage.addActor(dragger);
-
-        VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
-
-
-        Entity e = world.createEntity();
-		world.addEntity(e);
-		
-		Position pos = e.add(Position.class);
-		pos.pos.set(0f, 5, .5f);
-		e.add(Physics.class);
-		e.add(AABBBody.class).ys = .75f;
-		e.add(Brain.class).getShortTarget().set(100000, 0, 0);
-		
-		Move move = e.add(Move.class);
-		move.jumpStrength = 1.5f;
-		ActionList actionList = e.add(ActionComponent.class).action;
-		actionList.actions.add(AStand.class);
-		
-		
-		ModelInfo mod = e.add(ModelInfo.class);
-		AnimationController animController = new AnimationController(playerModel);
-		mod.set(playerModel, animController );
-		
-
-		e.add(Player.class);
-		e.add(CameraInfluencer.class);
-
-		
-		
-		e.add(PositionRollingAverage.class).size = 2;//rolling average of position
-		e.add(VelocityPredictor.class).scale = 240f;
-		e.get(VelocityPredictor.class).y = false;
-		e.add(VelocityRollingAverage.class).size = 100;
-
-		e.add(DebugVector.class).add(e.get(VelocityRollingAverage.class).result, Color.CYAN);
-
-
-		Entity camC = world.createEntity();
-		camC.add(CameraController.class);
-		camC.add(Position.class);
-
-	
-		world.addEntity(camC);
-		
-		Entity tester = world.createEntity();
-		tester.add(Position.class).pos.set(0,0,1);
-		//tester.add(DebugPosition.class);
-		world.addEntity(tester);
-
-        Camera camera = world.getSystem(CameraSystem.class).camera;
-        camera.position.set(0,16,16);
-        camera.rotate(50, -1, 0, 0);
-		
-		
-	}
 
 
 	private boolean getComponentFromName(String string) {

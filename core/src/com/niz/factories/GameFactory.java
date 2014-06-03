@@ -1,11 +1,14 @@
 package com.niz.factories;
 
 import com.artemis.Component;
+import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -13,12 +16,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
+import com.niz.actions.AStand;
+import com.niz.actions.ActionList;
+import com.niz.component.*;
 import com.niz.component.systems.*;
-import com.niz.ui.EdgeUIs.EdgeUI;
-import com.niz.ui.EdgeUIs.TestUI;
+import com.niz.ui.edgeUI.EdgeUI;
+import com.niz.ui.edgeUI.TestUI;
 
 public abstract class GameFactory {
     public static final String path = "data/";
@@ -39,9 +47,8 @@ public abstract class GameFactory {
         //ass.postProcess(assets);
 
         world.setSystem(assetsSys);
-        TextureAtlas tiles = assetsSys.getTextureAtlas("tiles");
-        VoxelSystem.white = tiles.findRegion("air");
-        if (VoxelSystem.white == null) throw new GdxRuntimeException("error");
+
+       // if (VoxelSystem.white == null) throw new GdxRuntimeException("error");
 
         world.setDelta(timeStep);
 
@@ -51,6 +58,7 @@ public abstract class GameFactory {
         systemDef = json.fromJson(SystemDefinition.class, file);
         systemDef.setJson(json);
         systemDef.setSystem(CameraSystem.class);
+        systemDef.setSystem(CameraUpVectorSystem.class);
         systemDef.setSystem(GraphicsSystem.class);
 
         systemDef.setSystem( PhysicsSystem.class );
@@ -66,6 +74,9 @@ public abstract class GameFactory {
 
 
         systemDef.setSystem( PositionRollingAverageSystem.class);
+        //systemDef.setSystem( RotationRollingAverageSystem.class);
+        systemDef.setSystem(UpVectorRollingAverageSystem.class);
+
         systemDef.setSystem( VelocityRollingAverageSystem.class);
         systemDef.setSystem(VelocityPredictionSystem.class);
         systemDef.setDrawSystem(VoxelRenderingSystem.class);
@@ -78,9 +89,11 @@ public abstract class GameFactory {
 
 
         systemDef.setSystem(CameraControllerSystem.class);
-        systemDef.setSystem( CameraInfluenceSystem.class);
+        systemDef.setSystem( CameraPositionInfluenceSystem.class);
+        systemDef.setSystem(CameraLookAtSystem.class);
+        //systemDef.setSystem( CameraRotationInfluenceSystem.class);
         systemDef.setSystem( PositionLimiterSystem.class);
-
+        systemDef.setSystem(VoxelEditingSystem.class);
         //systemDef.preWrite();
         systemDef.procesesSystems(world);
 
@@ -189,6 +202,7 @@ public void init(World world, AssetManager assets, FileHandle file){
                         if (allowedButtons.contains(f.parent().name(), false)){
                             Gdx.app.log("Loop", "button allowed "+f.parent().name());
                             table.add(createMenuButton(f.parent().name(), f, skin, assets, world, table));
+                            table.row();
                         } else {
                             Gdx.app.log("Loop", "button not allowed " + f.parent().name());
 
@@ -216,12 +230,14 @@ public void init(World world, AssetManager assets, FileHandle file){
 
 
                 init(world, assets, f);
+
+                newGame(world);
                 //init(timestep, world, assets, file);
                 table.clear();
                 EdgeUI ui = new TestUI();
                 Stage stage = table.getStage();
                 if (stage == null) throw new GdxRuntimeException("null stage");
-                ui.init(skin, stage, world.getSystem(AssetsSystem.class));
+                ui.init(skin, stage, world.getSystem(AssetsSystem.class), world);
                 String s = json.prettyPrint(ui);
                 Gdx.files.external(f.parent().path()+"/ui.ini").writeString(s, false);
                 Gdx.app.log("gamefactory", s);
@@ -238,6 +254,86 @@ public void init(World world, AssetManager assets, FileHandle file){
 
 
 
+
+
+
+    public void newGame(World world) {
+        //Gdx.app.log(TAG, "NEW GAME");
+
+        VoxelSystem voxel = world.getSystemOrSuperClass(VoxelSystem.class);
+        setDefaultMap(voxel.voxelWorld);
+        AssetsSystem as = world.getSystem(AssetsSystem.class);
+
+
+        //playerModel(as);
+
+
+        VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
+
+
+        Entity e = world.createEntity();
+        world.addEntity(e);
+
+        Position pos = e.add(Position.class);
+        pos.pos.set(0f, 5, .5f);
+       // e.add(Physics.class);
+        //e.add(AABBBody.class).ys = .75f;
+        //e.add(Brain.class).getShortTarget().set(100000, 0, 0);
+
+        //Move move = e.add(Move.class);
+        //move.jumpStrength = 1.5f;
+        ActionList actionList = e.add(ActionComponent.class).action;
+       // actionList.actions.add(AStand.class);
+
+
+        //ModelInfo mod = e.add(ModelInfo.class);
+       // AnimationController animController = new AnimationController(playerModel);
+        //mod.set(playerModel, animController );
+
+
+        e.add(Player.class);
+        e.add(CameraPositionInfluencer.class);
+        //e.add(CameraRotationInfluencer.class);
+
+
+        e.add(PositionRollingAverage.class).size = 100;//rolling average of position
+        e.add(UpVectorRollingAverage.class).size = 100;
+        e.add(UpVector.class).up.set(0,1,0);
+
+        //e.add(VelocityPredictor.class).scale = 240f;
+        //e.get(VelocityPredictor.class).y = false;
+        //e.add(VelocityRollingAverage.class).size = 100;
+
+        //e.add(DebugVector.class).add(e.get(VelocityRollingAverage.class).result, Color.CYAN);
+
+
+        Entity camC = world.createEntity();
+        camC.add(CameraController.class);
+        camC.add(Position.class);
+        //camC.add(UpVector.class);
+        //camC.add(UpVectorRollingAverage.class);
+
+        world.addEntity(camC);
+
+        Entity tester = world.createEntity();
+        tester.add(Position.class).pos.set(0,0,1);
+        //tester.add(DebugPosition.class);
+        world.addEntity(tester);
+
+        Camera camera = world.getSystem(CameraSystem.class).camera;
+        //camera.position.set(0,16,16);
+        //camera.rotate(50, -1, 0, 0);
+        Entity looker = world.createEntity();
+        looker.add(Position.class).pos .set(8,8,8);
+        looker.add(CameraLookAt.class);
+        world.addEntity(looker);
+    }
+
+    private void setDefaultMap(VoxelWorld voxelWorld) {
+        for (int i =0; i < 14; i++)
+        for (int j = 0; j < 14; j++)
+            voxelWorld.set(i,0,j,(byte)1);
+    }
 
 
 }
