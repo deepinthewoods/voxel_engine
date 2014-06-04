@@ -39,16 +39,7 @@ public class ActionList {
 		};
 		//Gdx.app.log(TAG, "size");
 	}
-	
-	
-	
-	void begin(){
-		
-	}
-	
-	void end(){
-		
-	}
+
 
 	public boolean hasAction(Class<? extends Action> class1) {
 		actions.iter();

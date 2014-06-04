@@ -4,11 +4,7 @@ import com.artemis.managers.ComponentManager;
 import com.artemis.managers.EntityManager;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Bits;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pool.Poolable;
-import com.niz.component.Position;
-import com.niz.component.VelocityRollingAverage;
 
 /**
  * The entity class. Cannot be instantiated outside the framework, you must
@@ -38,8 +34,15 @@ public final class Entity implements Poolable {
      * @param id Entity's id.
      */
     public Entity(World world, int id) {
-        this.world = world;
+        this(world);
         this.id = id;
+    }
+    /**
+     * Create an entity for the specified world.
+     * @param world World this entity belongs to.
+     */
+    public Entity(World world) {
+        this.world = world;
         this.entityManager = world.getEntityManager();
         this.componentManager = world.getComponentManager();
         systemBits = new Bits();
@@ -106,7 +109,7 @@ public final class Entity implements Poolable {
 
     /**
      * Remove component by its type.
-     * @param type
+     * @param type Type of component to remove.
      * 
      * @return this entity for chaining.
      */
@@ -168,7 +171,7 @@ public final class Entity implements Poolable {
     }
 
     /**
-     * Returns an array of Entity components. This is a generated array,
+     * @return An array of Entity components. This is a generated array,
      * and modifying it will not have an effect on components belonging
      * to this entity.
      * 
@@ -240,16 +243,4 @@ public final class Entity implements Poolable {
     public int hashCode() {
         return id;
     }
-
-    public <T extends Component> T add(Class<T> clas) {
-        T c = world.createComponent(clas);
-        addComponent(c);
-        return c;
-    }
-
-    public <T extends Component> T get(Class<T> clas) {
-        return getComponent(clas);
-    }
-
-
 }

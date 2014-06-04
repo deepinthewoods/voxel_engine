@@ -9,24 +9,22 @@ import com.badlogic.gdx.utils.Pools;
 public class EntityDefinition {
     String name;
     int id;
-    ComponentArray components;
+    ComponentArray components = new ComponentArray();
 
     public void setFrom(Entity e){
         components.c = e.getComponents();
-
     }
 
-    public void addEntityComponentsAndFree(Entity e){
+    public void setEntityFromThisOnce(Entity e){
         for (Component c : components.c){
             e.addComponent(c);
         }
         components.c.clear();
         Pools.free(components);
         components = null;
-
     }
 
-    public void addComponentsFrom(Entity e){
+    public void setEntityFromThisRepeatable(Entity e){
         for (Component c : components.c){
             e.add(c.getClass());
         }

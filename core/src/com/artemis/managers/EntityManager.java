@@ -35,7 +35,7 @@ public class EntityManager extends Manager {
 
             @Override
             protected Entity newObject() {
-                return new Entity(world, identifierPool.checkOut());
+                return new Entity(world);
             }
 
             @Override

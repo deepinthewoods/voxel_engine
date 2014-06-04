@@ -2,13 +2,12 @@ package com.niz.factories;
 
 import com.artemis.Component;
 import com.artemis.Entity;
+import com.artemis.EntityDefinition;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -21,7 +20,6 @@ import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
-import com.niz.actions.AStand;
 import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.component.systems.*;
@@ -30,6 +28,7 @@ import com.niz.ui.edgeUI.TestUI;
 
 public abstract class GameFactory {
     public static final String path = "data/";
+    private static final String TAG = "game factory";
     private SystemDefinition systemDef;
     AssetsSystem assetsSys;// = new AssetsSystem(assets);
 
@@ -43,7 +42,7 @@ public abstract class GameFactory {
         ass.process(world, assets);
         assetsSys.addDef(ass);
     }
-    private void systems(float timeStep, World world, AssetManager assets, FileHandle file) {
+    private void systemDefs(float timeStep, World world, AssetManager assets, FileHandle file) {
         //ass.postProcess(assets);
 
         world.setSystem(assetsSys);
@@ -104,11 +103,10 @@ public abstract class GameFactory {
 public void init(World world, AssetManager assets, FileHandle file){
 	
 	
-	systems(1f, world, assets, file);
+	systemDefs(1f, world, assets, file);
 	
 	world.initialize();
 	world.initializeDraw();
-
 
 }
 
@@ -228,10 +226,25 @@ public void init(World world, AssetManager assets, FileHandle file){
                 //wait for assets to be loaded
                 assetsSys.processDefinitions();
 
-
                 init(world, assets, f);
 
                 newGame(world);
+                //load game instead
+
+                world.process();
+                Array<EntityDefinition> eDefArray = new Array<EntityDefinition>();
+                Json entityJson = new Json();
+                for (Entity e : world.getEntityManager().entities){
+                    Gdx.app.log(TAG, "writing entity"+e);
+                    if (e == null) continue;
+                    EntityDefinition eDef = new EntityDefinition();
+                    eDef.setFrom(e);
+                    eDefArray.add(eDef);
+                }
+                String entities = entityJson.prettyPrint(eDefArray);
+                Gdx.files.external(f.parent().path()+"/entity.dat").writeString(entities, false);
+                Gdx.app.log(TAG, "entities  "+entities);
+
                 //init(timestep, world, assets, file);
                 table.clear();
                 EdgeUI ui = new TestUI();
@@ -239,7 +252,7 @@ public void init(World world, AssetManager assets, FileHandle file){
                 if (stage == null) throw new GdxRuntimeException("null stage");
                 ui.init(skin, stage, world.getSystem(AssetsSystem.class), world);
                 String s = json.prettyPrint(ui);
-                Gdx.files.external(f.parent().path()+"/ui.ini").writeString(s, false);
+                //Gdx.files.external(f.parent().path()+"/ui.ini").writeString(s, false);
                 Gdx.app.log("gamefactory", s);
 
             }

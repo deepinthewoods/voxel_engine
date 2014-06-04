@@ -533,7 +533,6 @@ public class VoxelChunk {
                     i++;
 				}
 				mask[maskIndex] = mx;
-                if (mx != 0)Gdx.app.log(TAG, "mask"+mx);
 			}
 			
 		}

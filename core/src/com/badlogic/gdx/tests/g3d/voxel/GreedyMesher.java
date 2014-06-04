@@ -456,7 +456,7 @@ public class GreedyMesher implements Mesher {
                 int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
                 int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-          
+
                 int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
                 int ao00T = visibilityMask[(y+2)*my+(z+1)];
 

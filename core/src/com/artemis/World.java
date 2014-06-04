@@ -6,7 +6,6 @@ import com.artemis.managers.Manager;
 import com.artemis.systems.EntitySystem;
 import com.artemis.systems.event.EventDeliverySystem;
 import com.artemis.systems.event.SystemEvent;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -14,13 +13,13 @@ import com.badlogic.gdx.utils.ObjectSet;
 
 /**
  * The primary instance for the framework. It contains all the managers.
- *
+ * 
  * You must use this to create, delete and retrieve entities.
- *
+ * 
  * It is also important to set the delta each game loop iteration, and initialize before game loop.
- *
+ * 
  * @author Arni Arent
- *
+ * 
  */
 public class World implements Disposable {
 
@@ -51,7 +50,7 @@ public class World implements Disposable {
 
     protected EventDeliverySystem eventSystem;
     protected Array<EntitySystem> systems;
-    protected Array<EntitySystem> drawSystemsArray;
+
     public World() {
         this(new ComponentManager(), new EntityManager());
     }
@@ -59,14 +58,13 @@ public class World implements Disposable {
     /**
      * Create a world with a specified component and entity
      * manager.
-     *
+     * 
      * @param cm ComponentManager to use.
      * @param em EntityManager to use.
      */
     public World(ComponentManager cm, EntityManager em) {
         managers = new Array<Manager>();
         systems = new Array<EntitySystem>();
-        drawSystemsArray = new Array<EntitySystem>();
 
         added = new ObjectSet<Entity>();
         changed = new ObjectSet<Entity>();
@@ -136,7 +134,7 @@ public class World implements Disposable {
 
     /**
      * Returns a manager that takes care of all the entities in the world.
-     *
+     * 
      * @return entity manager.
      */
     public EntityManager getEntityManager() {
@@ -145,7 +143,7 @@ public class World implements Disposable {
 
     /**
      * Returns a manager that takes care of all the components in the world.
-     *
+     * 
      * @return component manager.
      */
     public ComponentManager getComponentManager() {
@@ -155,8 +153,10 @@ public class World implements Disposable {
     /**
      * Add a manager into this world. It can be retrieved later.
      * World will notify this manager of changes to entity.
-     *
+     * 
+     * @param <T> Manager type
      * @param manager to be added
+     * @return the manager that was added
      */
     public <T extends Manager> T setManager(T manager) {
         managers.add(manager);
@@ -166,10 +166,9 @@ public class World implements Disposable {
 
     /**
      * Returns a manager of the specified type.
-     *
-     * @param <T>
-     * @param managerType
-     *            class type of the manager
+     * 
+     * @param <T> Manager type
+     * @param managerType class type of the manager
      * @return the manager
      */
     @SuppressWarnings("unchecked")
@@ -192,7 +191,7 @@ public class World implements Disposable {
 
     /**
      * Time since last game loop.
-     *
+     * 
      * @return delta time since last game loop.
      */
     public float getDelta() {
@@ -201,7 +200,7 @@ public class World implements Disposable {
 
     /**
      * You must specify the delta for the game here.
-     *
+     * 
      * @param delta time since last game loop.
      */
     public void setDelta(float delta) {
@@ -210,7 +209,7 @@ public class World implements Disposable {
 
     /**
      * Adds a entity to this world.
-     *
+     * 
      * @param e entity
      */
     public void addEntity(Entity e) {
@@ -221,7 +220,7 @@ public class World implements Disposable {
      * Ensure all systems are notified of changes to this entity.
      * If you're adding a component to an entity after it's been
      * added to the world, then you need to invoke this method.
-     *
+     * 
      * @param e entity
      */
     public void changedEntity(Entity e) {
@@ -230,8 +229,8 @@ public class World implements Disposable {
 
     /**
      * Delete the entity from the world.
-     *
-     * @param e entity
+     * 
+     * @param e Entity to remove
      */
     public void deleteEntity(Entity e) {
         if (!deleted.contains(e)) {
@@ -246,6 +245,8 @@ public class World implements Disposable {
     /**
      * (Re)enable the entity in the world, after it having being disabled.
      * Won't do anything unless it was already disabled.
+     * 
+     * @param e entity to enable
      */
     public void enable(Entity e) {
         enable.add(e);
@@ -254,6 +255,8 @@ public class World implements Disposable {
     /**
      * Disable the entity from being processed. Won't delete it, it will
      * continue to exist but won't get processed.
+     * 
+     * @param e entity to disable
      */
     public void disable(Entity e) {
         disable.add(e);
@@ -264,8 +267,8 @@ public class World implements Disposable {
      * Create and return a new or reused entity instance.
      * Will NOT add the entity to the world, use World.addEntity(Entity)
      * for that.
-     *
-     * @return entity
+     * 
+     * @return created entity
      */
     public Entity createEntity() {
         return em.createEntityInstance();
@@ -273,6 +276,8 @@ public class World implements Disposable {
 
     /**
      * Create and return a new or reused component instance of specified type.
+     * 
+     * @param <T> Type of component
      * @param type Type of component to return
      * @return Created component
      */
@@ -283,7 +288,8 @@ public class World implements Disposable {
     /**
      * Creates an instance of an event of a specified type. The event
      * needs to be posted to the world in order to be propagated to listeners.
-     *
+     * 
+     * @param <T> Type of event
      * @param type Type of event to create.
      * @return Event of specified type.
      */
@@ -293,9 +299,9 @@ public class World implements Disposable {
 
     /**
      * Get a entity having the specified id.
-     *
-     * @param entityId
-     * @return entity
+     * 
+     * @param entityId id of the entity to retrieve.
+     * @return entity Entity or null.
      */
     public Entity getEntity(int entityId) {
         return em.getEntity(entityId);
@@ -303,9 +309,9 @@ public class World implements Disposable {
 
     /**
      * Post event to all event systems.
-     *
-     * @param sendingSystem
-     * @param event
+     * 
+     * @param sendingSystem System that is sending the event.
+     * @param event Event being sent
      */
     public void postEvent(EntitySystem sendingSystem, SystemEvent event) {
         if (eventSystem != null) {
@@ -315,7 +321,8 @@ public class World implements Disposable {
 
     /**
      * Retrieve events from all systems. The set ensures that events are not repeated.
-     *
+     * 
+     * @param <T> Type of event
      * @param pollingSystem System that is requesting the events.
      * @param type Type of events requested.
      * @param events Event set to populate with events
@@ -329,7 +336,7 @@ public class World implements Disposable {
 
     /**
      * Gives you all the systems in this world for possible iteration.
-     *
+     * 
      * @return all entity systems in world.
      */
     public Array<EntitySystem> getSystems() {
@@ -338,20 +345,26 @@ public class World implements Disposable {
 
     /**
      * Returns the event system, or null if not set.
-     *
+     * 
      * @return Event System for the world.
      */
     public EventDeliverySystem getEventDeliverySystem() {
         return eventSystem;
     }
 
+    /**
+     * Set the system for event delivery.
+     * 
+     * @param eventSystem Event delivery system
+     */
     public void setEventDeliverySystem(EventDeliverySystem eventSystem) {
         this.eventSystem = eventSystem;
     }
 
     /**
      * Adds a system to this world that will be processed by World.process()
-     *
+     * 
+     * @param <T> Type of entity system
      * @param system the system to add.
      * @return the added system.
      */
@@ -369,7 +382,8 @@ public class World implements Disposable {
 
     /**
      * Will add a system to this world.
-     *
+     * 
+     * @param <T> Type of entity system
      * @param system the system to add.
      * @param passive wether or not this system will be processed by World.process()
      * @return the added system.
@@ -394,7 +408,7 @@ public class World implements Disposable {
 
     /**
      * Notify systems of changes to the specified entity.
-     *
+     * 
      * @param performer The performer that notifies the systems.
      * @param e Entity that has been affected.
      */
@@ -406,7 +420,7 @@ public class World implements Disposable {
 
     /**
      * Notify managers of changes to the specified entity.
-     *
+     * 
      * @param performer The performer that notifies the managers.
      * @param e Entity that has been affected.
      */
@@ -418,7 +432,8 @@ public class World implements Disposable {
 
     /**
      * Retrieve a system for specified system type.
-     *
+     * 
+     * @param <T> Type of entity system
      * @param type type of system.
      * @return instance of the system in this world.
      */
@@ -436,7 +451,7 @@ public class World implements Disposable {
 
     /**
      * Performs an action on each entity.
-     *
+     * 
      * @param entities
      * @param performer
      */
@@ -480,7 +495,8 @@ public class World implements Disposable {
     /**
      * Retrieves a ComponentMapper instance for fast retrieval of
      * components from entities.
-     *
+     * 
+     * @param <T> Type of component
      * @param type of component to get mapper for.
      * @return mapper for specified component type.
      */
@@ -511,7 +527,6 @@ public class World implements Disposable {
             eventSystem = null;
         }
     }
-
 
     public void initializeDraw(){
         for (int i = 0; i < drawSystemsArray.size; i++) {
