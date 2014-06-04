@@ -256,7 +256,7 @@ public class MeshBatcher{
             float c;// = GreedyMesher.lightValues[colorArray[i]];//highlightColors[i];//
             float delta = colorArray[i]/15f;
             if (delta > 1f) delta = 1f;
-            tmpC.set(Color.BLACK).lerp(blockColors[voxel.def.tileIndex], delta);
+            tmpC.set(blockColors[voxel.def.tileIndex]).mul(GreedyMesher.lightColors[colorArray[i]]);
             c = tmpC.toFloatBits();
             //Gdx.app.log(TAG, "verts"+width+"  "+height);
             cachedVerts[cacheProgress++] = v.x;

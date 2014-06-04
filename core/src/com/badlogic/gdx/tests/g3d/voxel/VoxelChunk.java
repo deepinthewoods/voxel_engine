@@ -17,6 +17,7 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;
@@ -469,25 +470,28 @@ public class VoxelChunk {
 
                 maskIndex = z+1+(y+1)*yM;
                 mx = 0;//mask[maskIndex];
-                boolean flip = false;
-                for(int x = -1; x < width+2; x+= width+1, flip = !flip) {
+
+                for(int x = -1; x < width+2; x+= width+1) {
                   //  Gdx.app.log(TAG, "x "+x + " shitf "+(2 << -1));
                     int bx = (int) (x + offset.x), by = (int) (y + offset.y), bz = (int) (z + offset.z);
 
                     int b = world.get(bx,by,bz);
                     if (b > 0){
-                        if (x < 0) mx &= 1;
+                        if (x < 0) mx |= 1;
                         else
-                            mx &= 2<<x;
+                            mx |= 2<<x;
                     }
                     BlockDefinition def = blockDef(b);
+                    if (x >= 0 && y >= 0 && z >= 0)
+                    for (int faceID = 0; faceID < 6; faceID++){
+                        VoxelFace face = faces[x][y][z][faceID];
 
-                    //light totals for verts
-                    if (flip){
-                        light[x + 1 + 1][y + 1][z + 1 + 1] += def.lightValue;
+                        face.set(def, faceID, b);
                     }
-                    else
+                    //light totals for verts
+
                         light[x + 1 + 1][y + 1][z + 1 + 1] += def.lightValue;
+
                     light[x +  1][y + 1][z +  1] += def.lightValue;
                     light[x +  1][y + 1][z + 1 + 1] += def.lightValue;
                     light[x + 1 + 1][y + 1][z +  1] += def.lightValue;
@@ -509,15 +513,15 @@ public class VoxelChunk {
 				for(int x = 0; x < width; x++) {
 					int b = voxels[i];
 					if (b > 0){
-						mx &= 2<<x;
+						mx |= 2<<x;
+
+                        //Gdx.app.log(TAG, "inc mx"+mx);
 					}
 					BlockDefinition def = blockDef(b);
 
 					for (int faceID = 0; faceID < 6; faceID++){
 						VoxelFace face = faces[x][y][z][faceID];
-                        if (faceID < 0){
 
-                        }
 						face.set(def, faceID, b);
 					}
 					//light totals for verts
@@ -529,7 +533,7 @@ public class VoxelChunk {
                     i++;
 				}
 				mask[maskIndex] = mx;
-
+                if (mx != 0)Gdx.app.log(TAG, "mask"+mx);
 			}
 			
 		}
@@ -546,12 +550,17 @@ public class VoxelChunk {
                     int bx = (int) (x + offset.x), by = (int) (y + offset.y), bz = (int) (z + offset.z);
                     int b = world.get(bx,by,bz);
                     if (b > 0){
-                        if (x == -1) mx &= 1;
+                        if (x == -1) mx |= 1;
                         else
-                            mx &= 2<<x;
+                            mx |= 2<<x;
                     }
                     BlockDefinition def = blockDef(b);
+                    if (x >= 0 && y >= 0 && z >= 0)
+                        for (int faceID = 0; faceID < 6; faceID++){
+                            VoxelFace face = faces[x][y][z][faceID];
 
+                            face.set(def, faceID, b);
+                        }
                     //light totals for verts
                     light[x + 1 + 1][y + 1][z + 1 + 1] += def.lightValue;
                     light[x +  1][y + 1][z +  1] += def.lightValue;
@@ -560,6 +569,7 @@ public class VoxelChunk {
 
                 }
                 mask[maskIndex] = mx;
+
                 mx = 0;
             }
 
@@ -577,12 +587,17 @@ public class VoxelChunk {
 
                     int b = world.get(bx, by, bz);
                     if (b > 0){
-                        if (x == -1) mx &= 1;
+                        if (x == -1) mx |= 1;
                         else
-                            mx &= 2<<x;
+                            mx |= 2<<x;
                     }
                     BlockDefinition def = blockDef(b);
+                    if (x >= 0 && y >= 0 && z >= 0)
+                        for (int faceID = 0; faceID < 6; faceID++){
+                            VoxelFace face = faces[x][y][z][faceID];
 
+                            face.set(def, faceID, b);
+                        }
                     //light totals for verts
                     light[x + 1 + 1][y + 1][z + 1 + 1] += def.lightValue;
                     light[x +  1][y + 1][z +  1] += def.lightValue;

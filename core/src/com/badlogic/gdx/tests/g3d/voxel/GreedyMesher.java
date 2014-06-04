@@ -1,6 +1,7 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -59,6 +60,7 @@ public class GreedyMesher implements Mesher {
      * then attributes like sunlight, artificial light which face per face or even per vertex.
      */
     private final VoxelFace [][][][] voxels = new VoxelFace [CHUNK_WIDTH+1][CHUNK_HEIGHT+1][CHUNK_WIDTH+1][6];
+    protected static Color[] lightColors;
 
     protected MeshBatcher meshBatch;
  
@@ -207,15 +209,15 @@ public class GreedyMesher implements Mesher {
     public void readBlocks(VoxelChunk chunk, VoxelWorld voxelWorld){
     	
     	//light level cache, per vert
-    	
+
     	for (int i = 0; i < CHUNK_WIDTH+2; i++) {
-    		
+
     		for (int j = 0; j < CHUNK_HEIGHT+2; j++) {
-    			
+
     			for (int k = 0; k < CHUNK_WIDTH+2; k++) {
-    	
+
     				lightCache[i][j][k] = 0;
-    				
+
     	}}}
     	
 		chunk.visibility(visibilityMask, lightCache, voxels, voxelWorld);
@@ -230,30 +232,44 @@ public class GreedyMesher implements Mesher {
 				
 				
 				int mask = visibilityMask[(y+1)*my+(z+1)];
-				
 				int maskNorth = visibilityMask[(y+1)*my+(z+2)];
 				int maskSouth = visibilityMask[(y+1)*my+(z)];
 				int maskTop = visibilityMask[(y+2)*my+(z+1)];
 				int maskBottom = visibilityMask[(y)*my+(z+1)];
+                int maskEast = (mask>>1);
+                int maskWest = (mask<<1);
 
-                int maskXY0 = visibilityMask[(y+1)*my+(z+2)];
+                int aoNE = maskNorth >>1;
+                int aoN = maskNorth;
+                int aoE = maskEast;
+                int aoC = mask;
 
+                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) >>1;
+                int aoNT = visibilityMask[(y+2)*my+(z+2)];
+                int aoET = maskTop>>1;
+                int aoCT = visibilityMask[(y+2)*my+(z+1)];
 
                 maskNorth &= mask;
                 maskSouth &= mask;
                 maskTop &= mask;
                 maskBottom &= mask;
-                int maskEast = mask & (mask<<1);
-                int maskWest = mask & (mask>>1);
-				
+                maskEast &= mask;
+                maskWest &= mask;
+
+
 				for(int x = 0; x < CHUNK_WIDTH; x++) {
     				//for (int faceID = 0; faceID < 6; faceID++){
-    				int light00 = lightCache[x+2][y+2][z+2]/4
-                            , light01 = light00, light10 = light00
-                            , light11 = light00
-                            , lightTop00 = light00, lightTop01 = light00
-                            , lightTop10 = light00, lightTop11 = light00;
-                    int lightLower = lightCache[x+2][y+1][z+2]/4;
+    				int
+                              light00 = ao(aoN>>(x+1)& 1,  aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
+                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1,  aoE>>(x+1)& 1)
+                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1,  aoN>>(x+1)& 1)
+                            , light11 = ao(aoN>>(x+1)& 1,  aoE>>(x+1)& 1,  aoC>>(x+1)& 1)
+                            , lightTop00 = ao(aoNT>>(x+1)& 1,  aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
+                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1,  aoET>>(x+1)& 1)
+                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1,  aoNT>>(x+1)& 1)
+                            , lightTop11 = ao(aoNT>>(x+1)& 1,  aoET>>(x+1)& 1,  aoCT>>(x+1)& 1);
+;
+
 
                     if ((maskTop>>(x+1)& 1 )> 0 ){
                         voxels[x][y][z][TOP].transparent = true;
@@ -281,39 +297,43 @@ public class GreedyMesher implements Mesher {
 
 
     				//00
-    				voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
-    				voxels[x][y+1][z][EAST].vertex(1,lightTop10);
-    				voxels[x][y+1][z][BOTTOM].vertex(3,light00);
-    				//01
-    				voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
-    				voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-    				voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
-    				//10
-    				voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
-    				voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-    				voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
-    				//11
-    				voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-    				voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-    				voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
-    				
-    				//00
-    				voxels[x][y][z][NORTH].vertex(3,light01);
-    				voxels[x][y][z][EAST].vertex(3,light10);
-    				voxels[x][y][z][TOP].vertex(3,lightTop00);
-    				//01
-    				voxels[x][y][z+1][SOUTH].vertex(3,light00);
-    				voxels[x][y][z+1][EAST].vertex(2,light11);
-    				voxels[x][y][z+1][TOP].vertex(1,lightTop01);
-    				//10
-    				voxels[x+1][y][z][NORTH].vertex(1,light11);
-    				voxels[x+1][y][z][WEST].vertex(3,light00);
-    				voxels[x+1][y][z][TOP].vertex(2,lightTop10);
-    				//11
-    				voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
-    				voxels[x+1][y][z+1][WEST].vertex(2,light01);
-    				voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
-    				
+                    voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
+                    voxels[x][y][z+1][TOP].vertex(1,lightTop01);
+
+                    voxels[x][y+1][z][EAST].vertex(1,lightTop10);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
+                    voxels[x+1][y][z][TOP].vertex(2,lightTop10);
+
+                    voxels[x][y+1][z][BOTTOM].vertex(3,light00);
+                    voxels[x+1][y][z][WEST].vertex(3,light00);
+                    voxels[x][y][z+1][SOUTH].vertex(3,light00);
+                    //01
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
+                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
+                    voxels[x][y][z][TOP].vertex(3,lightTop00);
+
+                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
+                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
+                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
+
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
+                    voxels[x][y][z][NORTH].vertex(3,light01);
+                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
+                    //10
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
+                    voxels[x][y][z][EAST].vertex(3,light10);
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
+                    //11
+
+                    //00
+                    //01
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
+                    voxels[x][y][z+1][EAST].vertex(2,light11);
+                    voxels[x+1][y][z][NORTH].vertex(1,light11);
+                    //10
+                    //11
+
     				
     				
     				
@@ -325,13 +345,38 @@ public class GreedyMesher implements Mesher {
     //BOTTOMS
         for(int y = -1; y < 0; y++) {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
+                int mask = visibilityMask[(y+1)*my+(z+1)];
+                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                int maskSouth = visibilityMask[(y+1)*my+(z)];
+                int maskTop = visibilityMask[(y+2)*my+(z+1)];
+//                int maskBottom = visibilityMask[(y)*my+(z+1)];
+                int maskEast = (mask<<1);
+               // int maskWest = (mask>>1);
+
+                int aoNE = maskNorth <<1;
+                int aoN = maskNorth;
+                int aoE = maskEast;
+                int aoC = mask;
+
+                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
+                int aoNT = visibilityMask[(y+2)*my+(z+2)];
+                int aoET = maskTop<<1;
+                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+
+
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+2][z+2]/4
-                            , light01 = light00, light10 = light00
-                            , light11 = light00
-                            , lightTop00 = light00, lightTop01 = light00
-                            , lightTop10 = light00, lightTop11 = light00;
+                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
+                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
+                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
+                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
+                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
+                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
+                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
+                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
+
+
+
                     //00
                     voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
                     voxels[x][y+1][z][EAST].vertex(1,lightTop10);
@@ -354,13 +399,35 @@ public class GreedyMesher implements Mesher {
 
         for(int y = 0; y < CHUNK_HEIGHT; y++) {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
+                int mask = visibilityMask[(y+1)*my+(z+1)];
+                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                int maskEast = (mask<<1);
+
+                int aoNE = maskNorth <<1;
+                int aoN = maskNorth;
+                int aoE = maskEast;
+                int aoC = mask;
+
+                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
+                int aoNT = visibilityMask[(y+2)*my+(z+2)];
+                int aoET = maskTop<<1;
+                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+
+
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+2][z+2]/4
-                            , light01 = light00, light10 = light00
-                            , light11 = light00
-                            , lightTop00 = light00, lightTop01 = light00
-                            , lightTop10 = light00, lightTop11 = light00;
+                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
+                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
+                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
+                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
+                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
+                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
+                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
+                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
+
+
+
 
                     //10
                     voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
@@ -386,13 +453,38 @@ public class GreedyMesher implements Mesher {
         //SOUTHS
         for(int y = 0; y < CHUNK_HEIGHT; y++) {
             for(int z = -1; z < 0; z++) {
+                int mask = visibilityMask[(y+1)*my+(z+1)];
+                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                int maskSouth = visibilityMask[(y+1)*my+(z)];
+                int maskTop = visibilityMask[(y+2)*my+(z+1)];
+               // int maskBottom = visibilityMask[(y)*my+(z+1)];
+                int maskEast = (mask<<1);
+                //int maskWest = (mask>>1);
+
+                int aoNE = maskNorth <<1;
+                int aoN = maskNorth;
+                int aoE = maskEast;
+                int aoC = mask;
+
+                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
+                int aoNT = visibilityMask[(y+2)*my+(z+2)];
+                int aoET = maskTop<<1;
+                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+
+
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+2][z+2]/4
-                            , light01 = light00, light10 = light00
-                            , light11 = light00
-                            , lightTop00 = light00, lightTop01 = light00
-                            , lightTop10 = light00, lightTop11 = light00;
+                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
+                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
+                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
+                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
+                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
+                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
+                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
+                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
+
+
+
 //00
                     //01
                     voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
@@ -419,13 +511,33 @@ public class GreedyMesher implements Mesher {
         //0 diagonal x
         for(int y = -1; y < 0; y++) {
             for(int z = -1; z < 0; z++) {
+                int mask = visibilityMask[(y+1)*my+(z+1)];
+                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                int maskEast = (mask<<1);
+
+                int aoNE = maskNorth <<1;
+                int aoN = maskNorth;
+                int aoE = maskEast;
+                int aoC = mask;
+
+                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
+                int aoNT = visibilityMask[(y+2)*my+(z+2)];
+                int aoET = maskTop<<1;
+                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+
+
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+2][z+2]/4
-                            , light01 = light00, light10 = light00
-                            , light11 = light00
-                            , lightTop00 = light00, lightTop01 = light00
-                            , lightTop10 = light00, lightTop11 = light00;
+                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
+                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
+                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
+                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
+                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
+                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
+                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
+                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
+
 
 
 
@@ -446,13 +558,40 @@ public class GreedyMesher implements Mesher {
         //diag y
         for(int y = 0; y < CHUNK_HEIGHT; y++) {
             for(int z = -1; z < 0; z++) {
+                int mask = visibilityMask[(y+1)*my+(z+1)];
+                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                int maskSouth = visibilityMask[(y+1)*my+(z)];
+                int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                int maskBottom = visibilityMask[(y)*my+(z+1)];
+                int maskEast = (mask<<1);
+                int maskWest = (mask>>1);
+
+                int aoNE = maskNorth <<1;
+                int aoN = maskNorth;
+                int aoE = maskEast;
+                int aoC = mask;
+
+                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
+                int aoNT = visibilityMask[(y+2)*my+(z+2)];
+                int aoET = maskTop<<1;
+                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+
+                maskNorth &= mask;
+                maskSouth &= mask;
+                maskTop &= mask;
+                maskBottom &= mask;
+                maskEast &= mask;
+                maskWest &= mask;
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+2][z+2]/4
-                            , light01 = light00, light10 = light00
-                            , light11 = light00
-                            , lightTop00 = light00, lightTop01 = light00
-                            , lightTop10 = light00, lightTop11 = light00;
+                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
+                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
+                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
+                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
+                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
+                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
+                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
+                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
 
                     //11
                     voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
@@ -471,13 +610,32 @@ public class GreedyMesher implements Mesher {
         //diag z
         for(int y = -1; y < 0; y++) {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
+                int mask = visibilityMask[(y+1)*my+(z+1)];
+                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                int maskEast = (mask<<1);
+
+                int aoNE = maskNorth <<1;
+                int aoN = maskNorth;
+                int aoE = maskEast;
+                int aoC = mask;
+
+                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
+                int aoNT = visibilityMask[(y+2)*my+(z+2)];
+                int aoET = maskTop<<1;
+                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+
+
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = lightCache[x+2][y+2][z+2]/4
-                            , light01 = light00, light10 = light00
-                            , light11 = light00
-                            , lightTop00 = light00, lightTop01 = light00
-                            , lightTop10 = light00, lightTop11 = light00;
+                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
+                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
+                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
+                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
+                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
+                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
+                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
+                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
                     //10
                     voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
                     voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
@@ -490,19 +648,17 @@ public class GreedyMesher implements Mesher {
 
                 }}}//}
     }
-    	
-    	 	
-    	
-    	
-    	
-    
-    
-    
-		
-		
-		
-		
-		
+
+    private int ao(int side1, int side2, int corner) {
+        if (side1 != 0 || side2 != 0 || corner != 0)
+            Gdx.app.log(TAG, "side1 "+side1+" side2 "+side2+" corner "+corner);
+        if((side1 & side2) == 1) {
+            return 0;
+        }
+        return (3 - (side1 + side2 + corner))*5;
+    }
+
+
 //		if(voxels[i+topOffset] <= 0) my += ();
 //		if(voxels[i+bottomOffset] <= 0) my += ();
 //		if(voxels[i+leftOffset] <= 0) mx += ();
@@ -514,13 +670,15 @@ public class GreedyMesher implements Mesher {
  
     public GreedyMesher(final MeshBatcher mesh) {
     	lightValues = new float[16];
+        lightColors = new Color[16];
     	float r,g,b,a = 1f;;
-    	for (int i = 0; i < 16; i++){
-    		r = i/16f;
-    		g = r;
-    		b = r;
+        Color c = new Color(Color.WHITE);
+    	for (int i = 15; i >= 0; i--){
 
-    		lightValues[i] = Color.toFloatBits(r, g, b, a);
+
+    		lightValues[i] = c.toFloatBits();
+            lightColors[i] = new Color(c);
+            c.mul(.95f);
 
     	}
 		meshBatch = mesh;
