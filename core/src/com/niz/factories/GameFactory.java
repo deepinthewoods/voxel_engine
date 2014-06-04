@@ -333,6 +333,10 @@ public void init(World world, AssetManager assets, FileHandle file){
         for (int i =0; i < 14; i++)
         for (int j = 0; j < 14; j++)
             voxelWorld.set(i,0,j,(byte)1);
+
+        for (int i = 0; i < 10; i++){
+            voxelWorld.set(10,i,10,(byte)1);
+        }
     }
 
 

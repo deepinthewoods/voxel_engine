@@ -155,11 +155,7 @@ public class GreedyMesher implements Mesher {
         			if (vertex[i] != face.vertex[i])
             			result = false;
         		}
-        			
-        		
-        		
-        		
-        			
+
         	}
         	return result;
         	
@@ -197,11 +193,23 @@ public class GreedyMesher implements Mesher {
 
 		}
 
+        public void vertex(int index, int side1, int side2, int corner, int x){
+            side1 = side1>>(x+1)& 1;
+            side2 = side2>>(x+1)& 1;
+            corner = corner>>(x+1)& 1;
+            if((side1 & side2) == 1) {
+                vertex(index, 0);
+            }
+            vertex(index, (3 - (side1 + side2 + corner))*5);
+        }
+
 
 		public boolean shouldFlipTriangles() {
 			if (vertex[0]+vertex[3] > vertex[1] + vertex[2]) return true;
 			return false;
 		}
+
+
     }
  
     
@@ -239,15 +247,15 @@ public class GreedyMesher implements Mesher {
                 int maskEast = (mask>>1);
                 int maskWest = (mask<<1);
 
-                int aoNE = maskNorth >>1;
-                int aoN = maskNorth;
-                int aoE = maskEast;
-                int aoC = mask;
+                int ao11 = visibilityMask[(y+1)*my+(z+2)] >>1;
+                int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) >>1;
-                int aoNT = visibilityMask[(y+2)*my+(z+2)];
-                int aoET = maskTop>>1;
-                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+                int ao11T = visibilityMask[(y+2)*my+(z+2)] >>1;
+                int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
+                int ao00T = visibilityMask[(y+2)*my+(z+1)];
 
                 maskNorth &= mask;
                 maskSouth &= mask;
@@ -259,15 +267,7 @@ public class GreedyMesher implements Mesher {
 
 				for(int x = 0; x < CHUNK_WIDTH; x++) {
     				//for (int faceID = 0; faceID < 6; faceID++){
-    				int
-                              light00 = ao(aoN>>(x+1)& 1,  aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
-                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1,  aoE>>(x+1)& 1)
-                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1,  aoN>>(x+1)& 1)
-                            , light11 = ao(aoN>>(x+1)& 1,  aoE>>(x+1)& 1,  aoC>>(x+1)& 1)
-                            , lightTop00 = ao(aoNT>>(x+1)& 1,  aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
-                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1,  aoET>>(x+1)& 1)
-                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1,  aoNT>>(x+1)& 1)
-                            , lightTop11 = ao(aoNT>>(x+1)& 1,  aoET>>(x+1)& 1,  aoCT>>(x+1)& 1);
+
 ;
 
 
@@ -295,48 +295,39 @@ public class GreedyMesher implements Mesher {
                         voxels[x][y][z][WEST].transparent = true;
                     }
 
+                    voxels[x][y][z][TOP].vertex(3,ao01T, ao10T, ao11T, x);
+                    voxels[x][y][z][EAST].vertex(3,ao10T, ao11, ao11T, x);
+                    voxels[x][y][z][NORTH].vertex(3,ao01T, ao11, ao11T, x);
 
-    				//00
-                    voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x][y][z+1][TOP].vertex(1,lightTop01);
+                    voxels[x+1][y][z][TOP].vertex(2,ao00T, ao11T, ao01T, x);
+                    voxels[x+1][y][z][WEST].vertex(3,ao00T, ao01, ao01T, x);
+                    voxels[x+1][y][z][NORTH].vertex(1,ao11T, ao01, ao01T, x);
 
-                    voxels[x][y+1][z][EAST].vertex(1,lightTop10);
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-                    voxels[x+1][y][z][TOP].vertex(2,lightTop10);
 
-                    voxels[x][y+1][z][BOTTOM].vertex(3,light00);
-                    voxels[x+1][y][z][WEST].vertex(3,light00);
-                    voxels[x][y][z+1][SOUTH].vertex(3,light00);
-                    //01
-                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
-                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-                    voxels[x][y][z][TOP].vertex(3,lightTop00);
+                    voxels[x][y][z+1][TOP].vertex(1,ao00T, ao11T, ao10T, x);
+                    voxels[x][y][z+1][EAST].vertex(2,ao11T, ao10, ao10T, x);
+                    voxels[x][y][z+1][SOUTH].vertex(3,ao00T, ao10, ao10T, x);
 
-                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
-                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
+                    voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, x);
+                    voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, x);
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, x);
 
-                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
-                    voxels[x][y][z][NORTH].vertex(3,light01);
-                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
-                    //10
-                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
-                    voxels[x][y][z][EAST].vertex(3,light10);
-                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
-                    //11
+                    voxels[x][y+1][z][BOTTOM].vertex(3,ao01, ao10, ao11, x);
+                    voxels[x][y+1][z][EAST].vertex(1,ao10, ao11T, ao11, x);
+                    voxels[x][y+1][z][NORTH].vertex(2,ao01, ao11T, ao11, x);
 
-                    //00
-                    //01
-                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
-                    voxels[x][y][z+1][EAST].vertex(2,light11);
-                    voxels[x+1][y][z][NORTH].vertex(1,light11);
-                    //10
-                    //11
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, x);
+                    voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, x);
+                    voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, x);
 
-    				
-    				
-    				
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, x);
+                    voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, x);
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, x);
+
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
+
     	}}}//}
 
         //edges /**************************************************/
@@ -345,264 +336,173 @@ public class GreedyMesher implements Mesher {
     //BOTTOMS
         for(int y = -1; y < 0; y++) {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
-                int mask = visibilityMask[(y+1)*my+(z+1)];
-                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
-                int maskSouth = visibilityMask[(y+1)*my+(z)];
-                int maskTop = visibilityMask[(y+2)*my+(z+1)];
-//                int maskBottom = visibilityMask[(y)*my+(z+1)];
-                int maskEast = (mask<<1);
-               // int maskWest = (mask>>1);
+                int ao11 = visibilityMask[(y+1)*my+(z+2)] >>1;
+                int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-                int aoNE = maskNorth <<1;
-                int aoN = maskNorth;
-                int aoE = maskEast;
-                int aoC = mask;
-
-                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
-                int aoNT = visibilityMask[(y+2)*my+(z+2)];
-                int aoET = maskTop<<1;
-                int aoCT = visibilityMask[(y+2)*my+(z+1)];
-
+                int ao11T = visibilityMask[(y+2)*my+(z+2)] >>1;
+                int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
+                int ao00T = visibilityMask[(y+2)*my+(z+1)];
 
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
-                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
-                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
-                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
-                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
-                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
-                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
-                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
 
 
 
-                    //00
-                    voxels[x][y+1][z][NORTH].vertex(2,lightTop01);
-                    voxels[x][y+1][z][EAST].vertex(1,lightTop10);
-                    voxels[x][y+1][z][BOTTOM].vertex(3,light00);
-                    //01
-                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
-                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
-                    //10
-                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
-                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
-                    //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
+
+
+                    voxels[x][y+1][z][BOTTOM].vertex(3,ao01, ao10, ao11, x);
+                    voxels[x][y+1][z][EAST].vertex(1,ao10, ao11T, ao11, x);
+                    voxels[x][y+1][z][NORTH].vertex(2,ao01, ao11T, ao11, x);
+
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, x);
+                    voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, x);
+                    voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, x);
+
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, x);
+                    voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, x);
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, x);
+
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
+
 
 
                 }}}//}
 
         for(int y = 0; y < CHUNK_HEIGHT; y++) {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
-                int mask = visibilityMask[(y+1)*my+(z+1)];
-                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
-                int maskTop = visibilityMask[(y+2)*my+(z+1)];
-                int maskEast = (mask<<1);
+                int ao11 = visibilityMask[(y+1)*my+(z+2)] >>1;
+                int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-                int aoNE = maskNorth <<1;
-                int aoN = maskNorth;
-                int aoE = maskEast;
-                int aoC = mask;
-
-                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
-                int aoNT = visibilityMask[(y+2)*my+(z+2)];
-                int aoET = maskTop<<1;
-                int aoCT = visibilityMask[(y+2)*my+(z+1)];
-
+                int ao11T = visibilityMask[(y+2)*my+(z+2)] >>1;
+                int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
+                int ao00T = visibilityMask[(y+2)*my+(z+1)];
 
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
-                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
-                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
-                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
-                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
-                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
-                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
-                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
 
 
 
 
-                    //10
-                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
-                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
-                    //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
+                    voxels[x+1][y][z][TOP].vertex(2,ao00T, ao11T, ao01T, x);
+                    voxels[x+1][y][z][WEST].vertex(3,ao00T, ao01, ao01T, x);
+                    voxels[x+1][y][z][NORTH].vertex(1,ao11T, ao01, ao01T, x);
 
+                    voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, x);
+                    voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, x);
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, x);
 
-                    //10
-                    voxels[x+1][y][z][NORTH].vertex(1,light11);
-                    voxels[x+1][y][z][WEST].vertex(3,light00);
-                    voxels[x+1][y][z][TOP].vertex(2,lightTop10);
-                    //11
-                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
-                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
-                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, x);
+                    voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, x);
+                    voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, x);
+
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
 
                 }}}//}
 
         //SOUTHS
         for(int y = 0; y < CHUNK_HEIGHT; y++) {
             for(int z = -1; z < 0; z++) {
-                int mask = visibilityMask[(y+1)*my+(z+1)];
-                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
-                int maskSouth = visibilityMask[(y+1)*my+(z)];
-                int maskTop = visibilityMask[(y+2)*my+(z+1)];
-               // int maskBottom = visibilityMask[(y)*my+(z+1)];
-                int maskEast = (mask<<1);
-                //int maskWest = (mask>>1);
+                int ao11 = visibilityMask[(y+1)*my+(z+2)] >>1;
+                int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-                int aoNE = maskNorth <<1;
-                int aoN = maskNorth;
-                int aoE = maskEast;
-                int aoC = mask;
-
-                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
-                int aoNT = visibilityMask[(y+2)*my+(z+2)];
-                int aoET = maskTop<<1;
-                int aoCT = visibilityMask[(y+2)*my+(z+1)];
-
+                int ao11T = visibilityMask[(y+2)*my+(z+2)] >>1;
+                int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
+                int ao00T = visibilityMask[(y+2)*my+(z+1)];
 
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
-                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
-                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
-                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
-                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
-                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
-                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
-                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
 
 
 
-//00
-                    //01
-                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
-                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
+                    voxels[x][y][z+1][TOP].vertex(1,ao00T, ao11T, ao10T, x);
+                    voxels[x][y][z+1][EAST].vertex(2,ao11T, ao10, ao10T, x);
+                    voxels[x][y][z+1][SOUTH].vertex(3,ao00T, ao10, ao10T, x);
 
-                    //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
+                    voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, x);
+                    voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, x);
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, x);
+
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, x);
+                    voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, x);
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, x);
+
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
 
 
-                    //01
-                    voxels[x][y][z+1][SOUTH].vertex(3,light00);
-                    voxels[x][y][z+1][EAST].vertex(2,light11);
-                    voxels[x][y][z+1][TOP].vertex(1,lightTop01);
 
-                    //11
-                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
-                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
-                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
+
                 }}}//}
 
         //0 diagonal x
         for(int y = -1; y < 0; y++) {
             for(int z = -1; z < 0; z++) {
-                int mask = visibilityMask[(y+1)*my+(z+1)];
-                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
-                int maskTop = visibilityMask[(y+2)*my+(z+1)];
-                int maskEast = (mask<<1);
+                int ao11 = visibilityMask[(y+1)*my+(z+2)] >>1;
+                int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-                int aoNE = maskNorth <<1;
-                int aoN = maskNorth;
-                int aoE = maskEast;
-                int aoC = mask;
+          
+                int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
+                int ao00T = visibilityMask[(y+2)*my+(z+1)];
 
-                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
-                int aoNT = visibilityMask[(y+2)*my+(z+2)];
-                int aoET = maskTop<<1;
-                int aoCT = visibilityMask[(y+2)*my+(z+1)];
+
 
 
                 for(int x = 0; x < CHUNK_WIDTH; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
-                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
-                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
-                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
-                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
-                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
-                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
-                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
 
 
 
 
-                    //01
-                    voxels[x][y+1][z+1][SOUTH].vertex(2,lightTop00);
-                    voxels[x][y+1][z+1][EAST].vertex(0,lightTop11);
-                    voxels[x][y+1][z+1][BOTTOM].vertex(1,light01);
+                    voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, x);
+                    voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, x);
+                    voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, x);
 
-                    //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
-
-                    //00
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
 
                 }}}//}
 
         //diag y
         for(int y = 0; y < CHUNK_HEIGHT; y++) {
             for(int z = -1; z < 0; z++) {
-                int mask = visibilityMask[(y+1)*my+(z+1)];
-                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
-                int maskSouth = visibilityMask[(y+1)*my+(z)];
-                int maskTop = visibilityMask[(y+2)*my+(z+1)];
-                int maskBottom = visibilityMask[(y)*my+(z+1)];
-                int maskEast = (mask<<1);
-                int maskWest = (mask>>1);
+                int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-                int aoNE = maskNorth <<1;
-                int aoN = maskNorth;
-                int aoE = maskEast;
-                int aoC = mask;
+                int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
+                int ao00T = visibilityMask[(y+2)*my+(z+1)];
 
-                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
-                int aoNT = visibilityMask[(y+2)*my+(z+2)];
-                int aoET = maskTop<<1;
-                int aoCT = visibilityMask[(y+2)*my+(z+1)];
-
-                maskNorth &= mask;
-                maskSouth &= mask;
-                maskTop &= mask;
-                maskBottom &= mask;
-                maskEast &= mask;
-                maskWest &= mask;
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
-                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
-                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
-                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
-                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
-                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
-                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
-                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
-
-                    //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
 
 
-                    //11
-                    voxels[x+1][y][z+1][SOUTH].vertex(1,light10);
-                    voxels[x+1][y][z+1][WEST].vertex(2,light01);
-                    voxels[x+1][y][z+1][TOP].vertex(0,lightTop11);
+                    voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, x);
+                    voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, x);
+                    voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, x);
+
+
+
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
 
 
                 }}}//}
@@ -610,53 +510,32 @@ public class GreedyMesher implements Mesher {
         //diag z
         for(int y = -1; y < 0; y++) {
             for(int z = 0; z < CHUNK_WIDTH; z++) {
-                int mask = visibilityMask[(y+1)*my+(z+1)];
-                int maskNorth = visibilityMask[(y+1)*my+(z+2)];
-                int maskTop = visibilityMask[(y+2)*my+(z+1)];
-                int maskEast = (mask<<1);
+                int ao11 = visibilityMask[(y+1)*my+(z+2)] >>1;
+                int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                int ao00 = visibilityMask[(y+1)*my+(z+1)];
 
-                int aoNE = maskNorth <<1;
-                int aoN = maskNorth;
-                int aoE = maskEast;
-                int aoC = mask;
-
-                int aoNET = (visibilityMask[(y+2)*my+(z+2)]) <<1;
-                int aoNT = visibilityMask[(y+2)*my+(z+2)];
-                int aoET = maskTop<<1;
-                int aoCT = visibilityMask[(y+2)*my+(z+1)];
-
+                int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                int ao00T = visibilityMask[(y+2)*my+(z+1)];
 
                 for(int x = -1; x < 0; x++) {
                     //for (int faceID = 0; faceID < 6; faceID++){
-                    int light00 = light00 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoNE>>(x+1)& 1)
-                            , light01 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoE>>(x+1)& 1)
-                            , light10 = ao(aoC>>(x+1)& 1, aoNE>>(x+1)& 1, aoN>>(x+1)& 1)
-                            , light11 = ao(aoN>>(x+1)& 1, aoE>>(x+1)& 1, aoC>>(x+1)& 1)
-                            , lightTop00 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoNET>>(x+1)& 1)
-                            , lightTop01 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoET>>(x+1)& 1)
-                            , lightTop10 = ao(aoCT>>(x+1)& 1, aoNET>>(x+1)& 1, aoNT>>(x+1)& 1)
-                            , lightTop11 = ao(aoNT>>(x+1)& 1, aoET>>(x+1)& 1, aoCT>>(x+1)& 1);
-                    //10
-                    voxels[x+1][y+1][z][NORTH].vertex(0,lightTop11);
-                    voxels[x+1][y+1][z][WEST].vertex(1,lightTop00);
-                    voxels[x+1][y+1][z][BOTTOM].vertex(2,light10);
-                    //11
-                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,lightTop10);
-                    voxels[x+1][y+1][z+1][WEST].vertex(0,lightTop01);
-                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,light11);
+
+
+
+                    voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, x);
+                    voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, x);
+                    voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, x);
+
+                    voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                    voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                    voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
 
 
                 }}}//}
     }
 
-    private int ao(int side1, int side2, int corner) {
-        if (side1 != 0 || side2 != 0 || corner != 0)
-            Gdx.app.log(TAG, "side1 "+side1+" side2 "+side2+" corner "+corner);
-        if((side1 & side2) == 1) {
-            return 0;
-        }
-        return (3 - (side1 + side2 + corner))*5;
-    }
+
 
 
 //		if(voxels[i+topOffset] <= 0) my += ();
