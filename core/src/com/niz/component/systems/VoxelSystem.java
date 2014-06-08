@@ -7,7 +7,6 @@ import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher;

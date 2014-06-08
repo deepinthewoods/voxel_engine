@@ -57,6 +57,12 @@ public abstract class UIElement {
         table.add(actor);
     }
 
+    public void onMaximize(){
 
+    }
+
+    public void onMinimize(){
+
+    }
 
 }

@@ -4,7 +4,6 @@ import com.artemis.Component;
 import com.artemis.Entity;
 import com.niz.component.Attributes;
 import com.niz.observer.AutoObserver;
-import com.niz.observer.Observer;
 import com.niz.observer.Subject;
 
 /**

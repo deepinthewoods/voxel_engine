@@ -2,10 +2,8 @@ package com.niz.ui.elements.blockEditor;
 
 import com.artemis.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.niz.component.IntegerButtonValue;
 import com.niz.component.systems.AssetsSystem;
@@ -58,10 +56,40 @@ public class EditorTools extends UIElement {
             }
         });
 
+        TextButton newBtn = new TextButton("New", skin);
+
+        newBtn.addListener(new ChangeListener() {
+
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                parent.maximize();
+            }
+        });
+
+        TextButton clearBtn = new TextButton("Clear", skin);
+
+        clearBtn.addListener(new ActorGestureListener(){
+            @Override
+            public boolean longPress(Actor actor, float x, float y) {
+                //TODO clear everything here
+
+                return true;
+            }
+        });
+
 
         tab.add(add);
+        //tab.row();
         tab.add(remove);
+       //tab.row();
         tab.add(set);
+        //tab.row();
+        //tab.top();
+        tab.add(new Label("   ", skin));
+        tab.add(newBtn);
+
+        tab.add(new Label("   ", skin));
+        tab.add(clearBtn);
 
         actor = tab;
     }

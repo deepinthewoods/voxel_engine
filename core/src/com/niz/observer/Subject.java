@@ -2,7 +2,6 @@ package com.niz.observer;
 
 import com.artemis.Component;
 import com.artemis.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
 public class Subject {

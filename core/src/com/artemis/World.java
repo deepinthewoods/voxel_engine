@@ -528,6 +528,9 @@ public class World implements Disposable {
         }
     }
 
+
+    protected Array<EntitySystem> drawSystemsArray = new Array<EntitySystem>();
+
     public void initializeDraw(){
         for (int i = 0; i < drawSystemsArray.size; i++) {
             drawSystemsArray.get(i).initialize();

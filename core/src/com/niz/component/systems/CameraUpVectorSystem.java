@@ -3,10 +3,7 @@ package com.niz.component.systems;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
-import com.artemis.Filter;
 import com.artemis.systems.EntityProcessingSystem;
-import com.niz.component.CameraController;
-import com.niz.component.UpVector;
 import com.niz.component.UpVectorRollingAverage;
 import com.niz.observer.Subject;
 

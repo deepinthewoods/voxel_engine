@@ -1,10 +1,8 @@
 package com.niz.factories;
 
 
-import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -16,21 +14,11 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
-import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
-import com.badlogic.gdx.utils.Pools;
-
-import com.niz.EngineScreen;
-import com.niz.actions.AJump;
-import com.niz.actions.AStand;
-import com.niz.actions.ActionList;
 import com.niz.blocks.EmptyBlockDefinition;
-import com.niz.component.*;
-import com.niz.component.systems.*;
+import com.niz.component.systems.AssetsSystem;
+import com.niz.component.systems.CameraControllerSystem;
 
 public class GeneralFactory extends GameFactory{
 	public static final float VIEWPORT_SIZE = 20;
@@ -231,84 +219,6 @@ public class GeneralFactory extends GameFactory{
 
 
 
-    public void setInput(Actor dragger, Actor clicker, final Entity player){
 
-		dragger.addListener(new InputListener(){
-			/*@Override
-			public void drag (InputEvent event, float x, float y, int pointer) {
-
-				tmp.set(0,0,0);
-				camera.project(tmp);
-	
-				tmp.set(0,0,.5f);
-				tmp2.set(Gdx.input.getDeltaX(), Gdx.input.getDeltaY(), .5f);
-				camera.unproject(tmp);
-				camera.unproject(tmp2);
-				tmp2.sub(tmp);
-				tmp2.z = 0;
-			
-				camera.position.sub(tmp2.x, 0, 0);
-				camera.update(true);
-				//Gdx.app.log(TAG,  "dragged"+tmp2);
-				player.get(Target.class).v.x = camera.position.x;;
-			}*/
-			@Override
-			public boolean keyDown(InputEvent event, int keycode) {
-				//player.get(Target.class).v.x *= -1;
-				Gdx.app.log(TAG, "df"+keycode);
-
-				return true;
-			};
-			
-			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-				Move move = player.get(Move.class);
-				AABBBody body = player.get(AABBBody.class);
-
-				if (body.onWall && body.onGround){
-					//move.jumping = true;
-					move.jumpEndTick = (int) (EngineScreen.tick + move.jumpTime / EngineScreen.timeStep);	
-					Brain brain = player.get(Brain.class);;
-					//Gdx.app.log(TAG, "jump"+(move.jumpTime / EngineScreen.timeStep));
-					//move.rotation += 180;
-					//move.rotation %= 360;
-					//brain.getShortTarget().scl(-1f, 0, 0);
-					//player.get(Target.class).v.x *= -1;
-					ActionComponent actionC = player.get(ActionComponent.class);
-					actionC.action.actions.clear();
-					Gdx.app.log(TAG, "wjump "+actionC.action.actions.size());
-					//body.wasOnWall = false;
-					body.onWall = false;
-					body.offWall = true;
-
-					actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
-                    return true;
-				}
-                if (body.onGround){
-                    //Move move = player.get(Move.class);
-                    //move.jumping = true;
-                    move.jumpEndTick = (int) (EngineScreen.tick + move.jumpTime / EngineScreen.timeStep);
-                    //Gdx.app.log(TAG, "jump"+(move.jumpTime / EngineScreen.timeStep));
-
-                    ActionComponent actionC = player.get(ActionComponent.class);
-                    actionC.action.actions.clear();
-                    actionC.action.actions.getRoot().insertAfterMe(Pools.obtain(AJump.class));
-                    return true;
-                }
-                return false;
-	        }
-	 
-	        public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-	        	//player.get(Move.class).jumping = false;
-	        	player.get(Move.class).jumpEndTick = EngineScreen.tick;
-				//Gdx.app.log(TAG, "NOT JUMPSING ANY MORE");	       
-	        	}
-
-			
-			
-		});
-		
-		
-	}
-	
 	
 }

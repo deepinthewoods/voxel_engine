@@ -8,7 +8,7 @@ public class RayCaster{
 	//converted from xna wiki http://www.xnawiki.com/index.php?title=Voxel_traversal
 	private static final float PositiveInfinity = Float.POSITIVE_INFINITY;
 	public int x,y,z;
-	private int stepX, stepY, stepZ;
+	public int stepX, stepY, stepZ;
 	//public IEnumerable<Point3D> GetCellsOnRay(Ray ray, int maxDepth)
 	Vec3i cellBoundary = new Vec3i(), start = new Vec3i();
 	Vector3 tDelta = new Vector3(), tMax = new Vector3(), tmpDirection = new Vector3();
@@ -16,7 +16,7 @@ public class RayCaster{
 	public int face, limit;
 	private int xFace, yFace, zFace;
 	public boolean hasNext, hasTarget;
-	public int targetX, targetY, targetZ;
+	public int targetX, targetY, targetZ, srcX, srcY, srcZ;
 	
 	public void trace(Vector3 src, Vector3 dst){
 		trace(src.x, src.y, src.z, dst);
@@ -26,6 +26,9 @@ public class RayCaster{
 	}
 		
 	public void trace(float x, float y, float z, float dstX, float dstY, float dstZ) {
+        srcX = (int) x;
+        srcY = (int) y;
+        srcZ = (int) z;
 		targetX = (int) dstX;
 		targetY = (int) dstY;
 		targetZ = (int) dstZ;

@@ -4,49 +4,68 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.Gdx;
+import com.artemis.systems.EntitySystem;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BinaryHeap;
 import com.niz.actions.Action;
-import com.niz.component.ActionComponent;
+import com.niz.actions.ActionList;
 
 
-public class ActionSystem extends EntityProcessingSystem {
+public class ActionSystem extends EntitySystem {
 	private static final String TAG = "action system";
-	ComponentMapper<ActionComponent> actionMap;
-	
+	ComponentMapper<ActionList> actionMap;
+
+    public BinaryHeap<Action> actions = new BinaryHeap<Action>();
+
 	public ActionSystem() {
-		super(Aspect.getAspectForOne(ActionComponent.class));
+		super(Aspect.getAspectForOne(ActionList.class));
 	}
 	@Override
 	public void initialize(){
-		actionMap = world.getMapper(ActionComponent.class);
+		actionMap = world.getMapper(ActionList.class);
+
 
 	}
 
 	
 	@Override
 	protected void inserted(Entity e) {
-		ActionComponent actionC = actionMap.get(e);
-		actionC.action.parent = e;
-		actionC.action.world = world;
-		
-	
-		//FIXME because this method isn't called right away, already added actions will have a null parent referrence
-		Action node = actionC.action.actions.getRoot();
-		while (node != null){
-			node.setParent(e);
-			node.onStart(world);
-			node = node.getNext();
-		}
-		
-		Gdx.app.log(TAG, "set e");
+		ActionList actionC = actionMap.get(e);
+        actionC.inserted(e, world);
+        actionC.delayedActions = actions;
+
 	}
 
+    @Override
+    protected void removed(Entity e) {
+        ActionList actionC = actionMap.get(e);
+        actionC.removed(e, world);
+    }
+
+    @Override
+    protected void processEntities(Array<Entity> entities) {
 
 
-	@Override
+        while (actions.size > 0 ){// del.actions.peek().getValue()<del.currentTime){
+            Action a = actions.pop();
+            if (a.getValue() >= a.parent.currentTime){
+                actions.add(a);
+                return;
+            }
+            a.unDelay();
+        }
+
+        for (int i = 0, s = entities.size; s > i; i++) {
+            process(entities.get(i));
+        }
+
+    }
+
+
+
 	protected void process(Entity e) {
-		ActionComponent actionC = actionMap.get(e);
-		actionC.action.update(world.getDelta());
+		ActionList actionC = actionMap.get(e);
+		actionC.update(world.getDelta());
 		
 	}
 

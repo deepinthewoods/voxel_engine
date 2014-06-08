@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.utils.Array;
 import com.niz.factories.AssetDefinition;
-import com.niz.factories.GameFactory;
 
 /**
  * Created by niz on 09/05/2014.

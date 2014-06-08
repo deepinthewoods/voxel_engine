@@ -1,7 +1,5 @@
 package com.niz;
 
-import com.artemis.Component;
-import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -12,10 +10,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
-import com.niz.component.AABBBody;
-import com.niz.component.ActionComponent;
-import com.niz.component.Move;
 import com.niz.factories.GameFactory;
 import com.niz.factories.GeneralFactory;
 

@@ -11,10 +11,11 @@ import com.niz.ui.elements.UIElement;
  * one edge of an edgeUI
  */
 public class UITable{
-    //private transient int side;
+    //private transient int face;
    // private transient Table minTable, maxTable;
     public UIElement[] min, max;
     transient Table table = new Table();
+    public boolean vertical = false;
     transient private EdgeUI parent;
     public UITable(){
        // minTable = new Table();
@@ -37,8 +38,10 @@ public class UITable{
     }
     public void addTo(EdgeUI edgeUI, boolean expand){
         for (UIElement e : min){
-            if (e != null)
-             e.addTo(table);
+            if (e != null){
+                e.addTo(table);
+                if (vertical) table.row();
+            }
         }
         if (expand)
             edgeUI.table.add(table).expand();
@@ -55,9 +58,26 @@ public class UITable{
 
     public void maximize() {
         parent.setMiddleScreen(this);
+
     }
 
     public void minimize() {
         parent.unsetMiddleScreen();
+        
+    }
+
+
+    public void onMinimize() {
+        for (UIElement e : max){
+            if (e != null)
+                e.onMinimize();
+        }
+    }
+
+    public void onMaximize(){
+        for (UIElement e : max){
+            if (e != null)
+                e.onMaximize();
+        }
     }
 }

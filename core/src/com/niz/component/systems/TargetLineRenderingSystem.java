@@ -6,19 +6,18 @@ import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.utils.Array;
 import com.niz.ShapeBatch;
-import com.niz.actions.AStand;
-import com.niz.component.ActionComponent;
+import com.niz.actions.ActionList;
 import com.niz.component.Player;
 
 public class TargetLineRenderingSystem extends EntitySystem {
 
 	//private ShapeBatch batch;
-	private ComponentMapper<ActionComponent> actionMap;
+	private ComponentMapper<ActionList> actionMap;
     private ShapeBatch shapeBatch;
 
 
     public TargetLineRenderingSystem() {
-		super(Aspect.getAspectForAll(Player.class, ActionComponent.class));
+		super(Aspect.getAspectForAll(Player.class, ActionList.class));
 		//this.batch = batch;
 	}
 
@@ -27,17 +26,17 @@ public class TargetLineRenderingSystem extends EntitySystem {
 	@Override
 	public void initialize(){
 		super.initialize();
-		actionMap = world.getMapper(ActionComponent.class);
+		actionMap = world.getMapper(ActionList.class);
         shapeBatch = world.getSystem(GraphicsSystem.class).shapeBatch;
 	}
 
 	@Override
 	protected void processEntities(Array<Entity> entities) {
 		for (Entity e: entities){
-			ActionComponent action = actionMap.get(e);
-			if (!action.action.actions.contains(AStand.class)){
+			ActionList action = actionMap.get(e);
+			//if (!action.contains(AStand.class)){
 				shapeBatch.drawCentralLine();
-			}
+			//}
 		}
 	}
 

@@ -85,6 +85,16 @@ public class EditorViewModeSelector extends UIElement {
         });
         table.add(but);
 
+        but = new TextButton("Free", skin);
+        but.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                intVal.value = VoxelEditingSystem.VIEW_MODE_FREE;
+                subjects[0].notify(null, null, intVal);
+            }
+        });
+        table.add(but);
+
         actor = table;
     }
 }

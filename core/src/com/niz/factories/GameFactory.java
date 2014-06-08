@@ -20,6 +20,8 @@ import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.Pools;
+import com.niz.actions.AHiglightBlock;
 import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.component.systems.*;
@@ -79,7 +81,8 @@ public abstract class GameFactory {
         systemDef.setSystem( VelocityRollingAverageSystem.class);
         systemDef.setSystem(VelocityPredictionSystem.class);
         systemDef.setDrawSystem(VoxelRenderingSystem.class);
-
+        systemDef.setDrawSystem(VoxelEditRenderingSystem.class);
+        systemDef.setDrawSystem(BlockHighlightRenderingSystem.class);
 
         systemDef.setDrawSystem(ModelRenderingSystem.class );
         systemDef.setSystem(BrainSystem.class);
@@ -295,7 +298,7 @@ public void init(World world, AssetManager assets, FileHandle file){
 
         //Move move = e.add(Move.class);
         //move.jumpStrength = 1.5f;
-        ActionList actionList = e.add(ActionComponent.class).action;
+        ActionList actionList = e.add(ActionList.class);
        // actionList.actions.add(AStand.class);
 
 
@@ -309,8 +312,8 @@ public void init(World world, AssetManager assets, FileHandle file){
         //e.add(CameraRotationInfluencer.class);
 
 
-        e.add(PositionRollingAverage.class).size = 100;//rolling average of position
-        e.add(UpVectorRollingAverage.class).size = 100;
+        e.add(PositionRollingAverage.class).size = 60;//rolling average of position
+        e.add(UpVectorRollingAverage.class).size = 60;
         e.add(UpVector.class).up.set(0,1,0);
 
         //e.add(VelocityPredictor.class).scale = 240f;
@@ -340,11 +343,18 @@ public void init(World world, AssetManager assets, FileHandle file){
         looker.add(Position.class).pos .set(8,8,8);
         looker.add(CameraLookAt.class);
         world.addEntity(looker);
+
+        Entity highlighter = world.createEntity();
+        highlighter.add(BlockHighlight.class).dirty = true;
+        highlighter.add(ActionList.class).addPre(Pools.obtain(AHiglightBlock.class));
+        highlighter.add(Position.class).pos.set(8,8,8);
+        world.addEntity(highlighter);
+
     }
 
     private void setDefaultMap(VoxelWorld voxelWorld) {
-        for (int i =0; i < 14; i++)
-        for (int j = 0; j < 14; j++)
+        for (int i =0; i < 16; i++)
+        for (int j = 0; j < 16; j++)
             voxelWorld.set(i,0,j,(byte)1);
 
         for (int i = 0; i < 10; i++){

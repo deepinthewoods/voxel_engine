@@ -243,4 +243,14 @@ public final class Entity implements Poolable {
     public int hashCode() {
         return id;
     }
+
+    public <T extends Component> T add(Class<T> clas) {
+        T c = world.createComponent(clas);
+        addComponent(c);
+        return c;
+    }
+
+    public <T extends Component> T get(Class<T> clas) {
+        return getComponent(clas);
+    }
 }

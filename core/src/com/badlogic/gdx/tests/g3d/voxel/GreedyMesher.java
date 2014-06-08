@@ -654,7 +654,7 @@ public class GreedyMesher implements Mesher {
                 q[d] = 1;
  
                 /*
-                 * Here we�re keeping track of the side that we�re meshing.
+                 * Here we�re keeping track of the face that we�re meshing.
                  */
                 if (d == 0)      { side = backFace ? WEST   : EAST;  }
                 else if (d == 1) { side = backFace ? BOTTOM : TOP;   }
@@ -794,7 +794,7 @@ public class GreedyMesher implements Mesher {
  
     /**
      * This function returns an instance of VoxelFace containing the attributes for
-     * one side of a voxel.  In this simple demo we just return a value from the
+     * one face of a voxel.  In this simple demo we just return a value from the
      * sample data array.  However, in an actual voxel engine, this function would
      * check if the voxel face should be culled, and set per-face and per-vertex
      * values as well as voxel values in the returned instance.
@@ -809,7 +809,7 @@ public class GreedyMesher implements Mesher {
  
         VoxelFace voxelFace = voxels[x][y][z][side];
  
-        //voxelFace.side = side;
+        //voxelFace.face = face;
         
         return voxelFace;
     }
@@ -882,7 +882,7 @@ public class GreedyMesher implements Mesher {
                 VertexAttribute.TexCoords(0),
                 new VertexAttribute(VertexAttributes.Usage.Generic, 2, "a_texStart")
         );
-		
+
 
 		return mesh;
 	}

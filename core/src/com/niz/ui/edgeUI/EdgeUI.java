@@ -5,8 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.niz.component.systems.AssetsSystem;
-import com.niz.ui.elements.BackgroundClick;
 import com.niz.ui.elements.BackgroundClickDrag;
+import com.niz.ui.elements.NullClickDrag;
 import com.niz.ui.elements.UIElement;
 
 /**
@@ -15,13 +15,14 @@ import com.niz.ui.elements.UIElement;
 public class EdgeUI{
     private static final String TAG = "EdgeUI";
     protected transient Table table = new Table();
+    transient UITable middleScreen = null;
 
     public UITable[] sides = new UITable[9];
     public UIElement back;
 
     public EdgeUI(){
         table.setFillParent(true);
-        back = new BackgroundClickDrag();
+
     }
 
     public void init(Skin skin, Stage stage, AssetsSystem assets, World world){
@@ -30,9 +31,11 @@ public class EdgeUI{
             for (int x = 0; x < 3; x++, i++){
                 if (sides[i] != null){
                     sides[i].init(skin, assets, world, this);
+
+
                     sides[i].addTo(this, i==4?true:false);
 
-                    //Gdx.app.log(TAG, "side");
+                    //Gdx.app.log(TAG, "face");
                 }
             }
             table.row();
@@ -49,13 +52,20 @@ public class EdgeUI{
         stage.addActor(table);
 
     }
-
     public void setMiddleScreen(UITable table){
+        if (middleScreen != null){
+            middleScreen.onMinimize();
+        }
         sides[4].table.clear();
         table.maximizeTo(sides[4].table);
+        table.onMaximize();
     }
 
     public void unsetMiddleScreen() {
+        if (middleScreen != null){
+            middleScreen.onMinimize();
+        }
+        middleScreen = null;
         sides[4].table.clear();
     }
 }

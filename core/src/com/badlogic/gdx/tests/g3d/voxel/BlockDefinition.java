@@ -9,7 +9,7 @@ public abstract class BlockDefinition {
     protected float[] uvs = new float[4];
 	public static float tile_size_px = 16;
 	//protected static int tile_side_length = 8;
-	public static final int TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3, FRONT = 4, BACK = 5;
+	public static final int TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3, FRONT = 4, BACK = 5, ALL = 6;
 	public int tileIndex;
 	private float u, v;
 	public int dayLightLoss = 15;

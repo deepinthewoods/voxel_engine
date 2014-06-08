@@ -1,10 +1,8 @@
 package com.niz.ui.edgeUI;
 
-import com.niz.ui.elements.blockEditor.EditorTools;
-import com.niz.ui.elements.*;
-import com.niz.ui.elements.blockEditor.BlockColorSelector;
-import com.niz.ui.elements.blockEditor.BlockSelector;
-import com.niz.ui.elements.blockEditor.EditorViewModeSelector;
+import com.niz.ui.elements.BackgroundClickDrag;
+import com.niz.ui.elements.UIElement;
+import com.niz.ui.elements.blockEditor.*;
 
 /**
  * Created by niz on 27/05/2014.
@@ -20,6 +18,8 @@ public class TestUI extends EdgeUI {
         sides[1] = new UITable();
         sides[1].min = new UIElement[1];
         sides[1].min[0] = new EditorTools();
+        sides[1].max = new UIElement[1];
+        sides[1].max[0] = new EditorSettings();
         table.row();
 
         sides[2] = new UITable();
@@ -28,6 +28,7 @@ public class TestUI extends EdgeUI {
         table.row();
 
         sides[3] = new UITable();
+        sides[3].vertical = true;
         sides[3].min = new UIElement[1];
         sides[3].min[0] = new BlockSelector();
         sides[3].max = new UIElement[1];
@@ -67,7 +68,7 @@ public class TestUI extends EdgeUI {
             }
             table.row();
         }*/
-
+        back = new BackgroundClickDrag();
 
     }
 }

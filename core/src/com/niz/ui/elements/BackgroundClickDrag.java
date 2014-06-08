@@ -5,9 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.niz.component.VectorInput;
 import com.niz.component.VectorInput2;
 import com.niz.component.VectorInput4;
@@ -76,6 +76,27 @@ public class BackgroundClickDrag extends UIElement {
 
                 if (subjects != null && subjects.length >2)
                     subjects[2].notify(null, null, vec4);
+            }
+
+
+        });
+        actor.addListener(new InputListener(){
+            @Override
+            public boolean scrolled(InputEvent event, float x, float y, int amount) {
+                float resx = Gdx.graphics.getWidth(), resy = Gdx.graphics.getHeight();
+                float dx = 1f/resx, dy = 1f/resy;
+                resx /= 2;
+                resy /= 2;
+                dx *= amount;
+                dy *= amount;
+                vec4.v.set(resx-dx, resy);
+                vec4.v2.set(resx+dx, resy);
+                vec4.v3.set(resx-dx-dx, resy);
+                vec4.v4.set(resx+dx+dx, resy);
+
+                if (subjects != null && subjects.length >2)
+                    subjects[2].notify(null, null, vec4);
+                return true;
             }
         });
        /* actor.addListener(new ClickListener() {

@@ -4,7 +4,6 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.badlogic.gdx.math.Vector3;
-import com.niz.component.RollingAverage;
 import com.niz.component.UpVector;
 import com.niz.component.UpVectorRollingAverage;
 

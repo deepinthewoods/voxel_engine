@@ -12,7 +12,8 @@ public class EntityDefinition {
     ComponentArray components = new ComponentArray();
 
     public void setFrom(Entity e){
-        components.c = e.getComponents();
+        components.c.clear();
+        components.c.addAll(e.getComponents());
     }
 
     public void setEntityFromThisOnce(Entity e){
