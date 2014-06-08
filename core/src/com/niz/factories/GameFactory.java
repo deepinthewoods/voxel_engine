@@ -355,10 +355,10 @@ public void init(World world, AssetManager assets, FileHandle file){
     private void setDefaultMap(VoxelWorld voxelWorld) {
         for (int i =0; i < 16; i++)
         for (int j = 0; j < 16; j++)
-            voxelWorld.set(i,0,j,(byte)1);
+            voxelWorld.set(i,0,j,0,(byte)1);
 
         for (int i = 0; i < 10; i++){
-            voxelWorld.set(10,i,10,(byte)1);
+            voxelWorld.set(10,i,10,0,(byte)1);
         }
     }
 

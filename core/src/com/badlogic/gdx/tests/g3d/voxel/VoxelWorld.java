@@ -26,11 +26,13 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.niz.component.Position;
 
 public class VoxelWorld implements RenderableProvider {
 	public final int CHUNK_SIZE_X;
 	public final int CHUNK_SIZE_Y;
 	public final int CHUNK_SIZE_Z;
+    public final int PLANES;
 	private static final String TAG = "VoxelWorld";
 
 	public final VoxelChunk[] chunks;
@@ -46,18 +48,17 @@ public class VoxelWorld implements RenderableProvider {
 	public final int voxelsY;
 	public final int voxelsZ;
 	public int renderedChunks;
-	public int numChunks;
+	public final int numChunks;
 	private Material material;
 	public int offsetX, offsetY, offsetZ;
-	private Mesher mesher;
-	private MeshBatcher batch;
     private Shader shader;
 
-    public VoxelWorld(int chunksX, int chunksY, int chunksZ, Mesher mesher, MeshBatcher meshBatcher, int sizeX, int sizeY) {
+    public VoxelWorld(int chunksX, int chunksY, int chunksZ, int sizeX, int sizeY, int planes) {
+        PLANES = planes;
+
         CHUNK_SIZE_X = sizeX;
         CHUNK_SIZE_Y = sizeY;
         CHUNK_SIZE_Z = sizeX;
-		batch = meshBatcher;
 		//if (blockDefs == null) throw new GdxRuntimeException("nill init");
 		this.material = material;
 		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
@@ -69,10 +70,11 @@ public class VoxelWorld implements RenderableProvider {
 		this.voxelsY = chunksY * CHUNK_SIZE_Y;
 		this.voxelsZ = chunksZ * CHUNK_SIZE_Z;
 		int i = 0;
+        for (int p = 0; p < planes; p++)
 		for(int y = 0; y < chunksY; y++) {
 			for(int z = 0; z < chunksZ; z++) {
 				for(int x = 0; x < chunksX; x++) {
-					VoxelChunk chunk = new VoxelChunk(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z, i);
+					VoxelChunk chunk = new VoxelChunk(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z, i, p);
 					chunk.offset.set(x * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, z * CHUNK_SIZE_Z);
 					chunks[i++] = chunk;
 				}
@@ -94,15 +96,14 @@ public class VoxelWorld implements RenderableProvider {
         
      
                 
-		this.mesher = mesher;
-       
+
 	}
 
-	public void set(Vector3 p, byte voxel){
-        set(p.x, p.y, p.z, voxel);
+	public void set(Vector3 p, int plane, byte voxel){
+        set(p.x, p.y, p.z, plane, voxel);
     }
 
-	public void set(float x, float y, float z, byte voxel) {
+	public void set(float x, float y, float z, int p, byte voxel) {
 		int ix = (int)x;
 		int iy = (int)y;
 		int iz = (int)z;
@@ -115,12 +116,17 @@ public class VoxelWorld implements RenderableProvider {
 		chunkX %= chunksX;
 		chunkY %= chunksY;
 		chunkZ %= chunksZ;
-		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ;
+		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ;// + numChunks*p;
 		chunks[index].set(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z, voxel);
 		dirty[index] = true;
 	}
 
-	public byte get(float x, float y, float z) {
+    public int get(Vector3 p, int plane) {
+        return get(p.x, p.y, p.z, plane);
+    }
+
+
+    public byte get(float x, float y, float z, int p) {
 		int ix = (int)x;
 		int iy = (int)y;
 		int iz = (int)z;
@@ -133,57 +139,13 @@ public class VoxelWorld implements RenderableProvider {
 		chunkX %= chunksX;
 		chunkY %= chunksY;
 		chunkZ %= chunksZ;
-		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ;
+		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ ;//+ numChunks*p;
 		return chunks[index].get(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z);
 	}
 
-	public float getHighest (float x, float z) {
-		int ix = (int)x;
-		int iz = (int)z;
-		if(ix < 0 || ix >= voxelsX) return 0;
-		if(iz < 0 || iz >= voxelsZ) return 0;
-		// FIXME optimize
-		for(int y = voxelsY - 1; y > 0; y--) {
-			if(get(ix, y, iz) > 0) return y + 1;
-		}
-		return 0;
-	}
 
-	public void setColumn(float x, float y, float z, byte voxel) {
-		int ix = (int)x;
-		int iy = (int)y;
-		int iz = (int)z;
-		if(ix < 0 || ix >= voxelsX) return;
-		if(iy < 0 || iy >= voxelsY) return;
-		if(iz < 0 || iz >= voxelsZ) return;
-		// FIXME optimize
-		for(; iy > 0; iy--) {
-			set(ix, iy, iz, voxel);
-		}
-	}
 
-	public void setCube(float x, float y, float z, float width, float height, float depth, byte voxel) {
-		int ix = (int)x;
-		int iy = (int)y;
-		int iz = (int)z;
-		int iwidth = (int)width;
-		int iheight = (int)height;
-		int idepth = (int)depth;
-		int startX = Math.max(ix, 0);
-		int endX = Math.min(voxelsX, ix + iwidth);
-		int startY = Math.max(iy, 0);
-		int endY = Math.min(voxelsY, iy + iheight);
-		int startZ = Math.max(iz, 0);
-		int endZ = Math.min(voxelsZ, iz + idepth);
-		// FIXME optimize
-		for(iy = startY; iy < endY; iy++) {
-			for(iz = startZ; iz < endZ; iz++) {
-				for(ix = startX; ix < endX; ix++) {
-					set(ix, iy, iz, voxel);
-				}
-			}
-		}	
-	}
+
 
 	@Override
 	public void getRenderables (Array<Renderable> renderables, Pool<Renderable> pool) {
@@ -213,20 +175,17 @@ public class VoxelWorld implements RenderableProvider {
 			renderedChunks++;
 		}
 	}
-	private Matrix4 idMatrix = new Matrix4().idt();
-	public int get(Vector3 p) {
-		return get(p.x, p.y, p.z);
-	}
 
-	public VoxelChunk getClosestDirtyChunk(Vector3 pos) {
+	public VoxelChunk getClosestDirtyChunk(Position pos) {
 		float dist = 0;
 		VoxelChunk closestChunk = null;
 		for(int i = 0; i < chunks.length; i++) {
 			VoxelChunk chunk = chunks[i];
 			//Mesh mesh = meshes[i];
+            if (chunk.plane != pos.plane) continue;
 			if(dirty[i]) {
 				
-				float d = pos.dst2(chunk.offset);
+				float d = pos.pos.dst2(chunk.offset);
 				if (d < dist || closestChunk == null){
 					//Gdx.app.log("dirsty", "found");
 					closestChunk = chunk;
@@ -252,7 +211,7 @@ public class VoxelWorld implements RenderableProvider {
 
 
     //make mesh closest to position
-    public void makeMesh(Vector3 position) {
+    public void makeMesh(Position position, Mesher mesher, MeshBatcher batch) {
 
         VoxelChunk closest = getClosestDirtyChunk(position);
 

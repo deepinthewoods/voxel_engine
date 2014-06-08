@@ -19,10 +19,12 @@ import com.niz.component.Position;
 public class VoxelSystem extends EntitySystem {
 
     private static final String TAG = "voxel system";
+    private GreedyMesher mesher;
+    private MeshBatcher batch;
     public transient VoxelWorld voxelWorld;
     private Renderable baseRenderable;
     private Texture voxelTexture;
-    private ComponentMapper<Position> posM;
+    protected ComponentMapper<Position> posM;
     //private BlockDefinition[] defs;
 	//private TextureRegion[] tiles;
     //public static TextureRegion white;
@@ -30,12 +32,11 @@ public class VoxelSystem extends EntitySystem {
 		super(Aspect.getAspectForAll(Player.class, Position.class));
 
 		int x = 12, y = 2, z = 2;
-		MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
-		voxelWorld = new VoxelWorld(x, y, z,
-				new GreedyMesher(batch)
-				//new SimpleMesher(VoxelWorld.CHUNK_SIZE_X, VoxelWorld.CHUNK_SIZE_Y, VoxelWorld.CHUNK_SIZE_Z)
-				, batch
-                , 16, 16
+		batch = new MeshBatcher(10000000, 10000000, 13);
+        mesher = new GreedyMesher(batch);
+
+        voxelWorld = new VoxelWorld(x, y, z
+                , 16, 16, 4
 				);
        // Gdx.app.log(TAG, "material"+voxelWorld.m);
 
@@ -52,7 +53,7 @@ public class VoxelSystem extends EntitySystem {
 	@Override
 	protected void processEntities(Array<Entity> entities) {
         if (entities.size == 0) return;
-        voxelWorld.makeMesh(posM.get(entities.get(0)).pos);
+        voxelWorld.makeMesh(posM.get(entities.get(0)), mesher, batch);
 
 
 	}

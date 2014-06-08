@@ -56,7 +56,9 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		bodyMap = world.getMapper(AABBBody.class);
 	}
 	
-	public boolean onTick(Vector3 position, Vector3 oldPosition, AABBBody body, VoxelWorld voxelWorld) {
+	public boolean onTick(Position pos, Vector3 oldPosition, AABBBody body, VoxelWorld voxelWorld) {
+        Vector3 position = pos.pos;
+        int plane = pos.plane;
 		//if (oldPosition.dst2(position) > .25f)
 		//	Gdx.app.log(TAG, "TUNNELLL");
 		//if (!VoxelChunk.blockDef(voxelWorld.get(position)).isSolid){
@@ -96,16 +98,16 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		int vectorCount = 0;
 	
 
-		vectorCount += getAdjustedPosition(position, yside, xside, zside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(position, yside, zside, xside,  returnVectors[vectorCount], body, voxelWorld);
+		vectorCount += getAdjustedPosition(pos, yside, xside, zside,  returnVectors[vectorCount], body, voxelWorld);
+		vectorCount += getAdjustedPosition(pos, yside, zside, xside,  returnVectors[vectorCount], body, voxelWorld);
 		//boolean hitGround = ;
 		int yCount = vectorCount;
 		//if (vectorCount != 0) body.onGround = true;
 		//int vectorProgressAfterYStep = vectorCount;
-		vectorCount += getAdjustedPosition(position, xside, yside, zside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(position, xside, zside, yside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(position, zside, yside, xside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(position, zside, xside, yside,  returnVectors[vectorCount], body, voxelWorld);
+		vectorCount += getAdjustedPosition(pos, xside, yside, zside,  returnVectors[vectorCount], body, voxelWorld);
+		vectorCount += getAdjustedPosition(pos, xside, zside, yside,  returnVectors[vectorCount], body, voxelWorld);
+		vectorCount += getAdjustedPosition(pos, zside, yside, xside,  returnVectors[vectorCount], body, voxelWorld);
+		vectorCount += getAdjustedPosition(pos, zside, xside, yside,  returnVectors[vectorCount], body, voxelWorld);
 		//if (vectorProgressAfterYStep != vectorCount) body.onWall = true;
 	
 		
@@ -130,7 +132,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 				position.add(returnVectors[smallestIndex]);
 			
 				body.onWall = true;
-				boolean onGroundBlock = VoxelChunk.blockDef(voxelWorld.get(position.x, position.y - body.ys-.1f, position.z)).isSolid;
+				boolean onGroundBlock = VoxelChunk.blockDef(voxelWorld.get(position.x, position.y - body.ys-.1f, position.z, plane)).isSolid;
 				if (onGroundBlock){
 					body.onGround = true;
 				}
@@ -152,7 +154,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		
 		
 	}
-	private int getAdjustedPosition(Vector3 position, int sidea, int sideb,
+	private int getAdjustedPosition(Position position, int sidea, int sideb,
 			int sidec, Vector3 v, AABBBody body, VoxelWorld voxelWorld) {
 		//Vector3 v = vectors[vIndex];
 		v.set(0,0,0);
@@ -168,7 +170,9 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		if (vadd != 0) done = true;
 			return done?1:0;
 	}
-	private int collideLine(Vector3 position, int side, Vector3 v, AABBBody body, VoxelWorld voxelWorld) {
+	private int collideLine(Position pos, int side, Vector3 v, AABBBody body, VoxelWorld voxelWorld) {
+        Vector3 position = pos.pos;
+        int plane = pos.plane;
 		
 		bounds(position, side, start, end, v, body);
 		int vectorsAdded = 0;
@@ -196,7 +200,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 					.add(v)
 					//.sub(cx,cy,cz)
 					;
-					int voxel = voxelWorld.get(x,y,z);
+					int voxel = voxelWorld.get(x,y,z, plane);
 					
 					//
 					if (VoxelChunk.blockDef(voxel).collideLineSegment(tStart, tEnd, side, v)){
@@ -248,7 +252,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		Position pos = posMap.get(e);
 		AABBBody body = bodyMap.get(e);
 		VoxelWorld voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
-		onTick(pos.pos, phys.oldPosition, body, voxelWorld);
+		onTick(pos, phys.oldPosition, body, voxelWorld);
 		
 	}
 

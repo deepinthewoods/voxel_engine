@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -24,6 +25,7 @@ import com.niz.component.Position;
  */
 public class BlockHighlightRenderingSystem extends EntitySystem implements RenderableProvider
 {
+    private static final String TAG = "block highlight rendering system";
     short[][] indices = new short[][]{
             {2,6, 3,7, 2,3, 6,7},
             {0,4, 1,5, 0,1, 4,5},
@@ -93,6 +95,8 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
     }
 
     private void setVerts(Mesh mesh, Vector3 offset, Vector3 size, Color color) {
+        Gdx.app.log(TAG, "highlight"+offset);
+
         float c = color.toFloatBits();
         int i = 0;
         verts[i++] = offset.x;

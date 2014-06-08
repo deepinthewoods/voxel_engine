@@ -148,7 +148,7 @@ public class GeneralFactory extends GameFactory{
 				for (int z = 0; z < 12; z++){
 					//if (MathUtils.randomBoolean()) {
 						//Gdx.app.log(TAG, "ww"+x+","+y+","+z+(voxelWorld == null));
-						voxelWorld.set(x, y, z, (byte) 1);
+						voxelWorld.set(x, y, z, 0, (byte) 1);
 					}
 		/*for (int i = 0; i < 30; i++){
 			voxelWorld.set(60,i,0, (byte)1);
@@ -161,7 +161,7 @@ public class GeneralFactory extends GameFactory{
 		for (int c = 0; c < 1000; c+= MathUtils.random(12, 20))
 			for (int d = 0, max = MathUtils.random(10); d < max; d++)
 				for (int i = 0; i < 4; i++){
-					voxelWorld.set(c,i,d, (byte)1);
+					voxelWorld.set(c,i,d, 0, (byte)1);
 					//voxelWorld.set(0,i,0, (byte)1);
 				}
 		//voxelWorld.set(0,0,0, (byte)1);*/

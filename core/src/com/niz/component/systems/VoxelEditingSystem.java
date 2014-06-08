@@ -265,11 +265,11 @@ public class VoxelEditingSystem extends EntitySystem {
         camera.unproject(src);
         camera.unproject(dst);
         //Gdx.app.log(TAG, "trace " +sx+","+sy+ " from "+src+" to "+dst);
-
+        int plane = 0;
         ray.trace(src, dst);
         while (ray.hasNext){
             ray.next();
-            if (vw.get(ray.x, ray.y, ray.z) != 0 || outOfBoundsForViewMode(ray)){
+            if (vw.get(ray.x, ray.y, ray.z, plane) != 0 || outOfBoundsForViewMode(ray)){
                 tmp.set(ray.x, ray.y, ray.z);
                 switch (editModeSelectedID){
                     case EDIT_MODE_ADD:
@@ -278,10 +278,10 @@ public class VoxelEditingSystem extends EntitySystem {
                     case EDIT_MODE_PLACE:
                         break;
                     case EDIT_MODE_REMOVE:
-                        vw.set(tmp, (byte) 0);
+                        vw.set(tmp, plane, (byte) 0);
                         return;
                 }
-                vw.set(tmp, (byte)blockTypeSelectedID);
+                vw.set(tmp, plane, (byte)blockTypeSelectedID);
                 //Gdx.app.log(TAG, "collided, set "+tmp + " to "+blockTypeSelectedID);
                 break;
             }
@@ -335,6 +335,7 @@ public class VoxelEditingSystem extends EntitySystem {
             default: return;
 
         }
+        int plane = 0;
         src.set(sx,sy,0);
         dst.set(sx, sy, 1);
         camera.unproject(src);
@@ -342,7 +343,7 @@ public class VoxelEditingSystem extends EntitySystem {
         ray.trace(src, dst);
         while (ray.hasNext){
             ray.next();
-            if (vw.get(ray.x, ray.y, ray.z) != 0 || outOfBoundsForViewMode(ray)){
+            if (vw.get(ray.x, ray.y, ray.z, plane) != 0 || outOfBoundsForViewMode(ray)){
                 tmp.set(ray.x, ray.y, ray.z);
                 tmp.sub(.04f);
                 highlightPos.pos.set(tmp);

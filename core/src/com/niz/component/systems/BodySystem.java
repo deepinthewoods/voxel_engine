@@ -59,8 +59,10 @@ public class BodySystem extends EntityProcessingSystem {
 	transient int[] sides = new int[3];
 	static Vector3 dir = new Vector3();
 	
-	public static void  onTick(Vector3 position, Vector3 oldPosition, Body c) {
-		if (!VoxelChunk.blockDef(voxelWorld.get(position)).isSolid){
+	public static void  onTick(Position pos, Vector3 oldPosition, Body c) {
+        Vector3 position = pos.pos;
+        int plane = pos.plane;
+		if (!VoxelChunk.blockDef(voxelWorld.get(position, plane)).isSolid){
 			c.onGround = false;
 			return;
 		}
@@ -84,12 +86,12 @@ public class BodySystem extends EntityProcessingSystem {
 			zside = BlockDefinition.FRONT;
 		}
 		
-		getAdjustedPosition(position, yside, xside, zside, returnVectors[0]);
-		getAdjustedPosition(position, yside, zside, xside, returnVectors[1]);
-		getAdjustedPosition(position, xside, yside, zside, returnVectors[2]);
-		getAdjustedPosition(position, xside, zside, yside, returnVectors[3]);
-		getAdjustedPosition(position, zside, yside, xside, returnVectors[4]);
-		getAdjustedPosition(position, zside, xside, yside, returnVectors[5]);
+		getAdjustedPosition(pos, yside, xside, zside, returnVectors[0]);
+		getAdjustedPosition(pos, yside, zside, xside, returnVectors[1]);
+		getAdjustedPosition(pos, xside, yside, zside, returnVectors[2]);
+		getAdjustedPosition(pos, xside, zside, yside, returnVectors[3]);
+		getAdjustedPosition(pos, zside, yside, xside, returnVectors[4]);
+		getAdjustedPosition(pos, zside, xside, yside, returnVectors[5]);
 		
 		float dist2 = 1000000000;
 		int smallestIndex = 0;
@@ -102,14 +104,15 @@ public class BodySystem extends EntityProcessingSystem {
 		position.set(returnVectors[smallestIndex]);
 		return;
 	}
-	private static void getAdjustedPosition(Vector3 position, int sidea, int sideb,
+	private static void getAdjustedPosition(Position pos, int sidea, int sideb,
 			int sidec, Vector3 v) {
-		v.set(position);
-		int voxel = voxelWorld.get(v);
+        int plane = pos.plane;
+		v.set(pos.pos);
+		int voxel = voxelWorld.get(v, plane);
 		if (VoxelChunk.blockDef(voxel).collide(sidea, v)){
-			voxel = voxelWorld.get(v);
+			voxel = voxelWorld.get(v, plane);
 			if (VoxelChunk.blockDef(voxel).collide(sideb, v)){
-				voxel = voxelWorld.get(v);
+				voxel = voxelWorld.get(v, plane);
 				VoxelChunk.blockDef(voxel).collide(sidec, v);
 			}
 		}
@@ -122,7 +125,7 @@ public class BodySystem extends EntityProcessingSystem {
 		Physics physics = physMap.get(e);
 		Position pos = posMap.get(e);
 		Body body = bodyMap.get(e);
-		onTick(pos.pos, physics.oldPosition, body);
+		onTick(pos, physics.oldPosition, body);
 		
 	}
 	
