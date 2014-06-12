@@ -56,7 +56,7 @@ public class SimpleMesher implements Mesher{
 			VoxelWorld voxelWorld, MeshBatcher batch) {
 		
 		int count = calculateVertices(vertices, chunk);;
-		batch.flush(chunk, vertices, count, indices, this);
+		batch.flushSimpleMesh(chunk, vertices, count, indices, this);
 		
 
 		return count ;

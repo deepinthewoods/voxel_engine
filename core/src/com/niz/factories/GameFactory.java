@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.actions.AHiglightBlock;
+import com.niz.actions.AHighlightBlock;
 import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.component.systems.*;
@@ -71,7 +71,6 @@ public abstract class GameFactory {
 
 
         systemDef.setSystem(VoxelSystem.class);
-        systemDef.setSystem(EditVoxelSystem.class);
 
 
         systemDef.setSystem( PositionRollingAverageSystem.class);
@@ -121,7 +120,6 @@ public void init(World world, AssetManager assets, FileHandle file){
 	public void initMenu(final World world, final Skin skin, final Stage stage, final AssetManager assets, final float timestep) {
 		//Group group = new WidgetGroup();
         assetsSys = new AssetsSystem(assets);
-		Gdx.input.setInputProcessor(stage);
 		final Table table = new Table();
 		//final Button newGame = new Button(new Label("New", skin), skin);
 
@@ -277,7 +275,7 @@ public void init(World world, AssetManager assets, FileHandle file){
         //Gdx.app.log(TAG, "NEW GAME");
 
         VoxelSystem voxel = world.getSystemOrSuperClass(VoxelSystem.class);
-        setDefaultMap(voxel.voxelWorld);
+        //setDefaultMap(voxel.voxelWorld);
         AssetsSystem as = world.getSystem(AssetsSystem.class);
 
 
@@ -346,7 +344,7 @@ public void init(World world, AssetManager assets, FileHandle file){
 
         Entity highlighter = world.createEntity();
         highlighter.add(BlockHighlight.class).dirty = true;
-        highlighter.add(ActionList.class).addPre(Pools.obtain(AHiglightBlock.class));
+        highlighter.add(ActionList.class).addPre(Pools.obtain(AHighlightBlock.class));
         highlighter.add(Position.class).pos.set(8,8,8);
         world.addEntity(highlighter);
 

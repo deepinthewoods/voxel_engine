@@ -561,12 +561,7 @@ public class World implements Disposable {
         return system;
     }
 
-    protected InputMultiplexer inputMux = new InputMultiplexer();
 
-
-    public InputMultiplexer getInputMux(){
-        return inputMux;
-    }
 
     /**
      * Retrieve a system for specified system type.

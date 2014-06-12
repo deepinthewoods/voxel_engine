@@ -1,4 +1,7 @@
 package com.gdx.extension.util;
+
+import com.badlogic.gdx.graphics.Color;
+
 //by Kyu
 public class ColorUtil {
 
@@ -57,6 +60,8 @@ public class ColorUtil {
 
         private int value;
 
+        public float h, s, v;
+
         public Color(int rgb) {
             value = 0xff000000 | rgb;
         }
@@ -84,6 +89,35 @@ public class ColorUtil {
         public void setValue(int rgb){
             value = 0xff000000 | rgb;
         }
+
+        public void RGBtoHSV (com.badlogic.gdx.graphics.Color col) {
+            float r = col.r;
+            float g = col.g;
+            float b = col.b;
+
+            float minRGB = Math.min(r,Math.min(g,b));
+            float maxRGB = Math.max(r,Math.max(g,b));
+
+            // Black-gray-white
+            if (minRGB==maxRGB) {
+
+                h =0;
+                s =0;
+                v =minRGB;
+                return;// [0,0,computedV];
+            }
+
+            // Colors other than black-gray-white:
+            float d = (r==minRGB) ? g-b : ((b==minRGB) ? r-g : b-r);
+            float h = (r==minRGB) ? 3 : ((b==minRGB) ? 1 : 5);
+            h = 60*(h - d/(maxRGB - minRGB));
+            s = (maxRGB - minRGB)/maxRGB;
+            v = maxRGB;
+
+            return;
+        }
+
+
     }
 
 }

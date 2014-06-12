@@ -19,7 +19,7 @@ import com.niz.component.Position;
 public class VoxelSystem extends EntitySystem {
 
     private static final String TAG = "voxel system";
-    private GreedyMesher mesher;
+    public GreedyMesher mesher;
     private MeshBatcher batch;
     public transient VoxelWorld voxelWorld;
     private Renderable baseRenderable;
@@ -31,7 +31,7 @@ public class VoxelSystem extends EntitySystem {
 	public VoxelSystem() {
 		super(Aspect.getAspectForAll(Player.class, Position.class));
 
-		int x = 12, y = 2, z = 2;
+		int x = 12, y = 4, z = 4;
 		batch = new MeshBatcher(10000000, 10000000, 13);
         mesher = new GreedyMesher(batch);
 

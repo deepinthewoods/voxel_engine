@@ -5,6 +5,8 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.niz.component.BlockHighlight;
 import com.niz.component.FacePosition;
 import com.niz.component.Position;
@@ -15,7 +17,7 @@ import com.niz.observer.Subjects;
 /**
  * Created by niz on 08/06/2014.
  */
-public class AHiglightBlock extends Action implements Observer{
+public class AHighlightBlock extends Action implements Observer{
 
     private static final String TAG = "highlight block action";
     private transient ComponentMapper<Position> posM;
@@ -54,8 +56,10 @@ public class AHiglightBlock extends Action implements Observer{
         if (pos.pos.dst2(newPos.pos) > .1f || high.face != newPos.face){
             high.dirty = true;
             high.face = newPos.face;
+            high.face = BlockDefinition.ALL;
             pos.pos.set(newPos.pos);
-            ///Gdx.app.log(TAG, "pos"+newPos.pos);
+            high.color.set(Color.WHITE);
+            //Gdx.app.log(TAG, "pos"+newPos.pos);
 
         }
     }

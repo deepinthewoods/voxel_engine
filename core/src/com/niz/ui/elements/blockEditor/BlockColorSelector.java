@@ -1,13 +1,21 @@
 package com.niz.ui.elements.blockEditor;
 
+import com.artemis.Component;
+import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher;
+import com.gdx.extension.util.ColorUtil;
 import com.niz.component.ColorValue;
+import com.niz.component.IntegerButtonValue;
 import com.niz.component.systems.AssetsSystem;
-import com.niz.ui.ColorPicker;
+import com.niz.observer.Observer;
+import com.niz.observer.Subject;
+import com.niz.observer.Subjects;
 import com.niz.ui.SlideColorPicker;
 import com.niz.ui.elements.UIElement;
 
@@ -24,25 +32,35 @@ public class BlockColorSelector extends UIElement {
     @Override
     protected void onInit(Skin skin, AssetsSystem assets, World world) {
         final SlideColorPicker pick = new SlideColorPicker( false, skin);
-        final Button color1 = new Button(skin, "white-button");
-        final Button color2 = new Button( skin, "white-button");
-        color1.add(new Label("          \n   ", skin));
-        color2.add(new Label("          \n   ", skin));
+        final TextButton color1 = new TextButton("          \n   ",skin, "block");
+        final TextButton color2 = new TextButton("          \n   ", skin, "block");
+
 
         Button ok = new Button(skin);
-        ok.add(new Label("Ok", skin));
+        ok.add(new Label(" Ok ", skin));
         Button cancel = new Button(skin);
         cancel.add(new Label("Cancel", skin));
+        Button apply = new Button(skin);
+        apply.add(new Label("Apply", skin));
+
         ok.addListener(new ChangeListener(){
 
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 colorC.color.set(pick.getSelectedColor());
                 subjects[0].notify(null, null, colorC);
-                BlockSelector sel =
-                        (BlockSelector) parent.min[0];
 
                 parent.minimize();
+            }
+        });
+
+        apply.addListener(new ChangeListener(){
+
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                colorC.color.set(pick.getSelectedColor());
+                subjects[0].notify(null, null, colorC);
+
             }
         });
 
@@ -105,9 +123,29 @@ public class BlockColorSelector extends UIElement {
         buttonTable.row();
 
         buttonTable.add(ok);
+        buttonTable.add(apply);
         buttonTable.add(cancel);
         //buttonTable.row();
         pickTable.add(buttonTable);
         actor = pickTable;
+        final Color col = new Color();
+        final ColorUtil.Color uC = new ColorUtil.Color(0);
+
+
+        Subjects.get("blockTypeSelected").add(new Observer(){
+
+            @Override
+            public void onNotify(Entity e, Subject.Event event, Component c) {
+                IntegerButtonValue i = (IntegerButtonValue) c;
+                int id = i.value;
+                Button selectedBlockButton = i.button;
+                col.set(GreedyMesher.blockColors[id]);
+                uC.setValue(col.toIntBits() >> 8);
+                uC.RGBtoHSV(col);
+                sat.setValue(uC.s);
+                bri.setValue(uC.v);
+                pick.setValue(uC.h);
+            }
+        });
     }
 }

@@ -142,9 +142,9 @@ public class MeshBatcher{
 
 
 
-	public void flush(VoxelChunk chunk, float[] vertices, int count,
-			short[] indices, Mesher mesher) {
-		
+	public void flushSimpleMesh(VoxelChunk chunk, float[] vertices, int count,
+                                short[] indices, Mesher mesher) {
+
 		chunk.mesh = getMesh(count, mesher);
 		chunk.mesh.setVertices(vertices, 0, count);
 		chunk.mesh.setIndices(indices, 0, (count*6)/4);
@@ -178,7 +178,7 @@ public class MeshBatcher{
 	
 	}
 
-    public void addVertices(Vector3[] vertices, int[] colorArray, int[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height) {
+    public void addVertices(Vector3[] vertices, int[] colorArray, short[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height) {
         for (int i = 0; i < 4; i++){
             Vector3 v = vertices[i];
             if (colorArray[i] > 15) throw new GdxRuntimeException("light error "+colorArray[i]);
@@ -249,7 +249,7 @@ public class MeshBatcher{
 
     }
     Color tmpC = new Color();
-    public void addVerticesColored(Vector3[] vertices, int[] colorArray, int[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height, Color[] blockColors) {
+    public void addVerticesColored(Vector3[] vertices, int[] colorArray, short[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height, Color[] blockColors) {
         for (int i = 0; i < 4; i++){
             Vector3 v = vertices[i];
             if (colorArray[i] > 15) throw new GdxRuntimeException("light error "+colorArray[i]);

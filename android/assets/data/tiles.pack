@@ -1,0 +1,110 @@
+
+tiles.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+fonts
+  rotate: false
+  xy: 1, 59
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+air
+  rotate: false
+  xy: 1, 41
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+slider
+  rotate: false
+  xy: 1, 41
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+dirt
+  rotate: false
+  xy: 259, 299
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+grassside
+  rotate: false
+  xy: 1, 23
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+grasstop
+  rotate: false
+  xy: 19, 41
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+leaf
+  rotate: false
+  xy: 259, 281
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+sand
+  rotate: false
+  xy: 277, 299
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+sandstone
+  rotate: false
+  xy: 1, 5
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stone
+  rotate: false
+  xy: 19, 23
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+wood
+  rotate: false
+  xy: 37, 41
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+sliderknob
+  rotate: false
+  xy: 259, 255
+  size: 2, 24
+  orig: 2, 24
+  offset: 0, 0
+  index: -1
+buttonselected
+  rotate: false
+  xy: 277, 289
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+empty
+  rotate: false
+  xy: 295, 307
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+button
+  rotate: false
+  xy: 1, 1
+  size: 2, 2
+  orig: 2, 2
+  offset: 0, 0
+  index: -1

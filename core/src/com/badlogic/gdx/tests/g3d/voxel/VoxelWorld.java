@@ -17,6 +17,7 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -61,7 +62,7 @@ public class VoxelWorld implements RenderableProvider {
         CHUNK_SIZE_Z = sizeX;
 		//if (blockDefs == null) throw new GdxRuntimeException("nill init");
 		this.material = material;
-		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
+		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ * planes];
 		this.chunksX = chunksX;
 		this.chunksY = chunksY;
 		this.chunksZ = chunksZ;
@@ -71,22 +72,22 @@ public class VoxelWorld implements RenderableProvider {
 		this.voxelsZ = chunksZ * CHUNK_SIZE_Z;
 		int i = 0;
         for (int p = 0; p < planes; p++)
-		for(int y = 0; y < chunksY; y++) {
-			for(int z = 0; z < chunksZ; z++) {
-				for(int x = 0; x < chunksX; x++) {
-					VoxelChunk chunk = new VoxelChunk(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z, i, p);
-					chunk.offset.set(x * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, z * CHUNK_SIZE_Z);
-					chunks[i++] = chunk;
-				}
-			}
-		}
+            for(int y = 0; y < chunksY; y++) {
+                for(int z = 0; z < chunksZ; z++) {
+                    for(int x = 0; x < chunksX; x++) {
+                        VoxelChunk chunk = new VoxelChunk(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z, i, p);
+                        chunk.offset.set(x * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, z * CHUNK_SIZE_Z);
+                        chunks[i++] = chunk;
+                    }
+                }
+            }
 		
 		//this.meshes = new Mesh[chunksX * chunksY * chunksZ];
 		//for(i = 0; i < meshes.length; i++) {
 		//	meshes[i] = mesher.newMesh(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z);
 			
 		//}
-		this.dirty = new boolean[chunksX * chunksY * chunksZ];
+		this.dirty = new boolean[chunksX * chunksY * chunksZ * planes];
 		for(i = 0; i < dirty.length; i++) dirty[i] = true;
 
 		//this.numVertices = new int[chunksX * chunksY * chunksZ];
@@ -116,8 +117,34 @@ public class VoxelWorld implements RenderableProvider {
 		chunkX %= chunksX;
 		chunkY %= chunksY;
 		chunkZ %= chunksZ;
-		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ;// + numChunks*p;
-		chunks[index].set(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z, voxel);
+        ix %= CHUNK_SIZE_X;
+        iy %= CHUNK_SIZE_Y;
+        iz %= CHUNK_SIZE_Z;
+		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
+		chunks[index].setFast(ix, iy, iz, voxel);
+        if (ix == CHUNK_SIZE_X-1){
+            dirty[chunkX+1 + chunkZ * chunksX + chunkY * chunksX * chunksZ] = true;
+        }
+        if (ix == 0 && chunkX != 0){
+            dirty[chunkX-1 + chunkZ * chunksX + chunkY * chunksX * chunksZ] = true;
+        }
+
+        if (iy == CHUNK_SIZE_Y-1){
+            dirty[chunkX + chunkZ * chunksX + (chunkY+1) * chunksX * chunksZ] = true;
+            //Gdx.app.log(TAG, "dirty y+1)");
+        }
+        if (iy == 0 && chunkY != 0){
+            dirty[chunkX + chunkZ * chunksX + (chunkY-1) * chunksX * chunksZ] = true;
+            //Gdx.app.log(TAG, "dirty y+1)");
+        }
+
+        if (iz == CHUNK_SIZE_Z-1){
+            dirty[chunkX + (chunkZ+1) * chunksX + chunkY * chunksX * chunksZ] = true;
+        }
+        if (iz == 0 && chunkZ != 0){
+            dirty[chunkX + (chunkZ-1) * chunksX + chunkY * chunksX * chunksZ] = true;
+        }
+
 		dirty[index] = true;
 	}
 
@@ -139,7 +166,7 @@ public class VoxelWorld implements RenderableProvider {
 		chunkX %= chunksX;
 		chunkY %= chunksY;
 		chunkZ %= chunksZ;
-		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ ;//+ numChunks*p;
+		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
 		return chunks[index].get(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z);
 	}
 
@@ -220,5 +247,10 @@ public class VoxelWorld implements RenderableProvider {
             dirty[closest.index] = false;
         }
 
+    }
+
+    public void setDirty(int chunkX, int chunkY, int chunkZ, int plane) {
+        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*plane;
+        dirty[index] = true;
     }
 }

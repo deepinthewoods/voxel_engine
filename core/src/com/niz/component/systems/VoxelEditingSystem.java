@@ -7,12 +7,19 @@ import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
+import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pools;
 import com.niz.RayCaster;
+import com.niz.actions.AHighlightBlock;
+import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.observer.Observer;
 import com.niz.observer.Subject;
@@ -26,14 +33,16 @@ public class VoxelEditingSystem extends EntitySystem {
     private static final String TAG = "voxel editing system";
     public static final int EDIT_MODE_ADD = 0, EDIT_MODE_REMOVE = 1, EDIT_MODE_PLACE = 2;
     public static final int VIEW_MODE_TOP = 0, VIEW_MODE_BOTTOM = 1, VIEW_MODE_LEFT = 2
-            , VIEW_MODE_RIGHT = 3, VIEW_MODE_FRONT = 4, VIEW_MODE_BACK = 5, VIEW_MODE_FREE = 6;
-
+    , VIEW_MODE_RIGHT = 3, VIEW_MODE_FRONT = 4, VIEW_MODE_BACK = 5, VIEW_MODE_FREE = 6;
+    public static final int EDIT_MODE_CUBE_ON = 3, EDIT_MODE_CUBE_OFF = 4;
+    public boolean cubeMode;
+    public Entity selectedBlockEntity = null;
 
     private int blockTypeSelectedID, editModeSelectedID, viewMode;
     private Button selectedBlockButton;
     //private Color[] blockColors = new Color[256];
-
     public int sizeX = 16, sizeY = 16, sizeZ = 16;
+
     Position centrePoint = new Position();
 
     private Camera camera;
@@ -41,15 +50,16 @@ public class VoxelEditingSystem extends EntitySystem {
     private boolean viewModeChanged = true;
     private ComponentMapper<Position> posM;
     private ComponentMapper<UpVector> upM;
-    private EditVoxelSystem eVs;
+    //Vector3 camOffset = new Vector3(16,16,16);
+    private ComponentMapper<BlockHighlight> highM;
     private Subject lookAtChanger;
     private Subject highlightBlockSubject;
     Vector3 cameraPosition = new Vector3();
     float cameraDistance;
     FacePosition highlightPos = new FacePosition();
-    //Vector3 camOffset = new Vector3(16,16,16);
 
     Vector3 unp1 = new Vector3(), unp2 = new Vector3();
+    private Position selectedBlockPosition = new Position();
 
     /**
      * Creates an entity system that uses the specified filter
@@ -125,11 +135,15 @@ public class VoxelEditingSystem extends EntitySystem {
 
     @Override
     public void initialize(){
-        vw = world.getSystemOrSuperClass(VoxelSystem.class).voxelWorld;
+        VoxelSystem vSys = world.getSystemOrSuperClass(VoxelSystem.class);
+        vw = vSys.voxelWorld;
+        vSys.mesher.texturedMode = false;//TODO do this in a better way
+
         camera = world.getSystemOrSuperClass(CameraSystem.class).camera;
         posM = world.getMapper(Position.class);
         upM = world.getMapper(UpVector.class);
-        eVs = world.getSystem(EditVoxelSystem.class);
+        highM = world.getMapper(BlockHighlight.class);
+
         Subjects.get("blockTypeSelected").add(new Observer(){
 
             @Override
@@ -147,8 +161,9 @@ public class VoxelEditingSystem extends EntitySystem {
             public void onNotify(Entity e, Subject.Event event, Component c) {
                // IntegerValue i = (IntegerValue) c;
                 ColorValue col = (ColorValue) c;
-                eVs.BLOCK_COLORS[blockTypeSelectedID].set(col.color);
+                GreedyMesher.blockColors[blockTypeSelectedID].set(col.color);
                 selectedBlockButton.setColor(col.color);
+                setAllDirty();
                 //Gdx.app.log(TAG, "color changed"+col);
             }
         });
@@ -158,7 +173,18 @@ public class VoxelEditingSystem extends EntitySystem {
             @Override
             public void onNotify(Entity e, Subject.Event event, Component c) {
                 IntegerButtonValue i = (IntegerButtonValue) c;
-                editModeSelectedID = i.value;
+                if (i.value == EDIT_MODE_CUBE_ON){
+                    cubeMode = true;
+                } else if (i.value == EDIT_MODE_CUBE_OFF){
+                    if (selectedBlockEntity != null){
+                        world.deleteEntity(selectedBlockEntity);
+                        selectedBlockEntity = null;
+                    }
+                    cubeMode = false;
+                } else {
+
+                    editModeSelectedID = i.value;
+                }
                 //Gdx.app.log(TAG, "edit mode selected"+editModeSelectedID);
             }
         });
@@ -181,13 +207,15 @@ public class VoxelEditingSystem extends EntitySystem {
                 viewMode = i.value;
                 changeViewMode();
                 //rayCast(i.v.x, i.v.y);
-               // Gdx.app.log(TAG, "view mode "+viewMode);
+                Gdx.app.log(TAG, "view mode "+viewMode);
             }
         });
 
         lookAtChanger = Subjects.get("setCameraLookAt");
 
         highlightBlockSubject = Subjects.get("highlightBlock");
+
+        final Subject freeModeSub = Subjects.get("viewModeFree");
 
         Subjects.get("editorDragged").add(new Observer(){
 
@@ -206,11 +234,12 @@ public class VoxelEditingSystem extends EntitySystem {
 
                 tmp.set(camera.up);
                 tmp.crs(cameraPosition);
-                cameraPosition.rotate(tmp, drag.v2.y);
+                cameraPosition.rotate(tmp, drag.v2.y/2f);
                 tmp.set(camera.up);
-                cameraPosition.rotate(tmp, -drag.v2.x);
+                cameraPosition.rotate(tmp, -drag.v2.x/2f);
 
                 viewMode = VIEW_MODE_FREE;
+                freeModeSub.notify(null, null, null);
                 changeViewMode();
 
             }
@@ -231,19 +260,45 @@ public class VoxelEditingSystem extends EntitySystem {
             }
         });
 
-        Subjects.get("editorPinched").add(new Observer(){
 
+        Observer zoomObserver = new Observer(){
             @Override
             public void onNotify(Entity e, Subject.Event event, Component c) {
                 VectorInput4 vec = (VectorInput4) c;
-                float dx = vec.v.x - vec.v3.x;
-                float dy = vec.v2.y - vec.v4.y;
 
+                viewModeChanged = true;
+                float d = vec.v.dst(vec.v2)/vec.v3.dst(vec.v4);
+                cameraDistance *= d;
+                Gdx.app.log(TAG, "scrolled"+d);
+            }
+        };
+        Subjects.get("backgroundScrolled").add(zoomObserver);
+        Subjects.get("editorPinched").add(zoomObserver);
 
+        Subjects.get("editorClear").add(new Observer(){
+
+            @Override
+            public void onNotify(Entity e, Subject.Event event, Component c) {
+                for (int x = 0; x < sizeX; x++)
+                    for (int y = 0; y < sizeY; y++)
+                        for (int z = 0; z < sizeZ; z++){
+                            int plane = 0;
+                            vw.set(x,y,z,plane, (byte) 0);
+                        }
             }
         });
 
         changeViewMode();
+
+    }
+
+    private void setAllDirty() {
+        for (int x = 0; x < sizeX/ vw.CHUNK_SIZE_X; x++)
+            for (int y = 0; y < sizeY/ vw.CHUNK_SIZE_Y; y++)
+                for (int z = 0; z < sizeZ/ vw.CHUNK_SIZE_Z; z++){
+                    int plane = 0;
+                    vw.setDirty(x,y,z,plane);
+                }
 
     }
 
@@ -271,6 +326,8 @@ public class VoxelEditingSystem extends EntitySystem {
             ray.next();
             if (vw.get(ray.x, ray.y, ray.z, plane) != 0 || outOfBoundsForViewMode(ray)){
                 tmp.set(ray.x, ray.y, ray.z);
+
+
                 switch (editModeSelectedID){
                     case EDIT_MODE_ADD:
                         tmp.add(BlockDefinition.reflectedNormals[ray.face]);
@@ -278,10 +335,64 @@ public class VoxelEditingSystem extends EntitySystem {
                     case EDIT_MODE_PLACE:
                         break;
                     case EDIT_MODE_REMOVE:
-                        vw.set(tmp, plane, (byte) 0);
-                        return;
+
+                        break;
                 }
-                vw.set(tmp, plane, (byte)blockTypeSelectedID);
+                if (cubeMode){
+                    if (selectedBlockEntity == null){
+                        selectedBlockEntity = world.createEntity();
+                        selectedBlockEntity.add(Position.class).pos.set(tmp);
+
+                        selectedBlockPosition.pos.set(tmp);
+                        //selectedBlockEntity.add(ActionList.class).addPre(Pools.obtain(AHighlightBlock.class));
+                        BlockHighlight hl = selectedBlockEntity.add(BlockHighlight.class);
+                        hl.dirty = true;
+                        hl.color.set(Color.LIGHT_GRAY);
+                        world.addEntity(selectedBlockEntity);
+                        break;
+                    } else {
+                        Position dst = selectedBlockPosition;
+                        Gdx.app.log(TAG, "block from "+tmp+" to "+dst.pos);
+                        float x0 = Math.min(dst.pos.x, tmp.x);
+                        float x1 = Math.max(dst.pos.x, tmp.x)+1;
+                        float y0 = Math.min(dst.pos.y, tmp.y);
+                        float y1 = Math.max(dst.pos.y, tmp.y)+1;
+                        float z0 = Math.min(dst.pos.z, tmp.z);
+                        float z1 = Math.max(dst.pos.z, tmp.z)+1;
+                        x0 = MathUtils.clamp(x0, 0, sizeX);
+                        x1 = MathUtils.clamp(x1, 0, sizeX);
+                        y0 = MathUtils.clamp(y0, 0, sizeY);
+                        y1 = MathUtils.clamp(y1, 0, sizeY);
+                        z0 = MathUtils.clamp(z0, 0, sizeZ);
+                        z1 = MathUtils.clamp(z1, 0, sizeZ);
+
+
+                        if (editModeSelectedID == EDIT_MODE_REMOVE){
+                            for (float y = y0; y < y1; y++)
+                                for (float z = z0; z < z1; z++)
+                                    for (float x = x0; x < x1; x++){
+                                        vw.set(x,y,z,dst.plane, (byte) 0);
+                                    }
+                        }else {
+                            for (float y = y0; y < y1; y++)
+                                for (float z = z0; z < z1; z++)
+                                    for (float x = x0; x < x1; x++){
+                                        vw.set(x,y,z,dst.plane, (byte) blockTypeSelectedID);
+                                    }
+
+                        }
+
+                        world.deleteEntity(selectedBlockEntity);
+                        selectedBlockEntity = null;
+                        break;
+                    }
+                }
+                if (editModeSelectedID == EDIT_MODE_REMOVE){
+                    vw.set(tmp, plane, (byte) 0);
+                }else {
+                    if (tmp.x < sizeX && tmp.y < sizeY && tmp.z < sizeZ && tmp.x >= 0 && tmp.y >= 0 && tmp.z >= 0)
+                        vw.set(tmp, plane, (byte) blockTypeSelectedID);
+                }
                 //Gdx.app.log(TAG, "collided, set "+tmp + " to "+blockTypeSelectedID);
                 break;
             }
@@ -309,22 +420,7 @@ public class VoxelEditingSystem extends EntitySystem {
             if (ray.z < 0) out = true;
         }
         return out;
-        /*switch (viewMode){
-            case VIEW_MODE_BACK:
-                return ray.z >= sizeZ;
-            case VIEW_MODE_FRONT:
-                return ray.z < 0;
-            case VIEW_MODE_LEFT:
-                return ray.x >= sizeX;
-            case VIEW_MODE_RIGHT:
-                return ray.x < 0;
-            case VIEW_MODE_TOP:
-                return ray.y < 0;
-            case VIEW_MODE_BOTTOM:
-                return ray.y >= sizeY;
-            default:
-                return false;
-        }*/
+
     }
 
 
@@ -345,10 +441,61 @@ public class VoxelEditingSystem extends EntitySystem {
             ray.next();
             if (vw.get(ray.x, ray.y, ray.z, plane) != 0 || outOfBoundsForViewMode(ray)){
                 tmp.set(ray.x, ray.y, ray.z);
-                tmp.sub(.04f);
-                highlightPos.pos.set(tmp);
+                switch (editModeSelectedID){
+                    case EDIT_MODE_ADD:
+                        tmp.add(BlockDefinition.reflectedNormals[ray.face]);
+                        break;
+                    case EDIT_MODE_PLACE:
+                        break;
+                    case EDIT_MODE_REMOVE:
+
+                        break;
+                }
+                tmp.x = (int)tmp.x;
+                tmp.y = (int)tmp.y;
+                tmp.z = (int)tmp.z;
+                highlightPos.pos.set(tmp).sub(0.004f);
                 highlightPos.face = ray.face;
                 highlightBlockSubject.notify(null, null, highlightPos);
+
+                if (selectedBlockEntity != null){
+                    BlockHighlight high = highM.get(selectedBlockEntity);
+                    Position hPos = posM.get(selectedBlockEntity);
+                    //high.size.set(tmp).sub(hPos.pos);//.add(1f,1f,1f);
+                    int srcx = (int) selectedBlockPosition.pos.x;
+                    int srcy = (int) selectedBlockPosition.pos.y;
+                    int srcz = (int) selectedBlockPosition.pos.z;
+                    hPos.pos.set(selectedBlockPosition.pos).sub(.005f);
+                    int dstx = (int) tmp.x;
+                    int dsty = (int) tmp.y;
+                    int dstz = (int) tmp.z;
+
+                    high.size.set(dstx, dsty, dstz).sub(srcx, srcy, srcz);
+
+                    if (srcx >= dstx){
+                        hPos.pos.x += 1.01f;
+                        high.size.x -= 1.01f;
+                    } else{
+                        high.size.x +=1.01f;
+                    }
+
+                    if (srcy >= dsty){
+                        hPos.pos.y += 1.01f;
+                        high.size.y -= 1.01f;
+                       // high.color.set(Color.RED);
+                    } else{
+                        //high.color.set(Color.GREEN);
+                        high.size.y +=1.01f;
+                    }
+
+                    if (srcz >= dstz){
+                        hPos.pos.z += 1.01f;
+                        high.size.z -= 1.01f;
+                    } else{
+                        high.size.z +=1.01f;
+                    }
+                    high.dirty = true;
+                }
                 //Gdx.app.log(TAG, "highlight"+tmp);
                 return;
 

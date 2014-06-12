@@ -35,6 +35,8 @@ public class BackgroundClickDrag extends UIElement {
         actor = new Actor();
         actor.setSize(100000, 100000);
 
+
+
         actor.addListener(new ActorGestureListener(){
             long lastDownTime;
             @Override
@@ -80,25 +82,7 @@ public class BackgroundClickDrag extends UIElement {
 
 
         });
-        actor.addListener(new InputListener(){
-            @Override
-            public boolean scrolled(InputEvent event, float x, float y, int amount) {
-                float resx = Gdx.graphics.getWidth(), resy = Gdx.graphics.getHeight();
-                float dx = 1f/resx, dy = 1f/resy;
-                resx /= 2;
-                resy /= 2;
-                dx *= amount;
-                dy *= amount;
-                vec4.v.set(resx-dx, resy);
-                vec4.v2.set(resx+dx, resy);
-                vec4.v3.set(resx-dx-dx, resy);
-                vec4.v4.set(resx+dx+dx, resy);
 
-                if (subjects != null && subjects.length >2)
-                    subjects[2].notify(null, null, vec4);
-                return true;
-            }
-        });
        /* actor.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event,

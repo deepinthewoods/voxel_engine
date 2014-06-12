@@ -40,7 +40,7 @@ public class EdgeUI{
             }
             table.row();
         }
-        table.layout();
+        //table.layout();
 
         //for screen touches
         Table backTable = new Table();

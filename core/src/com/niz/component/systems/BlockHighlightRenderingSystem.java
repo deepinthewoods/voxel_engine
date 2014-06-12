@@ -71,13 +71,17 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
                 setVerts(renderable.mesh, pos.pos, hi.size, hi.color);
                 hi.mesh.setIndices(indices[hi.face]);
                 hi.dirty = false;
+                //Gdx.app.log(TAG, "highlight"+pos.pos);
             }
             if (hi.face == BlockDefinition.ALL)
                 renderable.meshPartSize = 24;
             else renderable.meshPartSize = 8;
             renderable.material = material;
             renderable.primitiveType = GL20.GL_LINES;
+            renderable.worldTransform.idt();
             renderables.add(renderable);
+            //Gdx.app.log(TAG, "highlight"+pos.pos);
+
         }
 
     }
@@ -95,7 +99,6 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
     }
 
     private void setVerts(Mesh mesh, Vector3 offset, Vector3 size, Color color) {
-        Gdx.app.log(TAG, "highlight"+offset);
 
         float c = color.toFloatBits();
         int i = 0;

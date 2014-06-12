@@ -34,7 +34,7 @@ import com.badlogic.gdx.math.Vector3;
  *
  */
 public class GreedyMesher implements Mesher {
- 
+
     /*
      * In this test each voxel has a size of one world unit � in reality a voxel engine
      * might have larger voxels � and there�s a multiplication of the vertex coordinates
@@ -52,7 +52,7 @@ public class GreedyMesher implements Mesher {
      */
     private static int CHUNK_WIDTH = 16;
     private static int CHUNK_HEIGHT = 16;
- 
+
     /*
      * This is a 3D array of sample data � I�m using voxel faces here because I�m returning
      * the same data for each face in this example � but calls to the getVoxelFace function below
@@ -64,7 +64,7 @@ public class GreedyMesher implements Mesher {
     protected static Color[] lightColors;
 
     protected MeshBatcher meshBatch;
- 
+
     /*
      * These are just constants to keep track of which face we�re dealing with � their actual
      * values are unimportantly � only that they�re constant.
@@ -76,8 +76,8 @@ public class GreedyMesher implements Mesher {
     private static final int TOP        = 4;
     private static final int BOTTOM     = 5;
 
-	private static final String TAG = "Greedy Mesher";    
- 
+	private static final String TAG = "Greedy Mesher";
+
     /**
      * This class is used to encapsulate all information about a single voxel face.  Any number of attributes can be
      * included � and the equals function will be called in order to compare faces.  This is important because it
@@ -90,22 +90,20 @@ public class GreedyMesher implements Mesher {
      * might be when this algorithm is used in a real engine � could set the transparent attribute on faces based
      * on whether they should be visible or not.
      */
-	public Color tc = new Color();
+	//public Color tc = new Color();
+
+
+    public static Color[] blockColors;//for editing
+    public boolean texturedMode = true;
+
+    static {
+        blockColors = new Color[256];
+        for (int i = 0; i < 256; i++)
+            blockColors[i] = new Color(Color.WHITE);
+    }
 
 	private int[][][] lightCache;
 
-	
-	/**
-	 * face offsets for vertices
-	 * 0 for dont move in this plane
-	 * snewtb
-	 */
-	private int[] fox = {1,1,1,1,1,1};
-	
-	private int[] foy = {1,1,1,1,1,1};
-	private int[] foz = {1,1,1,1,1,1};
-
-	
 
 	private int width;
 	private int height;
@@ -119,9 +117,9 @@ public class GreedyMesher implements Mesher {
 	private int widthTimesDepth;
 
 	private int[] visibilityMask;
-	
-	
-	public void setConstants(int width, int height, int depth){
+
+
+    public void setConstants(int width, int height, int depth){
 		this.width = width;
 		this.height = height;
 		this.depth = depth;
@@ -133,11 +131,11 @@ public class GreedyMesher implements Mesher {
 		this.backOffset = width;
 		this.widthTimesDepth = width * depth;
 	}
-	
+
 	static float[] lightValues;
 
     class VoxelFace {
-    	
+
 		public BlockDefinition def;
         public boolean transparent;
         public int type;
@@ -145,13 +143,12 @@ public class GreedyMesher implements Mesher {
 		public float u, v;
 		float[] c = new float[4];
 		protected int[] vertex = new int[4];
-		
-        public boolean equals(final VoxelFace face) { 
-        	boolean result = face.transparent == this.transparent && 
+
+        public boolean equals(final VoxelFace face) {
+        	boolean result = face.transparent == this.transparent &&
         			face.type == this.type;
-        	//if (face.type != type) throw new GdxRuntimeException("right"+result+type);//Gdx.app.log(TAG,  "fal");
         	if (result){
-        		
+
         		for (int i = 0; i < 4; i++){
         			if (vertex[i] != face.vertex[i])
             			result = false;
@@ -159,9 +156,9 @@ public class GreedyMesher implements Mesher {
 
         	}
         	return result;
-        	
+
         }
-        
+
 
 		public void set(BlockDefinition def2, int faceID, int b) {
 			this.def = def2;
@@ -171,19 +168,19 @@ public class GreedyMesher implements Mesher {
 
 			if (b == 0){
 				transparent = true;
-				
-				
+
+
 			}else {
-				
-				
+
+
 
 				transparent = false;
 			}
 			type = b;
 			//offsets +1 0 1
 			//look in cache[]
-			
-			
+
+
 			//c[0] = tc.toFloatBits();
 		}
 
@@ -211,12 +208,15 @@ public class GreedyMesher implements Mesher {
 		}
 
 
+        public void vertex(int index, BlockDefinition a, BlockDefinition b, BlockDefinition c, BlockDefinition x) {
+            vertex[index] = (a.lightValue + b.lightValue + c.lightValue + x.lightValue)/4;
+        }
     }
- 
-    
- 
+
+
+
     public boolean readBlocks(VoxelChunk chunk, VoxelWorld voxelWorld, int progress){
-    	
+
     	int progressVisibilityMax = VoxelChunk.VISIBILITY_SUBDIVISIONS+3;
     	if (progress < progressVisibilityMax) {
             chunk.visibility(visibilityMask, lightCache, voxels, voxelWorld, progress);
@@ -224,10 +224,110 @@ public class GreedyMesher implements Mesher {
         }
         int prog = progress - progressVisibilityMax;
         int my = CHUNK_WIDTH+2;
-
+        int ox = (int) chunk.offset.x;
+        int oy = (int) chunk.offset.y;
+        int oz = (int) chunk.offset.z;
         if (prog < FACE_SUBDIVISIONS){
             int progSize = CHUNK_HEIGHT / FACE_SUBDIVISIONS;
-            for(int y = prog * progSize, n = (prog+1) * progSize; y < n; y++) {
+            //Gdx.app.log(TAG, "prog"+prog+"  /  "+FACE_SUBDIVISIONS + "  progrsize "+(prog * progSize));
+
+            int n = (prog+1) * progSize;
+            if (prog == FACE_SUBDIVISIONS-1)n--;
+
+            for(int y = prog * progSize; y < n; y++) {
+                for(int z = 0; z < CHUNK_WIDTH-1; z++) {
+                    int mask = visibilityMask[(y+1)*my+(z+1)];
+                    int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                    int maskSouth = visibilityMask[(y+1)*my+(z)];
+                    int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                    int maskBottom = visibilityMask[(y)*my+(z+1)];
+                    int maskEast = mask >> 1;
+                    int maskWest = mask << 1;
+
+
+
+
+
+                    maskNorth &= mask;
+                    maskSouth &= mask;
+                    maskTop &= mask;
+                    maskBottom &= mask;
+                    maskEast &= mask;
+                    maskWest &= mask;
+
+                    for(int x = 0; x < CHUNK_WIDTH-1; x++) {
+
+                        if ((maskTop>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][TOP].transparent = true;
+                        }
+
+                        if ((maskBottom>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][BOTTOM].transparent = true;
+                        }
+
+                        if ((maskNorth>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][NORTH].transparent = true;
+                        }
+
+                        if ((maskSouth>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][SOUTH].transparent = true;
+                        }
+
+                        if ((maskEast>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][EAST].transparent = true;
+                        }
+
+                        if ((maskWest>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][WEST].transparent = true;
+                        }
+
+                        BlockDefinition ao00 = chunk.getDef(x, y, z);
+                        BlockDefinition ao01 = chunk.getDef(x, y, z + 1);
+                        BlockDefinition ao10 = chunk.getDef(x + 1, y, z);
+                        BlockDefinition ao11 = chunk.getDef(x + 1, y, z + 1);
+
+                        BlockDefinition ao00T = chunk.getDef(x, y + 1, z);
+                        BlockDefinition ao01T = chunk.getDef(x, y + 1, z + 1);
+                        BlockDefinition ao10T = chunk.getDef(x + 1, y + 1, z);
+                        BlockDefinition ao11T = chunk.getDef(x + 1, y + 1, z + 1);
+
+                        voxels[x][y][z][TOP].vertex(3,ao01T, ao10T, ao11T, ao00T);
+                        voxels[x][y][z][EAST].vertex(3,ao10T, ao11, ao11T, ao10);
+                        voxels[x][y][z][NORTH].vertex(3,ao01T, ao11, ao11T, ao01);
+
+                        voxels[x+1][y][z][TOP].vertex(2,ao00T, ao11T, ao01T, ao10T);
+                        voxels[x+1][y][z][WEST].vertex(3,ao00T, ao01, ao01T, ao00);
+                        voxels[x+1][y][z][NORTH].vertex(1,ao11T, ao01, ao01T, ao11);
+
+
+                        voxels[x][y][z+1][TOP].vertex(1,ao00T, ao11T, ao10T, ao01T);
+                        voxels[x][y][z+1][EAST].vertex(2,ao11T, ao10, ao10T, ao11);
+                        voxels[x][y][z+1][SOUTH].vertex(3,ao00T, ao10, ao10T, ao00);
+
+                        voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, ao11T);
+                        voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, ao01);
+                        voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, ao10);
+
+                        voxels[x][y+1][z][BOTTOM].vertex(3,ao01, ao10, ao11, ao01);
+                        voxels[x][y+1][z][EAST].vertex(1,ao10, ao11T, ao11, ao10T);
+                        voxels[x][y+1][z][NORTH].vertex(2,ao01, ao11T, ao11, ao01T);
+
+                        voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, ao10);
+                        voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, ao00T);
+                        voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, ao11T);
+
+                        voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, ao01);
+                        voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, ao11T);
+                        voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, ao00T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+                    }}}//}
+        } else if (prog < FACE_SUBDIVISIONS+1){
+            //tops with visibility
+            for(int y = CHUNK_HEIGHT-1; y < CHUNK_HEIGHT; y++) {
                 for(int z = 0; z < CHUNK_WIDTH; z++) {
                     int mask = visibilityMask[(y+1)*my+(z+1)];
                     int maskNorth = visibilityMask[(y+1)*my+(z+2)];
@@ -237,15 +337,9 @@ public class GreedyMesher implements Mesher {
                     int maskEast = mask >> 1;
                     int maskWest = mask << 1;
 
-                    int ao00 = mask;
-                    int ao01 = maskNorth;
-                    int ao10 = maskEast >> 1;
-                    int ao11 = maskNorth >> 1;
 
-                    int ao00T = maskTop;
-                    int ao01T = visibilityMask[(y+2)*my+(z+2)];
-                    int ao10T = maskTop >> 1;
-                    int ao11T = ao01T >> 1;
+
+
 
                     maskNorth &= mask;
                     maskSouth &= mask;
@@ -279,6 +373,912 @@ public class GreedyMesher implements Mesher {
                         if ((maskWest>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][WEST].transparent = true;
                         }
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y, oz + z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y, oz + z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y + 1, oz + z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y + 1, oz + z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y + 1, oz + z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y + 1, oz + z + 1, chunk.plane));
+
+                        voxels[x][y][z][TOP].vertex(3,ao01T, ao10T, ao11T, ao00T);
+                        voxels[x][y][z][EAST].vertex(3,ao10T, ao11, ao11T, ao10);
+                        voxels[x][y][z][NORTH].vertex(3,ao01T, ao11, ao11T, ao01);
+
+                        voxels[x+1][y][z][TOP].vertex(2,ao00T, ao11T, ao01T, ao10T);
+                        voxels[x+1][y][z][WEST].vertex(3,ao00T, ao01, ao01T, ao00);
+                        voxels[x+1][y][z][NORTH].vertex(1,ao11T, ao01, ao01T, ao11);
+
+
+                        voxels[x][y][z+1][TOP].vertex(1,ao00T, ao11T, ao10T, ao01T);
+                        voxels[x][y][z+1][EAST].vertex(2,ao11T, ao10, ao10T, ao11);
+                        voxels[x][y][z+1][SOUTH].vertex(3,ao00T, ao10, ao10T, ao00);
+
+                        voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, ao11T);
+                        voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, ao01);
+                        voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, ao10);
+
+                        voxels[x][y+1][z][BOTTOM].vertex(3,ao01, ao10, ao11, ao01);
+                        voxels[x][y+1][z][EAST].vertex(1,ao10, ao11T, ao11, ao10T);
+                        voxels[x][y+1][z][NORTH].vertex(2,ao01, ao11T, ao11, ao01T);
+
+                        voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, ao10);
+                        voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, ao00T);
+                        voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, ao11T);
+
+                        voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, ao01);
+                        voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, ao11T);
+                        voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, ao00T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+                    }}}//}
+        } else if (prog < FACE_SUBDIVISIONS+2){
+            //norths
+            for(int y = 0; y < CHUNK_HEIGHT-1; y++) {
+                for(int z = CHUNK_WIDTH-1; z < CHUNK_WIDTH; z++) {
+                    int mask = visibilityMask[(y+1)*my+(z+1)];
+                    int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                    int maskSouth = visibilityMask[(y+1)*my+(z)];
+                    int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                    int maskBottom = visibilityMask[(y)*my+(z+1)];
+                    int maskEast = mask >> 1;
+                    int maskWest = mask << 1;
+
+
+
+
+
+                    maskNorth &= mask;
+                    maskSouth &= mask;
+                    maskTop &= mask;
+                    maskBottom &= mask;
+                    maskEast &= mask;
+                    maskWest &= mask;
+
+                    for(int x = 0; x < CHUNK_WIDTH; x++) {
+
+                        if ((maskTop>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][TOP].transparent = true;
+                        }
+
+                        if ((maskBottom>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][BOTTOM].transparent = true;
+                        }
+
+                        if ((maskNorth>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][NORTH].transparent = true;
+                        }
+
+                        if ((maskSouth>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][SOUTH].transparent = true;
+                        }
+
+                        if ((maskEast>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][EAST].transparent = true;
+                        }
+
+                        if ((maskWest>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][WEST].transparent = true;
+                        }
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y, oz + z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y, oz + z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y + 1, oz + z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y + 1, oz + z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y + 1, oz + z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y + 1, oz + z + 1, chunk.plane));
+
+                        voxels[x][y][z][TOP].vertex(3,ao01T, ao10T, ao11T, ao00T);
+                        voxels[x][y][z][EAST].vertex(3,ao10T, ao11, ao11T, ao10);
+                        voxels[x][y][z][NORTH].vertex(3,ao01T, ao11, ao11T, ao01);
+
+                        voxels[x+1][y][z][TOP].vertex(2,ao00T, ao11T, ao01T, ao10T);
+                        voxels[x+1][y][z][WEST].vertex(3,ao00T, ao01, ao01T, ao00);
+                        voxels[x+1][y][z][NORTH].vertex(1,ao11T, ao01, ao01T, ao11);
+
+
+                        voxels[x][y][z+1][TOP].vertex(1,ao00T, ao11T, ao10T, ao01T);
+                        voxels[x][y][z+1][EAST].vertex(2,ao11T, ao10, ao10T, ao11);
+                        voxels[x][y][z+1][SOUTH].vertex(3,ao00T, ao10, ao10T, ao00);
+
+                        voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, ao11T);
+                        voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, ao01);
+                        voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, ao10);
+
+                        voxels[x][y+1][z][BOTTOM].vertex(3,ao01, ao10, ao11, ao01);
+                        voxels[x][y+1][z][EAST].vertex(1,ao10, ao11T, ao11, ao10T);
+                        voxels[x][y+1][z][NORTH].vertex(2,ao01, ao11T, ao11, ao01T);
+
+                        voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, ao10);
+                        voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, ao00T);
+                        voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, ao11T);
+
+                        voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, ao01);
+                        voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, ao11T);
+                        voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, ao00T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+                    }}}//}
+        } else if (prog < FACE_SUBDIVISIONS+3){
+            //norths with visibility
+            for(int y = 0; y < CHUNK_HEIGHT-1; y++) {
+                for(int z = 0; z < CHUNK_WIDTH-1; z++) {
+                    int mask = visibilityMask[(y+1)*my+(z+1)];
+                    int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                    int maskSouth = visibilityMask[(y+1)*my+(z)];
+                    int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                    int maskBottom = visibilityMask[(y)*my+(z+1)];
+                    int maskEast = mask >> 1;
+                    int maskWest = mask << 1;
+
+
+
+
+
+                    maskNorth &= mask;
+                    maskSouth &= mask;
+                    maskTop &= mask;
+                    maskBottom &= mask;
+                    maskEast &= mask;
+                    maskWest &= mask;
+
+                    for(int x = CHUNK_WIDTH-1; x < CHUNK_WIDTH; x++) {
+
+                        if ((maskTop>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][TOP].transparent = true;
+                        }
+
+                        if ((maskBottom>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][BOTTOM].transparent = true;
+                        }
+
+                        if ((maskNorth>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][NORTH].transparent = true;
+                        }
+
+                        if ((maskSouth>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][SOUTH].transparent = true;
+                        }
+
+                        if ((maskEast>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][EAST].transparent = true;
+                        }
+
+                        if ((maskWest>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][WEST].transparent = true;
+                        }
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y, oz + z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y, oz + z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y + 1, oz + z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y + 1, oz + z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y + 1, oz + z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox + x + 1, oy + y + 1, oz + z + 1, chunk.plane));
+
+                        voxels[x][y][z][TOP].vertex(3,ao01T, ao10T, ao11T, ao00T);
+                        voxels[x][y][z][EAST].vertex(3,ao10T, ao11, ao11T, ao10);
+                        voxels[x][y][z][NORTH].vertex(3,ao01T, ao11, ao11T, ao01);
+
+                        voxels[x+1][y][z][TOP].vertex(2,ao00T, ao11T, ao01T, ao10T);
+                        voxels[x+1][y][z][WEST].vertex(3,ao00T, ao01, ao01T, ao00);
+                        voxels[x+1][y][z][NORTH].vertex(1,ao11T, ao01, ao01T, ao11);
+
+
+                        voxels[x][y][z+1][TOP].vertex(1,ao00T, ao11T, ao10T, ao01T);
+                        voxels[x][y][z+1][EAST].vertex(2,ao11T, ao10, ao10T, ao11);
+                        voxels[x][y][z+1][SOUTH].vertex(3,ao00T, ao10, ao10T, ao00);
+
+                        voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, ao11T);
+                        voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, ao01);
+                        voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, ao10);
+
+                        voxels[x][y+1][z][BOTTOM].vertex(3,ao01, ao10, ao11, ao01);
+                        voxels[x][y+1][z][EAST].vertex(1,ao10, ao11T, ao11, ao10T);
+                        voxels[x][y+1][z][NORTH].vertex(2,ao01, ao11T, ao11, ao01T);
+
+                        voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, ao10);
+                        voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, ao00T);
+                        voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, ao11T);
+
+                        voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, ao01);
+                        voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, ao11T);
+                        voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, ao00T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+                    }}}//}
+        }
+
+
+        else if (prog < FACE_SUBDIVISIONS+4 ){
+//BOTTOMS
+            for(int y = -1; y < 0; y++) {
+                for(int z = 0; z < CHUNK_WIDTH; z++) {
+
+                    for(int x = 0; x < CHUNK_WIDTH; x++) {
+
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z + 1, chunk.plane));
+
+
+                        voxels[x][y+1][z][BOTTOM].vertex(3,ao01, ao10, ao11, ao01);
+                        voxels[x][y+1][z][EAST].vertex(1,ao10, ao11T, ao11, ao10T);
+                        voxels[x][y+1][z][NORTH].vertex(2,ao01, ao11T, ao11, ao01T);
+
+                        voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, ao10);
+                        voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, ao00T);
+                        voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, ao11T);
+
+                        voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, ao01);
+                        voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, ao11T);
+                        voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, ao00T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+
+                    }}}//}
+        } else if (prog < FACE_SUBDIVISIONS+5 ){
+            for(int y = 0; y < CHUNK_HEIGHT; y++) {
+                for(int z = 0; z < CHUNK_WIDTH; z++) {
+
+                    for(int x = -1; x < 0; x++) {
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z + 1, chunk.plane));
+
+                        voxels[x+1][y][z][TOP].vertex(2,ao00T, ao11T, ao01T, ao10T);
+                        voxels[x+1][y][z][WEST].vertex(3,ao00T, ao01, ao01T, ao00);
+                        voxels[x+1][y][z][NORTH].vertex(1,ao11T, ao01, ao01T, ao11);
+
+
+
+
+                        voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, ao11T);
+                        voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, ao01);
+                        voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, ao10);
+
+
+                        voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, ao10);
+                        voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, ao00T);
+                        voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, ao11T);
+
+
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+                    }}}//}
+        } else if (prog < FACE_SUBDIVISIONS+6 ){
+//SOUTHS
+            for(int y = 0; y < CHUNK_HEIGHT; y++) {
+                for(int z = -1; z < 0; z++) {
+
+
+                    for(int x = 0; x < CHUNK_WIDTH; x++) {
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z + 1, chunk.plane));
+
+                        voxels[x][y][z+1][TOP].vertex(1,ao00T, ao11T, ao10T, ao01T);
+                        voxels[x][y][z+1][EAST].vertex(2,ao11T, ao10, ao10T, ao11);
+                        voxels[x][y][z+1][SOUTH].vertex(3,ao00T, ao10, ao10T, ao00);
+
+                        voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, ao11T);
+                        voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, ao01);
+                        voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, ao10);
+
+
+
+                        voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, ao01);
+                        voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, ao11T);
+                        voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, ao00T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+
+
+
+                    }}}//}
+
+        } else if (prog < FACE_SUBDIVISIONS+7 ){
+//0 diagonal x
+            for(int y = -1; y < 0; y++) {
+                for(int z = -1; z < 0; z++) {
+
+
+                    for (int x = 0; x < width; x++){
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z + 1, chunk.plane));
+
+
+                        voxels[x][y+1][z+1][BOTTOM].vertex(1,ao00, ao11, ao10, ao01);
+                        voxels[x][y+1][z+1][EAST].vertex(0,ao11, ao10T, ao10, ao11T);
+                        voxels[x][y+1][z+1][SOUTH].vertex(2,ao00, ao10T, ao10, ao00T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+                    }}}//}
+        } else if (prog < FACE_SUBDIVISIONS+8 ){
+//diag y
+            for(int y = 0; y < CHUNK_HEIGHT; y++) {
+                for(int z = -1; z < 0; z++) {
+
+
+                    for(int x = -1; x < 0; x++) {
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z + 1, chunk.plane));
+
+
+                        voxels[x+1][y][z+1][TOP].vertex(0,ao01T, ao10T, ao00T, ao11T);
+                        voxels[x+1][y][z+1][WEST].vertex(2,ao01T, ao00, ao00T, ao01);
+                        voxels[x+1][y][z+1][SOUTH].vertex(1,ao10T, ao00, ao00T, ao10);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+
+                    }}}//}
+
+        } else if (prog < FACE_SUBDIVISIONS+9){
+            //diag z
+            for(int y = -1; y < 0; y++) {
+                for(int z = 0; z < CHUNK_WIDTH; z++) {
+
+
+                    for(int x = -1; x < 0; x++) {
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z + 1, chunk.plane));
+
+                        voxels[x+1][y+1][z][BOTTOM].vertex(2,ao00, ao11, ao01, ao10);
+                        voxels[x+1][y+1][z][WEST].vertex(1,ao00, ao01T, ao01, ao00T);
+                        voxels[x+1][y+1][z][NORTH].vertex(0,ao01T, ao11, ao01, ao11T);
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+
+                    }}}//}
+        }else if (prog < FACE_SUBDIVISIONS+10){
+            for(int y = -1; y < 0; y++) {
+                for(int z = -1; z < 0; z++) {
+
+                    for(int x = -1; x < 0; x++) {
+
+                        BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
+                        BlockDefinition ao11 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z + 1, chunk.plane));
+
+                        BlockDefinition ao00T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao01T = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y + 1, oz+z + 1, chunk.plane));
+                        BlockDefinition ao10T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z, chunk.plane));
+                        BlockDefinition ao11T = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y + 1, oz+z + 1, chunk.plane));
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, ao11);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, ao01T);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, ao10T);
+
+                    }}}//}
+        }
+
+        else {
+            return true;
+        }
+        return false;
+
+
+
+    }
+
+
+
+
+//		if(voxels[i+topOffset] <= 0) my += ();
+//		if(voxels[i+bottomOffset] <= 0) my += ();
+//		if(voxels[i+leftOffset] <= 0) mx += ();
+//		if(voxels[i+rightOffset] <= 0) mx += ();
+//		if(voxels[i+frontOffset] <= 0) mz += ();
+//		if(voxels[i+backOffset] <= 0) mz += ();
+
+
+
+    public GreedyMesher(final MeshBatcher mesh) {
+    	lightValues = new float[16];
+        lightColors = new Color[16];
+    	float r,g,b,a = 1f;;
+        Color c = new Color(Color.WHITE);
+    	for (int i = 15; i >= 0; i--){
+
+
+    		lightValues[i] = c.toFloatBits();
+            lightColors[i] = new Color(c);
+            c.mul(.95f);
+
+    	}
+
+		meshBatch = mesh;
+		setConstants(16,16,16);
+		VoxelFace face, face2;
+		for (int i = 0; i < CHUNK_WIDTH+1; i++) {
+
+			for (int j = 0; j < CHUNK_HEIGHT+1; j++) {
+
+				for (int k = 0; k < CHUNK_WIDTH+1; k++) {
+
+					for (int faceID = 0; faceID < 6; faceID++){
+
+
+						/*
+						 * To see an example of face culling being used in combination with
+						 * greedy meshing, you could set the trasparent attribute to true.
+						 */
+						// face.transparent = true;
+
+
+
+
+						face = new VoxelFace();
+						face.side = faceID;
+						face2 = new VoxelFace();
+						face2.side = faceID;
+						voxels[i][j][k][faceID] = face;
+						voxels[i][j][k][faceID] = face2;
+					}
+				}
+			}
+		}
+		visibilityMask = new int[(CHUNK_HEIGHT+3)*(CHUNK_WIDTH+3)];
+		lightCache = new int[CHUNK_WIDTH+4][CHUNK_HEIGHT+4][CHUNK_WIDTH+4];
+	}
+
+
+	/**
+     *
+     */
+    final int[] x = new int []{0,0,0};
+    final int[] q = new int []{0,0,0};
+    final int[] du = new int[]{0,0,0};
+    final int[] dv = new int[]{0,0,0};
+    Vector3 cornerA = new Vector3(), cornerB = new Vector3(), cornerC = new Vector3(), cornerD = new Vector3();
+    void greedy(int progress) {
+
+        /*
+         * These are just working variables for the algorithm � almost all taken
+         * directly from Mikola Lysenko�s javascript implementation.
+         */
+        int i, j, k, l, w, h, u, v, n, side = 0;
+
+
+
+        /*
+         * We create a mask � this will contain the groups of matching voxel faces
+         * as we proceed through the chunk in 6 directions � once for each face.
+         */
+        final VoxelFace[] mask = new VoxelFace [CHUNK_WIDTH * CHUNK_HEIGHT];
+
+        /*
+         * These are just working variables to hold two faces during comparison.
+         */
+        VoxelFace voxelFace, voxelFace1;
+
+        /**
+         * We start with the lesser-spotted boolean for-loop (also known as the old flippy floppy).
+         *
+         * The variable backFace will be TRUE on the first iteration and FALSE on the second � this allows
+         * us to track which direction the indices should run during creation of the quad.
+         *
+         * This loop runs twice, and the inner loop 3 times � totally 6 iterations � one for each
+         * voxel face.
+         */
+       // for (boolean backFace = true, b = false; b != backFace; backFace = backFace && b, b = !b)
+        {
+
+            /*
+             * We sweep over the 3 dimensions � most of what follows is well described by Mikola Lysenko
+             * in his post � and is ported from his Javascript implementation.  Where this implementation
+             * diverges, I�ve added commentary.
+             */
+            //for(int d = 0; d < 3; d++)
+            {
+                int d = progress%3;
+                boolean backFace = progress < 3;
+                u = (d + 1) % 3;
+                v = (d + 2) % 3;
+
+                x[0] = 0;
+                x[1] = 0;
+                x[2] = 0;
+
+                q[0] = 0;
+                q[1] = 0;
+                q[2] = 0;
+                q[d] = 1;
+
+                /*
+                 * Here we�re keeping track of the face that we�re meshing.
+                 */
+                if (d == 0)      { side = backFace ? WEST   : EAST;  }
+                else if (d == 1) { side = backFace ? BOTTOM : TOP;   }
+                else if (d == 2) { side = backFace ? SOUTH  : NORTH; }
+
+                /*
+                 * We move through the dimension from front to back
+                 */
+                for(x[d] = -1; x[d] < CHUNK_WIDTH;) {
+
+                    /*
+                     * ����������������������-
+                     *   We compute the mask
+                     * ����������������������-
+                     */
+                    n = 0;
+
+                    for(x[v] = 0; x[v] < CHUNK_HEIGHT; x[v]++) {
+
+                        for(x[u] = 0; x[u] < CHUNK_WIDTH; x[u]++) {
+
+                            /*
+                             * Here we retrieve two voxel faces for comparison.
+                             */
+                            voxelFace  = (x[d] >= 0 )             ? getVoxelFace(x[0], x[1], x[2], side)                      : null;
+                            voxelFace1 = (x[d] < CHUNK_WIDTH - 1) ? getVoxelFace(x[0] + q[0], x[1] + q[1], x[2] + q[2], side) : null;
+
+                            /*
+                             * Note that we�re using the equals function in the voxel face class here, which lets the faces
+                             * be compared based on any number of attributes.
+                             *
+                             * Also, we choose the face to add to the mask depending on whether we�re moving through on a backface or not.
+                             */
+                            mask[n++] = ((voxelFace != null && voxelFace1 != null && voxelFace.equals(voxelFace1)))
+                                        ? null
+                                        : backFace ? voxelFace1 : voxelFace;
+                        }
+                    }
+
+                    x[d]++;
+
+                    /*
+                     * Now we generate the mesh for the mask
+                     */
+                    n = 0;
+
+                    for(j = 0; j < CHUNK_HEIGHT; j++) {
+
+                        for(i = 0; i < CHUNK_WIDTH;) {
+
+                            if(mask[n] != null) {
+
+                                /*
+                                 * We compute the width
+                                 */
+                                for(w = 1; i + w < CHUNK_WIDTH && mask[n + w] != null && mask[n + w].equals(mask[n]); w++) {}
+
+                                /*
+                                 * Then we compute height
+                                 */
+                                boolean done = false;
+
+                                for(h = 1; j + h < CHUNK_HEIGHT; h++) {
+
+                                    for(k = 0; k < w; k++) {
+
+                                        if(mask[n + k + h * CHUNK_WIDTH] == null || !mask[n + k + h * CHUNK_WIDTH].equals(mask[n])) { done = true; break; }
+                                    }
+
+                                    if(done) { break; }
+                                }
+
+                                /*
+                                 * Here we check the �transparent� attribute in the VoxelFace class to ensure that we don�t mesh
+                                 * any culled faces.
+                                 */
+                                if (!mask[n].transparent) {
+                                    /*
+                                     * Add quad
+                                     */
+                                    x[u] = i;
+                                    x[v] = j;
+
+                                    du[0] = 0;
+                                    du[1] = 0;
+                                    du[2] = 0;
+                                    du[u] = w;
+
+                                    dv[0] = 0;
+                                    dv[1] = 0;
+                                    dv[2] = 0;
+                                    dv[v] = h;
+
+                                    /*
+                                     * And here we call the quad function in order to render a merged quad in the scene.
+                                     *
+                                     * We pass mask[n] to the function, which is an instance of the VoxelFace class containing
+                                     * all the attributes of the face � which allows for variables to be passed to shaders � for
+                                     * example lighting values used to create ambient occlusion.
+                                     */
+                                    quad(cornerA.set(x[0],                 x[1],                   x[2]),
+                                         cornerB.set(x[0] + du[0],         x[1] + du[1],           x[2] + du[2]),
+                                         cornerC.set(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],   x[2] + du[2] + dv[2]),
+                                         cornerD.set(x[0] + dv[0],         x[1] + dv[1],           x[2] + dv[2]),
+                                         w,
+                                         h,
+                                         mask[n],
+                                         backFace);
+                                }
+
+                                /*
+                                 * We zero out the mask
+                                 */
+                                for(l = 0; l < h; ++l) {
+
+                                    for(k = 0; k < w; ++k) { mask[n + k + l * CHUNK_WIDTH] = null; }
+                                }
+
+                                /*
+                                 * And then finally increment the counters and continue
+                                 */
+                                i += w;
+                                n += w;
+
+                            } else {
+
+                              i++;
+                              n++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    /**
+     * This function returns an instance of VoxelFace containing the attributes for
+     * one face of a voxel.  In this simple demo we just return a value from the
+     * sample data array.  However, in an actual voxel engine, this function would
+     * check if the voxel face should be culled, and set per-face and per-vertex
+     * values as well as voxel values in the returned instance.
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @param side
+     * @return
+     */
+    VoxelFace getVoxelFace(final int x, final int y, final int z, final int side) {
+
+        VoxelFace voxelFace = voxels[x][y][z][side];
+
+        //voxelFace.face = face;
+
+        return voxelFace;
+    }
+
+    /**
+     * This function renders a single quad in the scene. This quad may represent many adjacent voxel
+     * faces � so in order to create the illusion of many faces, you might consider using a tiling
+     * function in your voxel shader. For this reason I�ve included the quad width and height as parameters.
+     *
+     * For example, if your texture coordinates for a single voxel face were 0 � 1 on a given axis, they should now
+     * be 0 � width or 0 � height. Then you can calculate the correct texture coordinate in your fragement
+     * shader using coord.xy = fract(coord.xy).
+     *
+     *
+     * @param bottomLeft
+     * @param topLeft
+     * @param topRight
+     * @param bottomRight
+     * @param width
+     * @param height
+     * @param voxel
+     * @param backFace
+     */
+    void quad(final Vector3 bottomLeft,
+              final Vector3 topLeft,
+              final Vector3 topRight,
+              final Vector3 bottomRight,
+              final int width,
+              final int height,
+              final VoxelFace voxel,
+              final boolean backFace) {
+    	// Gdx.app.log(TAG, "type"+voxel.type+topLeft);
+        final Vector3 [] vertices = new Vector3[4];
+
+        vertices[2] = topLeft.scl(VOXEL_SIZE);
+        vertices[3] = topRight.scl(VOXEL_SIZE);
+        vertices[0] = bottomLeft.scl(VOXEL_SIZE);
+        vertices[1] = bottomRight.scl(VOXEL_SIZE);
+ //013 320  310 023
+        boolean flip = voxel.shouldFlipTriangles();
+
+        final short [] indexes = backFace ?flip?backIndices:fwdIndices
+
+        : flip?flipBackIndices:flipFwdIndices;
+
+        if (texturedMode){
+            meshBatch.addVertices(vertices, voxel.vertex, indexes, flip , voxel, width, height);
+
+        } else
+
+        {
+            meshBatch.addVerticesColored(vertices, voxel.vertex, indexes, flip, voxel, width, height, blockColors);
+
+        }
+
+    }
+    short[] backIndices = new short[]{0,1,3, 3,2,0}, fwdIndices =  new short[] { 2,0,1, 1,3,2 }, flipBackIndices = new short[]{3,1,0, 0,2,3}, flipFwdIndices = new short[]{ 2,3,1, 1,0,2 };
+
+
+	@Override
+	public int calculateVertices( VoxelChunk chunk,
+			VoxelWorld voxelWorld, MeshBatcher batch) {
+        int progress = 0;
+		while (!readBlocks(chunk, voxelWorld, progress)){
+            progress++;
+        };
+        for (int i = 0; i < 6; i++)
+		    greedy(i);
+		return meshBatch.flushCache(chunk, this);
+
+
+	}
+
+	@Override
+	public Mesh newMesh(int size) {
+		Mesh mesh = new Mesh(true,
+				size,
+				size / 4 * 6,
+                VertexAttribute.Position(),
+				VertexAttribute.Color(),
+                VertexAttribute.TexCoords(0),
+                new VertexAttribute(VertexAttributes.Usage.Generic, 2, "a_texStart")
+        );
+
+
+		return mesh;
+	}
+
+
+    public boolean readBlocksAO(VoxelChunk chunk, VoxelWorld voxelWorld, int progress){
+
+        int progressVisibilityMax = VoxelChunk.VISIBILITY_SUBDIVISIONS+3;
+        if (progress < progressVisibilityMax) {
+            chunk.visibility(visibilityMask, lightCache, voxels, voxelWorld, progress);
+            return false;
+        }
+        int prog = progress - progressVisibilityMax;
+        int my = CHUNK_WIDTH+2;
+
+        if (prog < FACE_SUBDIVISIONS){
+            int progSize = CHUNK_HEIGHT / FACE_SUBDIVISIONS;
+            for(int y = prog * progSize, n = (prog+1) * progSize; y < n; y++) {
+                for(int z = 0; z < CHUNK_WIDTH; z++) {
+                    int mask = visibilityMask[(y+1)*my+(z+1)];
+                    int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                    int maskSouth = visibilityMask[(y+1)*my+(z)];
+                    int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                    int maskBottom = visibilityMask[(y)*my+(z+1)];
+                    int maskEast = mask >> 1;
+                    int maskWest = mask << 1;
+
+                    int ao00 = mask;
+                    int ao01 = maskNorth;
+                    int ao10 = maskEast;
+                    int ao11 = maskNorth >> 1;
+
+                    int ao00T = maskTop;
+                    int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                    int ao10T = maskTop >> 1;
+                    int ao11T = ao01T >> 1;
+
+
+
+                    maskNorth &= mask;
+                    maskSouth &= mask;
+                    maskTop &= mask;
+                    maskBottom &= mask;
+                    maskEast &= mask;
+                    maskWest &= mask;
+
+                    for(int x = 0; x < CHUNK_WIDTH; x++) {
+
+                        if ((maskTop>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][TOP].transparent = true;
+                        }
+
+                        if ((maskBottom>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][BOTTOM].transparent = true;
+                        }
+
+                        if ((maskNorth>>(x+1)& 1 )> 0 ){
+                            voxels[x][y][z][NORTH].transparent = true;
+                        }
+
+                        if ((maskSouth>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][SOUTH].transparent = true;
+                        }
+
+                        if ((maskEast>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][EAST].transparent = true;
+                        }
+
+                        if ((maskWest>>(x+1)& 1) > 0 ){
+                            voxels[x][y][z][WEST].transparent = true;
+                        }
+
+
 
                         voxels[x][y][z][TOP].vertex(3,ao01T, ao10T, ao11T, x);
                         voxels[x][y][z][EAST].vertex(3,ao10T, ao11, ao11T, x);
@@ -325,7 +1325,7 @@ public class GreedyMesher implements Mesher {
 
                     int ao00 = mask;
                     int ao01 = maskNorth;
-                    int ao10 = maskEast >> 1;
+                    int ao10 = maskEast;
                     int ao11 = maskNorth >> 1;
 
                     int ao00T = maskTop;
@@ -364,7 +1364,7 @@ public class GreedyMesher implements Mesher {
 
                     int ao00 = mask;
                     int ao01 = maskNorth;
-                    int ao10 = maskEast >> 1;
+                    int ao10 = maskEast;
                     int ao11 = maskNorth >> 1;
 
                     int ao00T = maskTop;
@@ -402,7 +1402,7 @@ public class GreedyMesher implements Mesher {
 
                     int ao00 = mask;
                     int ao01 = maskNorth;
-                    int ao10 = maskEast >> 1;
+                    int ao10 = maskEast;
                     int ao11 = maskNorth >> 1;
 
                     int ao00T = maskTop;
@@ -444,7 +1444,7 @@ public class GreedyMesher implements Mesher {
 
                     int ao00 = mask;
                     int ao01 = maskNorth;
-                    int ao10 = maskEast >> 1;
+                    int ao10 = maskEast;
                     int ao11 = maskNorth >> 1;
 
                     int ao00T = maskTop;
@@ -472,7 +1472,7 @@ public class GreedyMesher implements Mesher {
 
                     int ao00 = mask;
                     int ao01 = maskNorth;
-                    int ao10 = maskEast >> 1;
+                    int ao10 = maskEast;
 
                     int ao00T = maskTop;
                     int ao01T = visibilityMask[(y+2)*my+(z+2)];
@@ -504,7 +1504,7 @@ public class GreedyMesher implements Mesher {
 
                     int ao00 = mask;
                     int ao01 = maskNorth;
-                    int ao10 = maskEast >> 1;
+                    int ao10 = maskEast ;
                     int ao11 = maskNorth >> 1;
 
                     int ao00T = maskTop;
@@ -522,367 +1522,37 @@ public class GreedyMesher implements Mesher {
 
 
                     }}}//}
-        } else {
+        }else if (prog < FACE_SUBDIVISIONS+7){
+            for(int y = -1; y < 0; y++) {
+                for(int z = -1; z < 0; z++) {
+                    int mask = visibilityMask[(y+1)*my+(z+1)];
+                    int maskNorth = visibilityMask[(y+1)*my+(z+2)];
+                    int maskTop = visibilityMask[(y+2)*my+(z+1)];
+                    int maskEast = mask >> 1;
+
+                    int ao00 = mask;
+                    int ao01 = maskNorth;
+                    int ao10 = maskEast;
+
+                    int ao00T = maskTop;
+
+                    for(int x = -1; x < 0; x++) {
+
+
+
+                        voxels[x+1][y+1][z+1][BOTTOM].vertex(0,ao01, ao10, ao00, x);
+                        voxels[x+1][y+1][z+1][WEST].vertex(0,ao01, ao00T, ao00, x);
+                        voxels[x+1][y+1][z+1][SOUTH].vertex(0,ao10, ao00T, ao00, x);
+
+                    }}}//}
+        }
+
+        else {
             return true;
         }
         return false;
-    	
+
 
 
     }
-
-
-
-
-//		if(voxels[i+topOffset] <= 0) my += ();
-//		if(voxels[i+bottomOffset] <= 0) my += ();
-//		if(voxels[i+leftOffset] <= 0) mx += ();
-//		if(voxels[i+rightOffset] <= 0) mx += ();
-//		if(voxels[i+frontOffset] <= 0) mz += ();
-//		if(voxels[i+backOffset] <= 0) mz += ();
-		
-    
- 
-    public GreedyMesher(final MeshBatcher mesh) {
-    	lightValues = new float[16];
-        lightColors = new Color[16];
-    	float r,g,b,a = 1f;;
-        Color c = new Color(Color.WHITE);
-    	for (int i = 15; i >= 0; i--){
-
-
-    		lightValues[i] = c.toFloatBits();
-            lightColors[i] = new Color(c);
-            c.mul(.95f);
-
-    	}
-		meshBatch = mesh;
-		setConstants(16,16,16);
-		VoxelFace face, face2;
-		for (int i = 0; i < CHUNK_WIDTH+1; i++) {
-			
-			for (int j = 0; j < CHUNK_HEIGHT+1; j++) {
-				
-				for (int k = 0; k < CHUNK_WIDTH+1; k++) {
-					
-					for (int faceID = 0; faceID < 6; faceID++){
-						
-						
-						/*
-						 * To see an example of face culling being used in combination with
-						 * greedy meshing, you could set the trasparent attribute to true.
-						 */
-						// face.transparent = true;
-						
-						
-						
-						
-						face = new VoxelFace();
-						face.side = faceID;
-						face2 = new VoxelFace();
-						face2.side = faceID;
-						voxels[i][j][k][faceID] = face;
-						voxels[i][j][k][faceID] = face2;
-					}
-				}
-			}
-		}
-		visibilityMask = new int[(CHUNK_HEIGHT+3)*(CHUNK_WIDTH+3)];
-		lightCache = new int[CHUNK_WIDTH+4][CHUNK_HEIGHT+4][CHUNK_WIDTH+4];
-	}
-
-
-	/**
-     *
-     */
-    void greedy() {
- 
-        /*
-         * These are just working variables for the algorithm � almost all taken
-         * directly from Mikola Lysenko�s javascript implementation.
-         */
-        int i, j, k, l, w, h, u, v, n, side = 0;
- 
-        final int[] x = new int []{0,0,0};
-        final int[] q = new int []{0,0,0};
-        final int[] du = new int[]{0,0,0};
-        final int[] dv = new int[]{0,0,0};         
- 
-        /*
-         * We create a mask � this will contain the groups of matching voxel faces
-         * as we proceed through the chunk in 6 directions � once for each face.
-         */
-        final VoxelFace[] mask = new VoxelFace [CHUNK_WIDTH * CHUNK_HEIGHT];
- 
-        /*
-         * These are just working variables to hold two faces during comparison.
-         */
-        VoxelFace voxelFace, voxelFace1;
- 
-        /**
-         * We start with the lesser-spotted boolean for-loop (also known as the old flippy floppy).
-         *
-         * The variable backFace will be TRUE on the first iteration and FALSE on the second � this allows
-         * us to track which direction the indices should run during creation of the quad.
-         *
-         * This loop runs twice, and the inner loop 3 times � totally 6 iterations � one for each
-         * voxel face.
-         */
-        for (boolean backFace = true, b = false; b != backFace; backFace = backFace && b, b = !b) { 
- 
-            /*
-             * We sweep over the 3 dimensions � most of what follows is well described by Mikola Lysenko
-             * in his post � and is ported from his Javascript implementation.  Where this implementation
-             * diverges, I�ve added commentary.
-             */
-            for(int d = 0; d < 3; d++) {
- 
-                u = (d + 1) % 3;
-                v = (d + 2) % 3;
- 
-                x[0] = 0;
-                x[1] = 0;
-                x[2] = 0;
- 
-                q[0] = 0;
-                q[1] = 0;
-                q[2] = 0;
-                q[d] = 1;
- 
-                /*
-                 * Here we�re keeping track of the face that we�re meshing.
-                 */
-                if (d == 0)      { side = backFace ? WEST   : EAST;  }
-                else if (d == 1) { side = backFace ? BOTTOM : TOP;   }
-                else if (d == 2) { side = backFace ? SOUTH  : NORTH; }                
- 
-                /*
-                 * We move through the dimension from front to back
-                 */
-                for(x[d] = -1; x[d] < CHUNK_WIDTH;) {
- 
-                    /*
-                     * ����������������������-
-                     *   We compute the mask
-                     * ����������������������-
-                     */
-                    n = 0;
- 
-                    for(x[v] = 0; x[v] < CHUNK_HEIGHT; x[v]++) {
- 
-                        for(x[u] = 0; x[u] < CHUNK_WIDTH; x[u]++) {
- 
-                            /*
-                             * Here we retrieve two voxel faces for comparison.
-                             */
-                            voxelFace  = (x[d] >= 0 )             ? getVoxelFace(x[0], x[1], x[2], side)                      : null;
-                            voxelFace1 = (x[d] < CHUNK_WIDTH - 1) ? getVoxelFace(x[0] + q[0], x[1] + q[1], x[2] + q[2], side) : null;
- 
-                            /*
-                             * Note that we�re using the equals function in the voxel face class here, which lets the faces
-                             * be compared based on any number of attributes.
-                             *
-                             * Also, we choose the face to add to the mask depending on whether we�re moving through on a backface or not.
-                             */
-                            mask[n++] = ((voxelFace != null && voxelFace1 != null && voxelFace.equals(voxelFace1)))
-                                        ? null
-                                        : backFace ? voxelFace1 : voxelFace;
-                        }
-                    }
- 
-                    x[d]++;
- 
-                    /*
-                     * Now we generate the mesh for the mask
-                     */
-                    n = 0;
- 
-                    for(j = 0; j < CHUNK_HEIGHT; j++) {
- 
-                        for(i = 0; i < CHUNK_WIDTH;) {
- 
-                            if(mask[n] != null) {
- 
-                                /*
-                                 * We compute the width
-                                 */
-                                for(w = 1; i + w < CHUNK_WIDTH && mask[n + w] != null && mask[n + w].equals(mask[n]); w++) {}
- 
-                                /*
-                                 * Then we compute height
-                                 */
-                                boolean done = false;
- 
-                                for(h = 1; j + h < CHUNK_HEIGHT; h++) {
- 
-                                    for(k = 0; k < w; k++) {
- 
-                                        if(mask[n + k + h * CHUNK_WIDTH] == null || !mask[n + k + h * CHUNK_WIDTH].equals(mask[n])) { done = true; break; }
-                                    }
- 
-                                    if(done) { break; }
-                                }
- 
-                                /*
-                                 * Here we check the �transparent� attribute in the VoxelFace class to ensure that we don�t mesh
-                                 * any culled faces.
-                                 */
-                                if (!mask[n].transparent) {
-                                    /*
-                                     * Add quad
-                                     */
-                                    x[u] = i;
-                                    x[v] = j;
- 
-                                    du[0] = 0;
-                                    du[1] = 0;
-                                    du[2] = 0;
-                                    du[u] = w;
- 
-                                    dv[0] = 0;
-                                    dv[1] = 0;
-                                    dv[2] = 0;
-                                    dv[v] = h;
- 
-                                    /*
-                                     * And here we call the quad function in order to render a merged quad in the scene.
-                                     *
-                                     * We pass mask[n] to the function, which is an instance of the VoxelFace class containing
-                                     * all the attributes of the face � which allows for variables to be passed to shaders � for
-                                     * example lighting values used to create ambient occlusion.
-                                     */
-                                    quad(new Vector3(x[0],                 x[1],                   x[2]),
-                                         new Vector3(x[0] + du[0],         x[1] + du[1],           x[2] + du[2]),
-                                         new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],   x[2] + du[2] + dv[2]),
-                                         new Vector3(x[0] + dv[0],         x[1] + dv[1],           x[2] + dv[2]),
-                                         w,
-                                         h,
-                                         mask[n],
-                                         backFace);
-                                }
- 
-                                /*
-                                 * We zero out the mask
-                                 */
-                                for(l = 0; l < h; ++l) {
- 
-                                    for(k = 0; k < w; ++k) { mask[n + k + l * CHUNK_WIDTH] = null; }
-                                }
- 
-                                /*
-                                 * And then finally increment the counters and continue
-                                 */
-                                i += w;
-                                n += w;
- 
-                            } else {
- 
-                              i++;
-                              n++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-    }
- 
-    /**
-     * This function returns an instance of VoxelFace containing the attributes for
-     * one face of a voxel.  In this simple demo we just return a value from the
-     * sample data array.  However, in an actual voxel engine, this function would
-     * check if the voxel face should be culled, and set per-face and per-vertex
-     * values as well as voxel values in the returned instance.
-     *
-     * @param x
-     * @param y
-     * @param z
-     * @param side
-     * @return
-     */
-    VoxelFace getVoxelFace(final int x, final int y, final int z, final int side) {
- 
-        VoxelFace voxelFace = voxels[x][y][z][side];
- 
-        //voxelFace.face = face;
-        
-        return voxelFace;
-    }
- 
-    /**
-     * This function renders a single quad in the scene. This quad may represent many adjacent voxel
-     * faces � so in order to create the illusion of many faces, you might consider using a tiling
-     * function in your voxel shader. For this reason I�ve included the quad width and height as parameters.
-     *
-     * For example, if your texture coordinates for a single voxel face were 0 � 1 on a given axis, they should now
-     * be 0 � width or 0 � height. Then you can calculate the correct texture coordinate in your fragement
-     * shader using coord.xy = fract(coord.xy).
-     *
-     *
-     * @param bottomLeft
-     * @param topLeft
-     * @param topRight
-     * @param bottomRight
-     * @param width
-     * @param height
-     * @param voxel
-     * @param backFace
-     */
-    void quad(final Vector3 bottomLeft,
-              final Vector3 topLeft,
-              final Vector3 topRight,
-              final Vector3 bottomRight,
-              final int width,
-              final int height,
-              final VoxelFace voxel,
-              final boolean backFace) {
-    	// Gdx.app.log(TAG, "type"+voxel.type+topLeft);
-        final Vector3 [] vertices = new Vector3[4];
- 
-        vertices[2] = topLeft.scl(VOXEL_SIZE);
-        vertices[3] = topRight.scl(VOXEL_SIZE);
-        vertices[0] = bottomLeft.scl(VOXEL_SIZE);
-        vertices[1] = bottomRight.scl(VOXEL_SIZE);
- //013 320  310 023
-        boolean flip = voxel.shouldFlipTriangles();
-
-        final int [] indexes = backFace ?flip?new int[]{0,1,3, 3,2,0}: new int[] { 2,0,1, 1,3,2 } 
-        
-        : flip?new int[]{3,1,0, 0,2,3}:new int[]{ 2,3,1, 1,0,2 };
-
-        
-		meshBatch.addVertices(vertices, voxel.vertex, indexes, flip , voxel, width, height);
- 
-    }
-
-	
-
-	@Override
-	public int calculateVertices( VoxelChunk chunk,
-			VoxelWorld voxelWorld, MeshBatcher batch) {
-        int progress = 0;
-		while (!readBlocks(chunk, voxelWorld, progress)){
-            progress++;
-        };
-		greedy();
-		return meshBatch.flushCache(chunk, this);
-		
-		
-	}
-
-	@Override
-	public Mesh newMesh(int size) {
-		Mesh mesh = new Mesh(true, 
-				size, 
-				size / 4 * 6,
-                VertexAttribute.Position(),
-				VertexAttribute.Color(),
-                VertexAttribute.TexCoords(0),
-                new VertexAttribute(VertexAttributes.Usage.Generic, 2, "a_texStart")
-        );
-
-
-		return mesh;
-	}
 }

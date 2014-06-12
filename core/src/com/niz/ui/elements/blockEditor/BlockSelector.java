@@ -68,9 +68,9 @@ public class BlockSelector extends UIElement {
     }
 
     private void makeColorButton(Skin skin) {
-        final Button but = new Button(skin.get("block", Button.ButtonStyle.class));
         final int n = totalButtons+1;
-        but.add(new Label(""+ n, skin));
+        final Button but = new TextButton(""+ n, skin.get("block", TextButton.TextButtonStyle.class));
+        //but.add(new Label(, skin));
         but.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

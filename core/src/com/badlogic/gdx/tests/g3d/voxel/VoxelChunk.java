@@ -70,6 +70,7 @@ public class VoxelChunk {
 	}
 
 	public void setFast(int x, int y, int z, byte voxel) {
+        //Gdx.app.log(TAG, "x"+x+" y"+y+" z"+z);
 		voxels[x + z * width + y * widthTimesDepth] = voxel;
 	}
 
@@ -131,7 +132,7 @@ public class VoxelChunk {
             int prog = progress-1;
             int progSize = height/VISIBILITY_SUBDIVISIONS;
             //inside blocks
-            Gdx.app.log(TAG, "prog"+prog + "  n  "+((prog+1)*progSize));
+            //Gdx.app.log(TAG, "prog"+prog + "  n  "+((prog+1)*progSize));
             int i = depth*width*prog*progSize;
             for(int y = prog*progSize, n = (prog+1)*progSize; y < n; y++) {
 
@@ -186,7 +187,6 @@ public class VoxelChunk {
                         if (x >= 0 && y >= 0 && z >= 0)
                             for (int faceID = 0; faceID < 6; faceID++){
                                 VoxelFace face = faces[x][y][z][faceID];
-
                                 face.set(def, faceID, b);
                             }
                         //light totals for verts
@@ -250,4 +250,8 @@ public class VoxelChunk {
 
 
 	}
+
+    public BlockDefinition getDef(int x, int y, int z) {
+        return blockDef(get(x,y,z));
+    }
 }

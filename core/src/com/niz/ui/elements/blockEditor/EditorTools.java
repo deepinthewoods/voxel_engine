@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.niz.component.IntegerButtonValue;
 import com.niz.component.systems.AssetsSystem;
+import com.niz.component.systems.VoxelEditingSystem;
 import com.niz.ui.elements.UIElement;
 
 /**
@@ -18,18 +19,18 @@ public class EditorTools extends UIElement {
     transient IntegerButtonValue intVal = new IntegerButtonValue();
 
     public EditorTools(){
-        send = new String[]{"editorPlaceMode"};
+        send = new String[]{"editorPlaceMode", "editorClear"};
     }
 
     @Override
     protected void onInit(Skin skin, AssetsSystem assets, World world) {
         TextButton add = new TextButton("Add", skin.get("toggle", TextButton.TextButtonStyle.class));
         btnGr.add(add);
-        TextButton remove = new TextButton("Remove", skin.get("toggle", TextButton.TextButtonStyle.class));
+        TextButton remove = new TextButton("Rem", skin.get("toggle", TextButton.TextButtonStyle.class));
         btnGr.add(remove);
         TextButton set = new TextButton("Set", skin.get("toggle", TextButton.TextButtonStyle.class));
         btnGr.add(set);
-
+        TextButton cube = new TextButton("Cube", skin.get("toggle", TextButton.TextButtonStyle.class));
 
         add.addListener(new ChangeListener() {
             @Override
@@ -56,6 +57,20 @@ public class EditorTools extends UIElement {
             }
         });
 
+        cube.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                TextButton but = (TextButton) actor;
+                if (but.isChecked()){
+                    intVal.value = VoxelEditingSystem.EDIT_MODE_CUBE_ON;
+                } else {
+                    intVal.value = VoxelEditingSystem.EDIT_MODE_CUBE_OFF;
+
+                }
+                subjects[0].notify(null, null, intVal);
+            }
+        });
+
         TextButton newBtn = new TextButton("New", skin);
 
         newBtn.addListener(new ChangeListener() {
@@ -66,17 +81,19 @@ public class EditorTools extends UIElement {
             }
         });
 
-        TextButton clearBtn = new TextButton("Clear", skin);
+        TextButton clearBtn = new TextButton("Clr", skin);
 
         clearBtn.addListener(new ActorGestureListener(){
             @Override
             public boolean longPress(Actor actor, float x, float y) {
-                //TODO clear everything here
+                subjects[1].notify(null, null, null);
 
                 return true;
             }
         });
 
+        tab.add(cube);
+        tab.add(new Label("   ", skin));
 
         tab.add(add);
         //tab.row();
