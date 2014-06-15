@@ -180,7 +180,7 @@ public class VoxelWorld implements RenderableProvider {
 		for(int i = 0; i < chunks.length; i++) {
 			VoxelChunk chunk = chunks[i];
 			//Mesh mesh = meshes[i];
-			if(dirty[i]) {
+			if(chunk.mesh == null) {
 				
 				continue;
 			}
@@ -204,23 +204,25 @@ public class VoxelWorld implements RenderableProvider {
 	}
 
 	public VoxelChunk getClosestDirtyChunk(Position pos) {
-		float dist = 0;
-		VoxelChunk closestChunk = null;
-		for(int i = 0; i < chunks.length; i++) {
-			VoxelChunk chunk = chunks[i];
-			//Mesh mesh = meshes[i];
-            if (chunk.plane != pos.plane) continue;
-			if(dirty[i]) {
-				
-				float d = pos.pos.dst2(chunk.offset);
-				if (d < dist || closestChunk == null){
-					//Gdx.app.log("dirsty", "found");
-					closestChunk = chunk;
-					dist = d;
-				}
-			}
-		}
-		return closestChunk;
+        synchronized (dirtyLock) {
+            float dist = 0;
+            VoxelChunk closestChunk = null;
+            for (int i = 0; i < chunks.length; i++) {
+                VoxelChunk chunk = chunks[i];
+                //Mesh mesh = meshes[i];
+                if (chunk.plane != pos.plane) continue;
+                if (dirty[i]) {
+
+                    float d = pos.pos.dst2(chunk.offset);
+                    if (d < dist || closestChunk == null) {
+                        //Gdx.app.log("dirsty", "found");
+                        closestChunk = chunk;
+                        dist = d;
+                    }
+                }
+            }
+            return closestChunk;
+        }
 	}
 
 
@@ -237,20 +239,61 @@ public class VoxelWorld implements RenderableProvider {
     }
 
 
-    //make mesh closest to position
-    public void makeMesh(Position position, Mesher mesher, MeshBatcher batch) {
 
-        VoxelChunk closest = getClosestDirtyChunk(position);
 
-        if (closest != null){
-            mesher.calculateVertices(closest, this, batch);
-            dirty[closest.index] = false;
+    public void setDirty(int chunkX, int chunkY, int chunkZ, int plane) {
+        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*plane;
+        synchronized (dirtyLock) {
+            dirty[index] = true;
         }
 
     }
 
-    public void setDirty(int chunkX, int chunkY, int chunkZ, int plane) {
-        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*plane;
-        dirty[index] = true;
+    public boolean getDirtyfromVoxel(int x, int y, int z, int p) {
+        int ix = (int)x;
+        int iy = (int)y;
+        int iz = (int)z;
+        int chunkX = ix / CHUNK_SIZE_X;
+        if(chunkX < offsetX || chunkX >= chunksX + offsetX) return false;
+        int chunkY = iy / CHUNK_SIZE_Y;
+        if(chunkY < offsetY || chunkY >= chunksY + offsetY) return false;
+        int chunkZ = iz / CHUNK_SIZE_Z;
+        if(chunkZ < offsetZ || chunkZ >= chunksZ + offsetZ) return false;
+        chunkX %= chunksX;
+        chunkY %= chunksY;
+        chunkZ %= chunksZ;
+        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
+        return dirty[index];
+    }
+
+    public void setDirty(int index, boolean dirt) {
+        synchronized (dirtyLock) {
+            dirty[index] = dirt;
+        }
+    }
+
+    public boolean getDirty(int index) {
+        synchronized (dirtyLock) {
+            return dirty[index];
+        }
+
+    }
+    public Object dirtyLock = new Object();
+
+    public VoxelChunk getChunkFromVoxel(int x, int y, int z, int p) {
+        int ix = (int)x;
+        int iy = (int)y;
+        int iz = (int)z;
+        int chunkX = ix / CHUNK_SIZE_X;
+        if(chunkX < offsetX || chunkX >= chunksX + offsetX) return null;
+        int chunkY = iy / CHUNK_SIZE_Y;
+        if(chunkY < offsetY || chunkY >= chunksY + offsetY) return null;
+        int chunkZ = iz / CHUNK_SIZE_Z;
+        if(chunkZ < offsetZ || chunkZ >= chunksZ + offsetZ) return null;
+        chunkX %= chunksX;
+        chunkY %= chunksY;
+        chunkZ %= chunksZ;
+        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
+        return chunks[index];
     }
 }

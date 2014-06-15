@@ -21,7 +21,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Pools;
-import com.niz.actions.AHighlightBlock;
 import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.component.systems.*;
@@ -80,7 +79,6 @@ public abstract class GameFactory {
         systemDef.setSystem( VelocityRollingAverageSystem.class);
         systemDef.setSystem(VelocityPredictionSystem.class);
         systemDef.setDrawSystem(VoxelRenderingSystem.class);
-        systemDef.setDrawSystem(VoxelEditRenderingSystem.class);
         systemDef.setDrawSystem(BlockHighlightRenderingSystem.class);
 
         systemDef.setDrawSystem(ModelRenderingSystem.class );
@@ -342,11 +340,11 @@ public void init(World world, AssetManager assets, FileHandle file){
         looker.add(CameraLookAt.class);
         world.addEntity(looker);
 
-        Entity highlighter = world.createEntity();
+       /* Entity highlighter = world.createEntity();
         highlighter.add(BlockHighlight.class).dirty = true;
         highlighter.add(ActionList.class).addPre(Pools.obtain(AHighlightBlock.class));
         highlighter.add(Position.class).pos.set(8,8,8);
-        world.addEntity(highlighter);
+        world.addEntity(highlighter);*/
 
     }
 

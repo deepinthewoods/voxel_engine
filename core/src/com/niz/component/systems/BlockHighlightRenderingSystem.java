@@ -18,6 +18,7 @@ import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.niz.component.BlockHighlight;
+import com.niz.component.Face;
 import com.niz.component.Position;
 
 /**
@@ -27,12 +28,12 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
 {
     private static final String TAG = "block highlight rendering system";
     short[][] indices = new short[][]{
-            {2,6, 3,7, 2,3, 6,7},
-            {0,4, 1,5, 0,1, 4,5},
-            {0,3, 4,7, 3,7, 0,4},
-            {1,5, 2,6, 1,2, 5,6},
             {4,5, 5,6, 6,7, 7,4},
             {0,1, 1,2, 2,3, 3,0},
+            {0,3, 4,7, 3,7, 0,4},
+            {1,5, 2,6, 1,2, 5,6},
+            {0,4, 1,5, 0,1, 4,5},
+            {2,6, 3,7, 2,3, 6,7},
             {0,1,1,2,2,3,3,0, 4,5,5,6,6,7,7,4,  0,4,1,5,2,6,3,7}
     };
     float[] verts = new float[8*4];
@@ -42,6 +43,7 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
     private ComponentMapper<BlockHighlight> bhM;
     private ComponentMapper<Position> posM;
     private Material material = new Material();
+    private ComponentMapper<Face> faceM;
 
     /**
      * Creates an entity system that uses the specified filter
@@ -49,7 +51,7 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
      *
      */
     public BlockHighlightRenderingSystem() {
-        super(Aspect.getAspectForAll(BlockHighlight.class, Position.class));
+        super(Aspect.getAspectForAll(BlockHighlight.class, Position.class, Face.class));
     }
 
     @Override
@@ -65,15 +67,16 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
         for (Entity e : ents){
             BlockHighlight hi = bhM.get(e);
             Position pos = posM.get(e);
+            Face face = faceM.get(e);
             Renderable renderable = pool.obtain();
             renderable.mesh = hi.mesh;
             if (hi.dirty) {
                 setVerts(renderable.mesh, pos.pos, hi.size, hi.color);
-                hi.mesh.setIndices(indices[hi.face]);
+                hi.mesh.setIndices(indices[face.face]);
                 hi.dirty = false;
                 //Gdx.app.log(TAG, "highlight"+pos.pos);
             }
-            if (hi.face == BlockDefinition.ALL)
+            if (face.face == BlockDefinition.ALL)
                 renderable.meshPartSize = 24;
             else renderable.meshPartSize = 8;
             renderable.material = material;
@@ -96,6 +99,7 @@ public class BlockHighlightRenderingSystem extends EntitySystem implements Rende
         camera = world.getSystem(CameraSystem.class).camera;
         bhM = world.getMapper(BlockHighlight.class);
         posM = world.getMapper(Position.class);
+        faceM = world.getMapper(Face.class);
     }
 
     private void setVerts(Mesh mesh, Vector3 offset, Vector3 size, Color color) {

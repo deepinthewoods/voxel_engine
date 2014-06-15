@@ -12,7 +12,7 @@ import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
  */
 public class BlockHighlight implements Component{
     public Vector3 size = new Vector3(1.008f,1.008f,1.008f);
-    public int face = BlockDefinition.ALL;
+    //public int face = BlockDefinition.ALL;
     public transient Mesh mesh = new Mesh(true,
             8,
             24,

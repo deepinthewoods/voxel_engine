@@ -35,12 +35,7 @@ import com.badlogic.gdx.math.Vector3;
  */
 public class GreedyMesher implements Mesher {
 
-    /*
-     * In this test each voxel has a size of one world unit � in reality a voxel engine
-     * might have larger voxels � and there�s a multiplication of the vertex coordinates
-     * below to account for this.
-     */
-    protected static final int VOXEL_SIZE = 1;
+
     private static final int FACE_SUBDIVISIONS = 8;
 
     /*
@@ -63,7 +58,7 @@ public class GreedyMesher implements Mesher {
     private final VoxelFace [][][][] voxels = new VoxelFace [CHUNK_WIDTH+1][CHUNK_HEIGHT+1][CHUNK_WIDTH+1][6];
     protected static Color[] lightColors;
 
-    protected MeshBatcher meshBatch;
+    public MeshBatch meshBatch;
 
     /*
      * These are just constants to keep track of which face we�re dealing with � their actual
@@ -93,14 +88,10 @@ public class GreedyMesher implements Mesher {
 	//public Color tc = new Color();
 
 
-    public static Color[] blockColors;//for editing
-    public boolean texturedMode = true;
 
-    static {
-        blockColors = new Color[256];
-        for (int i = 0; i < 256; i++)
-            blockColors[i] = new Color(Color.WHITE);
-    }
+
+
+    public IVoxelPreprocessor preprocessor = null;
 
 	private int[][][] lightCache;
 
@@ -134,7 +125,7 @@ public class GreedyMesher implements Mesher {
 
 	static float[] lightValues;
 
-    class VoxelFace {
+    public class VoxelFace {
 
 		public BlockDefinition def;
         public boolean transparent;
@@ -145,6 +136,7 @@ public class GreedyMesher implements Mesher {
 		protected int[] vertex = new int[4];
 
         public boolean equals(final VoxelFace face) {
+            //if (face.transparent && this.transparent) return true;
         	boolean result = face.transparent == this.transparent &&
         			face.type == this.type;
         	if (result){
@@ -853,7 +845,7 @@ public class GreedyMesher implements Mesher {
 
 
 
-    public GreedyMesher(final MeshBatcher mesh) {
+    public GreedyMesher(final MeshBatch mesh) {
     	lightValues = new float[16];
         lightColors = new Color[16];
     	float r,g,b,a = 1f;;
@@ -1067,7 +1059,7 @@ public class GreedyMesher implements Mesher {
                                      * all the attributes of the face � which allows for variables to be passed to shaders � for
                                      * example lighting values used to create ambient occlusion.
                                      */
-                                    quad(cornerA.set(x[0],                 x[1],                   x[2]),
+                                    meshBatch.quad(cornerA.set(x[0],                 x[1],                   x[2]),
                                          cornerB.set(x[0] + du[0],         x[1] + du[1],           x[2] + du[2]),
                                          cornerC.set(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],   x[2] + du[2] + dv[2]),
                                          cornerD.set(x[0] + dv[0],         x[1] + dv[1],           x[2] + dv[2]),
@@ -1126,68 +1118,63 @@ public class GreedyMesher implements Mesher {
         return voxelFace;
     }
 
-    /**
-     * This function renders a single quad in the scene. This quad may represent many adjacent voxel
-     * faces � so in order to create the illusion of many faces, you might consider using a tiling
-     * function in your voxel shader. For this reason I�ve included the quad width and height as parameters.
-     *
-     * For example, if your texture coordinates for a single voxel face were 0 � 1 on a given axis, they should now
-     * be 0 � width or 0 � height. Then you can calculate the correct texture coordinate in your fragement
-     * shader using coord.xy = fract(coord.xy).
-     *
-     *
-     * @param bottomLeft
-     * @param topLeft
-     * @param topRight
-     * @param bottomRight
-     * @param width
-     * @param height
-     * @param voxel
-     * @param backFace
-     */
-    void quad(final Vector3 bottomLeft,
-              final Vector3 topLeft,
-              final Vector3 topRight,
-              final Vector3 bottomRight,
-              final int width,
-              final int height,
-              final VoxelFace voxel,
-              final boolean backFace) {
-    	// Gdx.app.log(TAG, "type"+voxel.type+topLeft);
-        final Vector3 [] vertices = new Vector3[4];
+    int progress, progressCoarse;
+    VoxelChunk chunk;
+    VoxelWorld voxelWorld;
+    @Override
+    public void begin(VoxelChunk chunk, VoxelWorld voxelWorld) {
+        CHUNK_WIDTH = chunk.width;
+        CHUNK_HEIGHT = chunk.height;
+        this.chunk = chunk;
+        progress = 0;
+        progressCoarse = 0;
+        this.voxelWorld = voxelWorld;
 
-        vertices[2] = topLeft.scl(VOXEL_SIZE);
-        vertices[3] = topRight.scl(VOXEL_SIZE);
-        vertices[0] = bottomLeft.scl(VOXEL_SIZE);
-        vertices[1] = bottomRight.scl(VOXEL_SIZE);
- //013 320  310 023
-        boolean flip = voxel.shouldFlipTriangles();
+    }
 
-        final short [] indexes = backFace ?flip?backIndices:fwdIndices
-
-        : flip?flipBackIndices:flipFwdIndices;
-
-        if (texturedMode){
-            meshBatch.addVertices(vertices, voxel.vertex, indexes, flip , voxel, width, height);
-
-        } else
-
-        {
-            meshBatch.addVerticesColored(vertices, voxel.vertex, indexes, flip, voxel, width, height, blockColors);
+    @Override
+    public boolean process() {
+        switch (progressCoarse){
+            case 0:
+                if (!readBlocks(chunk, voxelWorld, progress)){
+                    progress++;
+                } else {
+                    progress = 0;
+                    progressCoarse++;
+                }
+                break;
+            case 1:
+                if (preprocessor != null)
+                    preprocessor.process(voxels, CHUNK_WIDTH, CHUNK_HEIGHT, chunk.offset);
+                progressCoarse++;
+                progress = 0;
+                break;
+            case 2:
+                greedy(progress++);
+                if (progress >= 6) return true;
 
         }
 
+        return false;
     }
-    short[] backIndices = new short[]{0,1,3, 3,2,0}, fwdIndices =  new short[] { 2,0,1, 1,3,2 }, flipBackIndices = new short[]{3,1,0, 0,2,3}, flipFwdIndices = new short[]{ 2,3,1, 1,0,2 };
 
+    @Override
+    public int end() {
+        return meshBatch.flushCache(chunk, this);
 
-	@Override
-	public int calculateVertices( VoxelChunk chunk,
+    }
+
+    public int calculateVertices( VoxelChunk chunk,
 			VoxelWorld voxelWorld, MeshBatcher batch) {
+        CHUNK_WIDTH = chunk.width;
+        CHUNK_HEIGHT = chunk.height;
         int progress = 0;
 		while (!readBlocks(chunk, voxelWorld, progress)){
             progress++;
         };
+        if (preprocessor != null)
+            preprocessor.process(voxels, CHUNK_WIDTH, CHUNK_HEIGHT, chunk.offset);
+
         for (int i = 0; i < 6; i++)
 		    greedy(i);
 		return meshBatch.flushCache(chunk, this);

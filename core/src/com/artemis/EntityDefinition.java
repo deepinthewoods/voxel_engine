@@ -11,9 +11,13 @@ public class EntityDefinition {
     int id;
     ComponentArray components = new ComponentArray();
 
-    public void setFrom(Entity e){
+    //@returns true if valid
+    public boolean setFrom(Entity e){
+
         components.c.clear();
-        components.c.addAll(e.getComponents());
+        Array<Component> cs = e.getComponents();
+        return components.addAll(cs);
+
     }
 
     public void setEntityFromThisOnce(Entity e){

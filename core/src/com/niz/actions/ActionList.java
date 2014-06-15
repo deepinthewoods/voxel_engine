@@ -39,7 +39,7 @@ public class ActionList implements Component{
                 iter.remove();
 			}
 		};
-		//Gdx.app.log(TAG, "size");
+		//Gdx.app.log(TAG, "update");
 	}
 
 

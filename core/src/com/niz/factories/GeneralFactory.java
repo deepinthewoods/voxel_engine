@@ -16,7 +16,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
-import com.niz.blocks.EmptyBlockDefinition;
 import com.niz.component.systems.AssetsSystem;
 import com.niz.component.systems.CameraControllerSystem;
 
@@ -205,7 +204,7 @@ public class GeneralFactory extends GameFactory{
 
         for (int i = 0; i < 256; i++){
             if (defs[i] == null){
-                defs[i] = new EmptyBlockDefinition(tiles.findRegion("empty"), i);
+                defs[i] = new BlockDefinition(tiles.findRegion("empty"), i);
             }
         }
 

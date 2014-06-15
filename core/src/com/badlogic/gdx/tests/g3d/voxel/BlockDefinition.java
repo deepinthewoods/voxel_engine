@@ -4,12 +4,19 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher.VoxelFace;
 
-public abstract class BlockDefinition {
+public class BlockDefinition {
     public static Vector3[] reflectedNormals = new Vector3[6];
     protected float[] uvs = new float[4];
 	public static float tile_size_px = 16;
 	//protected static int tile_side_length = 8;
-	public static final int TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3, FRONT = 4, BACK = 5, ALL = 6;
+	public static final int //TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3, FRONT = 4, BACK = 5,
+            ALL = 6;
+    public static final int BACK      = 0;
+    public static final int FRONT      = 1;
+    public static final int RIGHT       = 2;
+    public static final int LEFT       = 3;
+    public static final int TOP        = 4;
+    public static final int BOTTOM     = 5;
 	public int tileIndex;
 	private float u, v;
 	public int dayLightLoss = 15;
@@ -19,15 +26,16 @@ public abstract class BlockDefinition {
 	public int lightValue;
 	public boolean isEmpty = false;;
 	private static BlockDefinition[] defs = new BlockDefinition[256];
-	public BlockDefinition(){
-		
-	}
-	public BlockDefinition(TextureRegion region, int tIndex){
-		tileIndex = tIndex;
+   //public int id;
+
+
+	public BlockDefinition(TextureRegion region, int id){
+		//this.id = id;
 		//int tileIndexX = tileIndex % tiles[0].length;
 		//int tileIndexY = tileIndex / tiles[0].length;
 		//TextureRegion region =  tiles[tileIndexY][tileIndexX];
 		//Gdx.app.log("index:"+tileIndex+"block def", "tx"+tileIndexX+"  ty"+tileIndexY);
+        tileIndex = id;
 		u = region.getU();
 		v = region.getV();
 		//u2 = region.getU2();
@@ -35,7 +43,7 @@ public abstract class BlockDefinition {
 		
 	}
 	
-	public abstract void onUpdate(int x, int y, int z, VoxelWorld world);
+	public void onUpdate(int x, int y, int z, VoxelWorld world){};
 		
 	
 		
@@ -308,7 +316,12 @@ public abstract class BlockDefinition {
 		face.v = v;
 		//face.v2 = v2;
 	}
-	
-	
-	
+
+
+    public static int flipFace(int face) {
+        if (face == ALL) return face;
+        if (face % 2 == 0) return face+1;
+        return face-1;
+
+    }
 }

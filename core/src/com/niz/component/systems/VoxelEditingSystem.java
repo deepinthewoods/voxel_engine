@@ -11,19 +11,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
-import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher;
-import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
-import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
+import com.badlogic.gdx.tests.g3d.voxel.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.RayCaster;
-import com.niz.actions.AHighlightBlock;
+import com.niz.actions.AHighlightLerpColor;
+import com.niz.actions.AHighlightLerpColorSwitch;
 import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.observer.Observer;
 import com.niz.observer.Subject;
 import com.niz.observer.Subjects;
+import com.niz.ui.edgeUI.EdgeUI;
 
 /**
  * Created by niz on 31/05/2014.
@@ -34,9 +33,8 @@ public class VoxelEditingSystem extends EntitySystem {
     public static final int EDIT_MODE_ADD = 0, EDIT_MODE_REMOVE = 1, EDIT_MODE_PLACE = 2;
     public static final int VIEW_MODE_TOP = 0, VIEW_MODE_BOTTOM = 1, VIEW_MODE_LEFT = 2
     , VIEW_MODE_RIGHT = 3, VIEW_MODE_FRONT = 4, VIEW_MODE_BACK = 5, VIEW_MODE_FREE = 6;
-    public static final int EDIT_MODE_CUBE_ON = 3, EDIT_MODE_CUBE_OFF = 4;
+    public static final int EDIT_MODE_CUBE_ON = 3, EDIT_MODE_CUBE_OFF = 4, EDIT_MODE_FACE_SET = 5, EDIT_MODE_FACE_REMOVE = 6;
     public boolean cubeMode;
-    public Entity selectedBlockEntity = null;
 
     private int blockTypeSelectedID, editModeSelectedID, viewMode;
     private Button selectedBlockButton;
@@ -50,16 +48,25 @@ public class VoxelEditingSystem extends EntitySystem {
     private boolean viewModeChanged = true;
     private ComponentMapper<Position> posM;
     private ComponentMapper<UpVector> upM;
-    //Vector3 camOffset = new Vector3(16,16,16);
     private ComponentMapper<BlockHighlight> highM;
+    private ComponentMapper<Face> faceM;
     private Subject lookAtChanger;
-    private Subject highlightBlockSubject;
+    // private Subject highlightBlockSubject;
     Vector3 cameraPosition = new Vector3();
     float cameraDistance;
-    FacePosition highlightPos = new FacePosition();
+    TextureCreationBatcher textureBatch = new TextureCreationBatcher();
+    FacesPreprocessor facePre = textureBatch.facesPre;
+    GreedyMesher greedy = new GreedyMesher(textureBatch);
+    //MeshBatch defaultMeshBatcher;
+
+
+    Entity highlighter, outlineHighlighter, selectionHighlighter, selectionStartMarker;
+
+    boolean saving = false;
 
     Vector3 unp1 = new Vector3(), unp2 = new Vector3();
-    private Position selectedBlockPosition = new Position();
+    private VoxelSystem vSys;
+    //private Position selectedBlockPosition = new Position();
 
     /**
      * Creates an entity system that uses the specified filter
@@ -131,19 +138,39 @@ public class VoxelEditingSystem extends EntitySystem {
         float my = Gdx.input.getY();
         //Gdx.app.log(TAG, "highlight "+mx+"  ,  "+my);
         rayCastForHighlight(mx, my);
+
+        if (saving){
+            //check for all meshes completed
+            boolean allMeshesCompleted = true;
+            int plane = 0;
+            for (int x = 0; x < sizeX; x += vw.CHUNK_SIZE_X)
+                for (int y = 0; y < sizeY; y += vw.CHUNK_SIZE_Y)
+                    for (int z = 0; z < sizeZ; z += vw.CHUNK_SIZE_Z){
+                        if (vw.getDirtyfromVoxel(x,y,z,plane)) allMeshesCompleted = false;
+                    }
+
+            if (allMeshesCompleted){
+
+                EdgeUI.getCurrentlyEnabled().enableTouches();
+            }
+
+            saving = false;
+        }
     }
 
     @Override
     public void initialize(){
-        VoxelSystem vSys = world.getSystemOrSuperClass(VoxelSystem.class);
+        vSys = world.getSystemOrSuperClass(VoxelSystem.class);
         vw = vSys.voxelWorld;
-        vSys.mesher.texturedMode = false;//TODO do this in a better way
+        //vSys.mesher.preprocessor = null;
+        vSys.setColoredBatcher();
+        vSys.setPreprocessor(facePre);
 
         camera = world.getSystemOrSuperClass(CameraSystem.class).camera;
         posM = world.getMapper(Position.class);
         upM = world.getMapper(UpVector.class);
         highM = world.getMapper(BlockHighlight.class);
-
+        faceM = world.getMapper(Face.class);
         Subjects.get("blockTypeSelected").add(new Observer(){
 
             @Override
@@ -161,7 +188,7 @@ public class VoxelEditingSystem extends EntitySystem {
             public void onNotify(Entity e, Subject.Event event, Component c) {
                // IntegerValue i = (IntegerValue) c;
                 ColorValue col = (ColorValue) c;
-                GreedyMesher.blockColors[blockTypeSelectedID].set(col.color);
+                ColoredMeshBatcher.blockColors[blockTypeSelectedID].set(col.color);
                 selectedBlockButton.setColor(col.color);
                 setAllDirty();
                 //Gdx.app.log(TAG, "color changed"+col);
@@ -176,9 +203,9 @@ public class VoxelEditingSystem extends EntitySystem {
                 if (i.value == EDIT_MODE_CUBE_ON){
                     cubeMode = true;
                 } else if (i.value == EDIT_MODE_CUBE_OFF){
-                    if (selectedBlockEntity != null){
-                        world.deleteEntity(selectedBlockEntity);
-                        selectedBlockEntity = null;
+                    if (selectionHighlighter != null){
+                        world.deleteEntity(selectionHighlighter);
+                        selectionHighlighter = null;
                     }
                     cubeMode = false;
                 } else {
@@ -213,7 +240,7 @@ public class VoxelEditingSystem extends EntitySystem {
 
         lookAtChanger = Subjects.get("setCameraLookAt");
 
-        highlightBlockSubject = Subjects.get("highlightBlock");
+        //highlightBlockSubject = Subjects.get("highlightBlock");
 
         final Subject freeModeSub = Subjects.get("viewModeFree");
 
@@ -285,8 +312,61 @@ public class VoxelEditingSystem extends EntitySystem {
                             int plane = 0;
                             vw.set(x,y,z,plane, (byte) 0);
                         }
+                for (int i = 0; i < 256; i++)
+                    ColoredMeshBatcher.blockColors[i].set(Color.WHITE);
+                for (int f = 0; f < 6; f++) {
+                    textureBatch.facesPre.faces[f].clear();
+                    textureBatch.faces[f].clear();
+                }
             }
         });
+
+
+        Subjects.get("saveBlock").add(new Observer(){
+
+            @Override
+            public void onNotify(Entity e, Subject.Event event, Component c) {
+                setAllDirty();
+                //saving = true;
+                //mesher.preprocessor = textureBatch;
+                //mesher.meshBatch = textureBatch;
+                for (int x = 0; x < sizeX; x+= vw.CHUNK_SIZE_X)
+                    for (int y = 0; y < sizeY; y+= vw.CHUNK_SIZE_Y)
+                        for (int z = 0; z < sizeZ; z+= vw.CHUNK_SIZE_Z){
+                            int plane = 0;
+                            VoxelChunk chunk = vw.getChunkFromVoxel(x,y,z, plane);
+                            greedy.begin(chunk, vw);
+                            while (!greedy.process());
+                            greedy.end();
+                        }
+
+                //TODO loop thru all chunks and process immediately
+            }
+        });
+
+        highlighter = world.createEntity();
+        highlighter.add(Transient.class);
+        highlighter.add(Position.class);
+        highlighter.add(BlockHighlight.class).dirty = true;
+        highlighter.add(Face.class);
+        ActionList action = highlighter.add(ActionList.class);
+        action.addPre(Pools.obtain(AHighlightLerpColor.class));
+        action.addPre(Pools.obtain(AHighlightLerpColorSwitch.class));
+        highlighter.add(ColorTarget.class);
+        world.addEntity(highlighter);
+
+        outlineHighlighter = world.createEntity();
+        outlineHighlighter.add(Transient.class);
+        outlineHighlighter.add(Position.class);
+        outlineHighlighter.add(BlockHighlight.class).dirty = true;
+        outlineHighlighter.add(Face.class).face = BlockDefinition.ALL;
+
+        world.addEntity(outlineHighlighter);
+
+        selectionStartMarker = world.createEntity();
+        selectionStartMarker.add(Position.class);
+
+        world.addEntity(selectionStartMarker);
 
         changeViewMode();
 
@@ -309,7 +389,8 @@ public class VoxelEditingSystem extends EntitySystem {
         float scalar = 1.5f;
         cameraDistance = Math.max( sizeY*scalar, sizeZ*scalar);
         cameraDistance = Math.max(cameraDistance, sizeX*scalar);
-
+        highM.get(outlineHighlighter).size.set(sizeX, sizeY, sizeZ);
+        highM.get(outlineHighlighter).dirty = true;
     }
 
     private RayCaster ray = new RayCaster();
@@ -339,19 +420,25 @@ public class VoxelEditingSystem extends EntitySystem {
                         break;
                 }
                 if (cubeMode){
-                    if (selectedBlockEntity == null){
-                        selectedBlockEntity = world.createEntity();
-                        selectedBlockEntity.add(Position.class).pos.set(tmp);
-
-                        selectedBlockPosition.pos.set(tmp);
-                        //selectedBlockEntity.add(ActionList.class).addPre(Pools.obtain(AHighlightBlock.class));
-                        BlockHighlight hl = selectedBlockEntity.add(BlockHighlight.class);
+                    if (selectionHighlighter == null){
+                        selectionHighlighter = world.createEntity();
+                        selectionHighlighter.add(Position.class).pos.set(tmp);
+                        selectionHighlighter.add(Transient.class);
+                        ActionList action = selectionHighlighter.add(ActionList.class);
+                        action.addPre(Pools.obtain(AHighlightLerpColor.class));
+                        AHighlightLerpColorSwitch swit = Pools.obtain(AHighlightLerpColorSwitch.class);
+                        action.addPre(swit);
+                        selectionHighlighter.add(ColorTarget.class);
+                        //selectedBlockPosition.pos.set(tmp);
+                        BlockHighlight hl = selectionHighlighter.add(BlockHighlight.class);
                         hl.dirty = true;
                         hl.color.set(Color.LIGHT_GRAY);
-                        world.addEntity(selectedBlockEntity);
+                        selectionHighlighter.add(Face.class).face = BlockDefinition.ALL;
+                        world.addEntity(selectionHighlighter);
+                        posM.get(selectionStartMarker).pos.set(tmp);
                         break;
                     } else {
-                        Position dst = selectedBlockPosition;
+                        Position dst = posM.get(selectionStartMarker);
                         Gdx.app.log(TAG, "block from "+tmp+" to "+dst.pos);
                         float x0 = Math.min(dst.pos.x, tmp.x);
                         float x1 = Math.max(dst.pos.x, tmp.x)+1;
@@ -373,25 +460,47 @@ public class VoxelEditingSystem extends EntitySystem {
                                     for (float x = x0; x < x1; x++){
                                         vw.set(x,y,z,dst.plane, (byte) 0);
                                     }
-                        }else {
+                        }else if (editModeSelectedID == EDIT_MODE_PLACE){
+                            for (float y = y0; y < y1; y++)
+                                for (float z = z0; z < z1; z++)
+                                    for (float x = x0; x < x1; x++){
+                                        if (vw.get(x,y,z,plane) != 0) vw.set(x,y,z,dst.plane, (byte) blockTypeSelectedID);
+                                    }
+
+                        } else  if (editModeSelectedID == EDIT_MODE_ADD){
                             for (float y = y0; y < y1; y++)
                                 for (float z = z0; z < z1; z++)
                                     for (float x = x0; x < x1; x++){
                                         vw.set(x,y,z,dst.plane, (byte) blockTypeSelectedID);
                                     }
 
+                        } else if (editModeSelectedID == EDIT_MODE_FACE_SET){
+
+                        } else if (editModeSelectedID == EDIT_MODE_FACE_REMOVE){
+
                         }
 
-                        world.deleteEntity(selectedBlockEntity);
-                        selectedBlockEntity = null;
+                        world.deleteEntity(selectionHighlighter);
+                        selectionHighlighter = null;
                         break;
                     }
                 }
                 if (editModeSelectedID == EDIT_MODE_REMOVE){
-                    vw.set(tmp, plane, (byte) 0);
-                }else {
+                    if (tmp.x < sizeX && tmp.y < sizeY && tmp.z < sizeZ && tmp.x >= 0 && tmp.y >= 0 && tmp.z >= 0)
+                        vw.set(tmp, plane, (byte) 0);
+                }else if (editModeSelectedID == EDIT_MODE_PLACE || editModeSelectedID == EDIT_MODE_ADD){
                     if (tmp.x < sizeX && tmp.y < sizeY && tmp.z < sizeZ && tmp.x >= 0 && tmp.y >= 0 && tmp.z >= 0)
                         vw.set(tmp, plane, (byte) blockTypeSelectedID);
+                } else if (editModeSelectedID == EDIT_MODE_FACE_SET){
+                    int face = ray.face;
+                    if (tmp.x < sizeX && tmp.y < sizeY && tmp.z < sizeZ && tmp.x >= 0 && tmp.y >= 0 && tmp.z >= 0)
+                        facePre.setFace(tmp.x, tmp.y, tmp.z, face, blockTypeSelectedID);
+                    setAllDirty();
+                } else if (editModeSelectedID == EDIT_MODE_FACE_REMOVE){
+                    int face = ray.face;
+                    if (tmp.x < sizeX && tmp.y < sizeY && tmp.z < sizeZ && tmp.x >= 0 && tmp.y >= 0 && tmp.z >= 0)
+                        facePre.faces[face].remove(facePre.hash(tmp.x, tmp.y, tmp.z), 0);
+                    setAllDirty();
                 }
                 //Gdx.app.log(TAG, "collided, set "+tmp + " to "+blockTypeSelectedID);
                 break;
@@ -454,14 +563,22 @@ public class VoxelEditingSystem extends EntitySystem {
                 tmp.x = (int)tmp.x;
                 tmp.y = (int)tmp.y;
                 tmp.z = (int)tmp.z;
-                highlightPos.pos.set(tmp).sub(0.004f);
-                highlightPos.face = ray.face;
-                highlightBlockSubject.notify(null, null, highlightPos);
+                posM.get(highlighter).pos.set(tmp).sub(0.004f);
+                if (true)//TODO
+                    highM.get(highlighter).dirty = true;
+                if (editModeSelectedID == EDIT_MODE_ADD) {
+                    faceM.get(highlighter).face = BlockDefinition.ALL;
+                }
+                else {
+                    faceM.get(highlighter).face = BlockDefinition.flipFace(ray.face);
+                }
 
-                if (selectedBlockEntity != null){
-                    BlockHighlight high = highM.get(selectedBlockEntity);
-                    Position hPos = posM.get(selectedBlockEntity);
+
+                if (selectionHighlighter != null){
+                    BlockHighlight high = highM.get(selectionHighlighter);
+                    Position hPos = posM.get(selectionHighlighter);
                     //high.size.set(tmp).sub(hPos.pos);//.add(1f,1f,1f);
+                    Position selectedBlockPosition = posM.get(selectionStartMarker);
                     int srcx = (int) selectedBlockPosition.pos.x;
                     int srcy = (int) selectedBlockPosition.pos.y;
                     int srcz = (int) selectedBlockPosition.pos.z;
@@ -502,5 +619,9 @@ public class VoxelEditingSystem extends EntitySystem {
             }
         }
     }
+
+
+
+
 
 }

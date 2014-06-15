@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 
 
 public class NizMain extends Game {
+    public static CoreInfo coreInfo;
     public EngineScreen engine;
 
     @Override
@@ -34,5 +35,9 @@ public class NizMain extends Game {
     @Override
     public void dispose() {
         getScreen().dispose();
+    }
+
+    public NizMain(CoreInfo coreInfo){
+        this.coreInfo = coreInfo;
     }
 }

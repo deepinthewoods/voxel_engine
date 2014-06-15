@@ -16,7 +16,7 @@ public class UITable{
     public UIElement[] min, max;
     transient Table table = new Table();
     public boolean vertical = false;
-    transient private EdgeUI parent;
+    transient public EdgeUI parent;
     public UITable(){
        // minTable = new Table();
         //maxTable = new Table();

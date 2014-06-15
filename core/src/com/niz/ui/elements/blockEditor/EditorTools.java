@@ -19,7 +19,7 @@ public class EditorTools extends UIElement {
     transient IntegerButtonValue intVal = new IntegerButtonValue();
 
     public EditorTools(){
-        send = new String[]{"editorPlaceMode", "editorClear"};
+        send = new String[]{"editorPlaceMode", "editorClear", "saveBlock"};
     }
 
     @Override
@@ -30,6 +30,27 @@ public class EditorTools extends UIElement {
         btnGr.add(remove);
         TextButton set = new TextButton("Set", skin.get("toggle", TextButton.TextButtonStyle.class));
         btnGr.add(set);
+        TextButton faceSet = new TextButton("Face+", skin.get("toggle", TextButton.TextButtonStyle.class));
+        TextButton faceRem = new TextButton("Face-", skin.get("toggle", TextButton.TextButtonStyle.class));
+        btnGr.add(faceSet);
+        btnGr.add(faceRem);
+
+        faceSet.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                intVal.value = VoxelEditingSystem.EDIT_MODE_FACE_SET;
+                subjects[0].notify(null, null, intVal);
+            }
+        });
+
+        faceRem.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                intVal.value = VoxelEditingSystem.EDIT_MODE_FACE_REMOVE;
+                subjects[0].notify(null, null, intVal);
+            }
+        });
+
         TextButton cube = new TextButton("Cube", skin.get("toggle", TextButton.TextButtonStyle.class));
 
         add.addListener(new ChangeListener() {
@@ -92,8 +113,21 @@ public class EditorTools extends UIElement {
             }
         });
 
+        TextButton saveBtn = new TextButton("Save", skin);
+
+        saveBtn.addListener(new ChangeListener() {
+
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                subjects[2].notify(null, null, null);
+                //parent.parent.disableTouches();
+            }
+        });
+
         tab.add(cube);
         tab.add(new Label("   ", skin));
+        tab.add(faceSet);
+        tab.add(faceRem);
 
         tab.add(add);
         //tab.row();
@@ -107,6 +141,9 @@ public class EditorTools extends UIElement {
 
         tab.add(new Label("   ", skin));
         tab.add(clearBtn);
+
+        tab.add(new Label("   ", skin));
+        tab.add(saveBtn);
 
         actor = tab;
     }

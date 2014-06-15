@@ -1,12 +1,18 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.math.Vector3;
 
 public interface Mesher {
 
-	int calculateVertices(VoxelChunk chunk, VoxelWorld voxelWorld, MeshBatcher batch);
+	void begin(VoxelChunk chunk, VoxelWorld voxelWorld);
+    boolean process();
+    int end();
 
 
 	Mesh newMesh(int vertexCount);
+
+
+
 
 }

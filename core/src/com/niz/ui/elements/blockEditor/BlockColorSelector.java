@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.tests.g3d.voxel.ColoredMeshBatcher;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher;
 import com.gdx.extension.util.ColorUtil;
 import com.niz.component.ColorValue;
@@ -139,7 +140,7 @@ public class BlockColorSelector extends UIElement {
                 IntegerButtonValue i = (IntegerButtonValue) c;
                 int id = i.value;
                 Button selectedBlockButton = i.button;
-                col.set(GreedyMesher.blockColors[id]);
+                col.set(ColoredMeshBatcher.blockColors[id]);
                 uC.setValue(col.toIntBits() >> 8);
                 uC.RGBtoHSV(col);
                 sat.setValue(uC.s);

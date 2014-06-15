@@ -51,7 +51,7 @@ public class SimpleMesher implements Mesher{
 		this.widthTimesDepth = width * depth;
 		
 	}
-	@Override
+
 	public int calculateVertices(VoxelChunk chunk,
 			VoxelWorld voxelWorld, MeshBatcher batch) {
 		
@@ -62,7 +62,24 @@ public class SimpleMesher implements Mesher{
 		return count ;
 	}
 
-	@Override
+    @Override
+    public void begin(VoxelChunk chunk, VoxelWorld voxelWorld) {
+        //TODO
+    }
+
+    @Override
+    public boolean process() {
+        return false;
+        //TODO
+    }
+
+    @Override
+    public int end() {
+        return 0;
+        //TODO
+    }
+
+    @Override
 	public Mesh newMesh(int vertexCount) {
 		Mesh mesh = new Mesh(true, 
 				vertexCount, 

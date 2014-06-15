@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
 import com.artemis.systems.EntitySystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BinaryHeap;
 import com.niz.actions.Action;
@@ -23,6 +24,7 @@ public class ActionSystem extends EntitySystem {
 	@Override
 	public void initialize(){
 		actionMap = world.getMapper(ActionList.class);
+
 
 
 	}
@@ -50,12 +52,13 @@ public class ActionSystem extends EntitySystem {
             Action a = actions.pop();
             if (a.getValue() >= a.parent.currentTime){
                 actions.add(a);
-                return;
+                break;
             }
             a.unDelay();
         }
+        //Gdx.app.log(TAG, "update");
 
-        for (int i = 0, s = entities.size; s > i; i++) {
+        for (int i = 0, s = entities.size; i < s; i++) {
             process(entities.get(i));
         }
 
