@@ -254,4 +254,12 @@ public class VoxelChunk {
     public BlockDefinition getDef(int x, int y, int z) {
         return blockDef(get(x,y,z));
     }
+
+    public void setByIndex(int i, byte value) {
+        voxels[i] = value;
+    }
+
+    public byte getByIndex(int i) {
+        return voxels[i];
+    }
 }

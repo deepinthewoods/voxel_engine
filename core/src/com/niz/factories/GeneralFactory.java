@@ -174,7 +174,7 @@ public class GeneralFactory extends GameFactory{
 
         Gdx.app.log(TAG, "BLOCK DEFS");
 		BlockDefinition[] defs = new BlockDefinition[256];
-		defs[0] = new BlockDefinition(tiles.findRegion("air"), 0)
+		defs[0] = new BlockDefinition( 0)
 		{
 
 			@Override
@@ -183,7 +183,7 @@ public class GeneralFactory extends GameFactory{
 			
 		};
 		defs[0].lightValue = 15;
-		defs[0].dayLightLoss = 0;
+		//defs[0].dayLightLoss = 0;
 		defs[0].isSolid = false;
 		defs[0].isEmpty = true;
 		//for (int i = 1; i < 32; i++){
@@ -191,7 +191,7 @@ public class GeneralFactory extends GameFactory{
 			//BlockDefinition.add(i, defs[i]);
 		//}
 		
-		defs[1] = new BlockDefinition(tiles.findRegion("dirt"), 1){
+		defs[1] = new BlockDefinition( 1){
 
 			@Override
 			public void onUpdate(int x, int y, int z, VoxelWorld world) {
@@ -204,7 +204,7 @@ public class GeneralFactory extends GameFactory{
 
         for (int i = 0; i < 256; i++){
             if (defs[i] == null){
-                defs[i] = new BlockDefinition(tiles.findRegion("empty"), i);
+                defs[i] = new BlockDefinition(i);
             }
         }
 

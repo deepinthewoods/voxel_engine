@@ -26,7 +26,6 @@ public class VoxelSystem extends EntitySystem {
     private Renderable baseRenderable;
     private Texture voxelTexture;
     protected ComponentMapper<Position> posM;
-    private boolean hasThreads;
 
     //private BlockDefinition[] defs;
 	//private TextureRegion[] tiles;
@@ -35,6 +34,7 @@ public class VoxelSystem extends EntitySystem {
 		super(Aspect.getAspectForAll(Player.class, Position.class));
 
 		int x = 12, y = 4, z = 4;
+        x = 8; y = 8; z = 8;
 		//batch = new MeshBatcher(10000000, 10000000, 13);
         //mesher = new GreedyMesher(batch);
 
@@ -52,44 +52,13 @@ public class VoxelSystem extends EntitySystem {
     transient Vector3 tmp = new Vector3();
 	
 	
-	Array<MeshThread> threads = new Array<MeshThread>();
-    MeshRunnable runnable = null;
+
 	@Override
 	protected void processEntities(Array<Entity> entities) {
         if (entities.size == 0) return;
         //voxelWorld.makeMesh(), mesher, batch);
 
-        if (hasThreads){
-            for (int i = 0; i < threads.size; i++){
-                MeshThread thread = threads.get(i);
-                if (thread.isPaused()){
-                    //Gdx.app.log(TAG, "paused thread");
-                    if (thread.runn.idle){
-                        //try to start on a new mesh
-                        VoxelChunk chunk = voxelWorld.getClosestDirtyChunk(posM.get(entities.get(0)));
-                        if (chunk == null) return;
-                        voxelWorld.setDirty(chunk.index, false);
-                        thread.runn.start(chunk, voxelWorld);
-                        return;
-                    } else if (thread.runn.done){
 
-                        thread.runn.end();
-                        return;
-                    }
-                }
-            }
-        } else {
-            if (runnable.idle){
-                //try to start on a new mesh
-                VoxelChunk chunk = voxelWorld.getClosestDirtyChunk(posM.get(entities.get(0)));
-                voxelWorld.setDirty(chunk.index, false);
-                runnable.start(chunk, voxelWorld);
-            } else if (runnable.done){
-
-                runnable.end();
-            }
-            runnable.run();
-        }
 	}
 
     @Override
@@ -101,70 +70,9 @@ public class VoxelSystem extends EntitySystem {
         MeshBatcher.whiteTextureU = white.getU();
         MeshBatcher.whiteTextureV = white.getV();
 
-        hasThreads = NizMain.coreInfo.shouldUseThreads();
 
-        if (hasThreads){
-            int num = NizMain.coreInfo.getNumberOfCores();
-            //Gdx.app.log(TAG, "cores : "+num);
-            for (int i = 0; i < num; i++){
-                MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
-                GreedyMesher mesher = new GreedyMesher(batch);
-                MeshThread thr = new MeshThread(new MeshRunnable(
-                        mesher
-                ));
-                thr.init();
-                threads.add(thr);
-                thr.start();
-                thr.onPause();
-            }
-        } else {
-            MeshBatcher batch = new MeshBatcher(10000000, 10000000, 13);
-            GreedyMesher mesher = new GreedyMesher(batch);
-            runnable = new MeshRunnable(
-                    mesher
-            );
-        }
 
     }
 
-    public void setPreprocessor(FacesPreprocessor pre) {
-        if (hasThreads){
-            for (int i = 0; i < threads.size; i++){
-                MeshThread thr = threads.get(i);
-                thr.runn.mesher.preprocessor = pre;
 
-            }
-        } else {
-            runnable.mesher.preprocessor = pre;
-        }
-    }
-
-    public void setColoredBatcher() {
-        if (hasThreads){
-            for (int i = 0; i < threads.size; i++) {
-                MeshThread thread = threads.get(i);
-                thread.stopThread();
-            }
-            threads.clear();
-            int num = NizMain.coreInfo.getNumberOfCores();
-            for (int i = 0; i < num; i++){
-
-                MeshBatcher batch = new ColoredMeshBatcher(10000000, 10000000, 13);
-                GreedyMesher mesher = new GreedyMesher(batch);
-                MeshThread thr = new MeshThread(new MeshRunnable(
-                        mesher
-                ));
-                thr.init();
-                threads.add(thr);
-                thr.start();
-                thr.onPause();
-            }
-        } else {
-            MeshBatcher batch = new ColoredMeshBatcher(10000000, 10000000, 13);
-            GreedyMesher mesher = new GreedyMesher(batch);
-            runnable = new MeshRunnable(
-                    mesher
-            );
-        }
-    }
 }

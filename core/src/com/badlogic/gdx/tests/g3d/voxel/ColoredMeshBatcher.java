@@ -24,8 +24,9 @@ public class ColoredMeshBatcher extends MeshBatcher {
 
     Color tmpC = new Color();
 
-    @Override
 
+
+    @Override
     public void addVertices(Vector3[] vertices, int[] colorArray, short[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height) {
         //Gdx.app.log(TAG, "add verts");
         for (int i = 0; i < 4; i++){
@@ -96,5 +97,35 @@ public class ColoredMeshBatcher extends MeshBatcher {
         }
         //Gdx.app.log(TAG, "index length "+vertexTotal);
         vertexTotal += 4;
+    }
+
+    @Override
+    public void quad(final Vector3 bottomLeft,
+                     final Vector3 topLeft,
+                     final Vector3 topRight,
+                     final Vector3 bottomRight,
+                     final int width,
+                     final int height,
+                     final GreedyMesher.VoxelFace voxel,
+                     final boolean backFace) {
+        // Gdx.app.log(TAG, "type"+voxel.type+topLeft);
+        final Vector3 [] vertices = new Vector3[4];
+
+        vertices[2] = topLeft.scl(VOXEL_SIZE);
+        vertices[3] = topRight.scl(VOXEL_SIZE);
+        vertices[0] = bottomLeft.scl(VOXEL_SIZE);
+        vertices[1] = bottomRight.scl(VOXEL_SIZE);
+        //013 320  310 023
+        boolean flip = voxel.shouldFlipTriangles();
+
+        final short [] indexes = backFace ?flip?backIndices:fwdIndices
+
+                : flip?flipBackIndices:flipFwdIndices;
+
+
+        addVertices(vertices, voxel.vertex, indexes, flip, voxel, width, height);
+
+
+
     }
 }

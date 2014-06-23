@@ -46,7 +46,7 @@ public class TextureCreationBatcher implements IVoxelPreprocessor, MeshBatch {
                             faces[f].put(facesPre.hash(x,y,z), face);
                         }
                         GreedyMesher.VoxelFace aFace = voxels[x][y][z][f];
-                        if (!aFace.transparent)
+                        //if (!aFace.transparent)
                             aFace.set(def, f, 1);
                     }
 

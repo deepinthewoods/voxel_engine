@@ -1,0 +1,118 @@
+[
+{
+	class: com.artemis.EntityDefinition,
+	c: [
+		{
+			class: com.niz.component.Player
+		},
+		{
+			class: com.niz.component.Position,
+			pos: {
+				x: 8,
+				y: 32,
+				z: 8
+			}
+		},
+		{
+			class: com.niz.component.CameraPositionInfluencer,
+			values: [
+				{
+					x: 0.13333334,
+					y: 0.53333336,
+					z: 0.13333334
+				}
+			],
+			weights: {
+				items: [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+				size: 1
+			}
+		},
+		{
+			class: com.niz.actions.ActionList,
+			currentTime: 1
+		},
+		{
+			class: com.niz.component.PositionRollingAverage,
+			arr: [
+				{
+					x: 8,
+					y: 32,
+					z: 8
+				}
+			],
+			size: 60,
+			total: {
+				x: 8,
+				y: 32,
+				z: 8
+			},
+			progress: 1,
+			result: {
+				x: 0.13333334,
+				y: 0.53333336,
+				z: 0.13333334
+			}
+		},
+		{
+			class: com.niz.component.UpVectorRollingAverage,
+			arr: [
+				{
+					z: -1
+				}
+			],
+			size: 60,
+			total: {
+				z: -1
+			},
+			progress: 1,
+			result: {
+				z: -0.016666668
+			}
+		},
+		{
+			class: com.niz.component.UpVector,
+			up: {
+				z: -1
+			}
+		}
+	]
+},
+{
+	class: com.artemis.EntityDefinition,
+	c: [
+		{
+			class: com.niz.component.Position
+		},
+		{
+			class: com.niz.component.CameraController
+		}
+	]
+},
+{
+	class: com.artemis.EntityDefinition,
+	c: [
+		{
+			class: com.niz.component.Position,
+			pos: {
+				z: 1
+			}
+		}
+	]
+},
+{
+	class: com.artemis.EntityDefinition,
+	c: [
+		{
+			class: com.niz.component.Position,
+			pos: {
+				x: 8,
+				y: 8,
+				z: 8
+			}
+		},
+		{
+			class: com.niz.component.CameraLookAt
+		}
+	]
+}
+]

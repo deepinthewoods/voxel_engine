@@ -33,8 +33,8 @@ public class ActionSystem extends EntitySystem {
 	@Override
 	protected void inserted(Entity e) {
 		ActionList actionC = actionMap.get(e);
-        actionC.inserted(e, world);
         actionC.delayedActions = actions;
+        actionC.inserted(e, world);
 
 	}
 

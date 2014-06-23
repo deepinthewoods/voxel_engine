@@ -15,28 +15,23 @@ import com.niz.component.IntegerButtonValue;
 import com.niz.component.systems.AssetsSystem;
 import com.niz.component.systems.VoxelEditingSystem;
 import com.niz.observer.AutoObserver;
+import com.niz.observer.Observer;
 import com.niz.observer.Subject;
+import com.niz.observer.Subjects;
 import com.niz.ui.elements.UIElement;
 
 /**
  * Created by niz on 01/06/2014.
  */
-public class EditorViewModeSelector extends UIElement {
+public class EditorViewSelect extends UIElement {
     transient IntegerButtonValue intVal = new IntegerButtonValue();
     transient private TextButton freeButton;
     transient ButtonGroup group = new ButtonGroup();
 
-    public EditorViewModeSelector(){
+    public EditorViewSelect(){
 
         send = new String[]{"view"};
-        observers = new AutoObserver[]{new AutoObserver(){
 
-            @Override
-            public void onNotify(Entity e, Subject.Event event, Component c) {
-                freeButton.setChecked(true);
-            }
-        }};
-        observers[0].from = "viewModeFree";
     }
 
     @Override
@@ -124,6 +119,13 @@ public class EditorViewModeSelector extends UIElement {
         table.add(freeButton);
         group.add(freeButton);
 
+
+        Subjects.get("freeMode").add(new Observer(){
+            @Override
+            public void onNotify(Entity e, Subject.Event event, Component c) {
+                freeButton.setChecked(true);
+            }
+        });
 
 
         actor = table;

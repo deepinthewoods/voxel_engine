@@ -10,7 +10,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class MeshBatcher implements MeshBatch{
-	public Array<Array<Mesh>> meshes;
+    private static final int VERTEX_SIZE = 8;
+    public Array<Array<Mesh>> meshes;
 	private int levels;
 	public static int[] levelMaxSize;
 	//public ObjectMap<VoxelChunk, IntervalInt> smallChunks, normalChunks;
@@ -28,6 +29,7 @@ public class MeshBatcher implements MeshBatch{
 		meshes = new Array<Array<Mesh>>();
 		for (int i = 0; i < levels; i++){
 			levelMaxSize[i] = (int) (vertexSize / Math.pow(2, i));
+            Gdx.app.log(TAG,  "creating mesh slot "+levelMaxSize[i]);
 			meshes.add(new Array<Mesh>());
 		}
 		this.levels = levels;
@@ -40,8 +42,12 @@ public class MeshBatcher implements MeshBatch{
 		for (int i = levels-1; i >=0; i--){
 			if (vertexCount < levelMaxSize[i]){
 				Array<Mesh> ar = meshes.get(i);
-				if (ar.size > 0) return ar.pop();
-				//Gdx.app.log(TAG,  "creating mesh");
+				if (ar.size > 0){
+                    Gdx.app.log(TAG,  "recycling mesh"+i);
+
+                    return ar.pop();
+                }
+				Gdx.app.log(TAG,  "creating mesh"+i);
 				return mesher.newMesh(levelMaxSize[i]);
 				
 				
@@ -55,18 +61,19 @@ public class MeshBatcher implements MeshBatch{
         if (chunk.mesh != null){
             int vertexCount = chunk.mesh.getMaxVertices();
             for (int i = levels-1; i >=0; i--){
-                if (vertexCount == levelMaxSize[i]){
+                if (vertexCount <= levelMaxSize[i]){
                     Array<Mesh> ar = meshes.get(i);
                     ar.add(chunk.mesh);
                     chunk.mesh = null;
-                    Gdx.app.log(TAG,  "freeing mesh");
+                    Gdx.app.log(TAG,  "freeing mesh"+i);
                     return;
 
 
                 }
             }
+            throw new GdxRuntimeException("couldn't free mesh"+vertexCount);
         }
-        throw new GdxRuntimeException("couldn't free mesh");
+
     }
 
 	public Mesh getMesh2222(int vertexCount, Mesher mesher){
@@ -88,7 +95,12 @@ public class MeshBatcher implements MeshBatch{
 
 	@Override
 	public int flushCache(VoxelChunk chunk, GreedyMesher mesher) {
-		Mesh mesh = getMesh(cacheProgress/8, mesher);
+        freeMesh(chunk);
+        if (cacheProgress/VERTEX_SIZE == 0){
+            return 0;
+        }
+		Mesh mesh = getMesh(cacheProgress/VERTEX_SIZE, mesher);
+
 		
 		mesh.setVertices(cachedVerts, 0, cacheProgress);
 		int size = cacheProgress;
@@ -97,7 +109,7 @@ public class MeshBatcher implements MeshBatch{
 		cacheProgress = 0;
 		vertexTotal = 0;
 		indexProgress = 0;
-		chunk.numVerts = size/8;
+		chunk.numVerts = size/VERTEX_SIZE;
 		chunk.mesh = mesh;
 		//Gdx.app.log(TAG, "mesh");
 		return 0;

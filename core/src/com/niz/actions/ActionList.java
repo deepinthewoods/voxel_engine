@@ -14,9 +14,9 @@ public class ActionList implements Component{
 	//public DoublyLinkedList actions;
 	public transient Entity e;
 	public transient World world;
-	public ActionContainer actions;
+	public ActionContainer actions = new ActionContainer();;
 	public ActionList(){
-		actions = new ActionContainer(this);;
+
 	}
 	
 	public void update(float dt){
@@ -104,7 +104,7 @@ public class ActionList implements Component{
             }
         }
         ///Gdx.app.log(TAG, "inserted!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
+        actions.init(this);
     }
 
     public float currentTime;

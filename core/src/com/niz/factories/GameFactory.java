@@ -20,12 +20,13 @@ import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.Pools;
 import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.component.systems.*;
 import com.niz.ui.edgeUI.EdgeUI;
+import com.niz.ui.edgeUI.EditorUI;
 import com.niz.ui.edgeUI.TestUI;
+import com.artemis.EntityDefArray;
 
 public abstract class GameFactory {
     public static final String path = "data/";
@@ -53,14 +54,13 @@ public abstract class GameFactory {
         world.setDelta(timeStep);
 
 
-        Json json = new Json();
+        //Json json = new Json();
 
         systemDef = json.fromJson(SystemDefinition.class, file);
         systemDef.setJson(json);
         systemDef.setSystem(CameraSystem.class);
         systemDef.setSystem(CameraUpVectorSystem.class);
         systemDef.setSystem(GraphicsSystem.class);
-
         systemDef.setSystem( PhysicsSystem.class );
         systemDef.setSystem( MovementSystem.class);
         systemDef.setSystem( AABBBodySystem.class);
@@ -70,6 +70,10 @@ public abstract class GameFactory {
 
 
         systemDef.setSystem(VoxelSystem.class);
+        systemDef.setSystem(VoxelEditingSystem.class);
+
+        systemDef.setSystem(VoxelMeshSystem.class);
+        systemDef.setSystem(VoxelSerializingSystem.class);
 
 
         systemDef.setSystem( PositionRollingAverageSystem.class);
@@ -92,7 +96,6 @@ public abstract class GameFactory {
         systemDef.setSystem(CameraLookAtSystem.class);
         //systemDef.setSystem( CameraRotationInfluenceSystem.class);
         systemDef.setSystem( PositionLimiterSystem.class);
-        systemDef.setSystem(VoxelEditingSystem.class);
         //systemDef.preWrite();
         systemDef.procesesSystems(world);
 
@@ -100,15 +103,7 @@ public abstract class GameFactory {
     }
 
 
-public void init(World world, AssetManager assets, FileHandle file){
-	
-	
-	systemDefs(1f, world, assets, file);
-	
-	world.initialize();
-	world.initializeDraw();
 
-}
 
 	Array<Component> components = new Array<Component>();
 	public void save(World world){
@@ -156,22 +151,28 @@ public void init(World world, AssetManager assets, FileHandle file){
 
     */
 
-	}
+        //json.addClassTag("Entity Definition", EntityDefinition.class);
+        //json.addClassTag("Entity array", EntityDefArray.class);
+        //json.setElementType(EntityDefArray.class, "Entity Def", EntityDefinition.class);
+
+
+
+    }
 
 
     public void getHandles(FileHandle begin, Array<String> allowedButtons, int recursions, Table table, Skin skin, AssetManager assets, World world)
     {
 
         FileHandle[] newHandles = begin.list();
-        Gdx.app.log("Loop", "running!"+newHandles.length);
+        //Gdx.app.log("Loop", "running!"+newHandles.length);
 
         for (FileHandle f : newHandles)
         {
-            Gdx.app.log("Loop", "f!");
+            //Gdx.app.log("Loop", "f!");
 
             if (f.isDirectory())
             {
-                Gdx.app.log("Loop", "isFolder!");
+                //Gdx.app.log("Loop", "isFolder!");
 
 
 
@@ -185,23 +186,23 @@ public void init(World world, AssetManager assets, FileHandle file){
             }
             else
             {
-                Gdx.app.log("Loop", "isFile!");
+               // Gdx.app.log("Loop", "isFile!");
                 //check if systems
                 //check if .ini
 
                 if (f.name().equals("systems.ini")){
                     Gdx.app.log("Loop", "is systems.ini!");
                     if (recursions > 1){
-                        Gdx.app.log("Loop", "is mod!");
+                        //Gdx.app.log("Loop", "is mod!");
 
                     } else {
-                        Gdx.app.log("Loop", "is button!"+f.name());
+                        //Gdx.app.log("Loop", "is button!"+f.name());
                         if (allowedButtons.contains(f.parent().name(), false)){
                             Gdx.app.log("Loop", "button allowed "+f.parent().name());
                             table.add(createMenuButton(f.parent().name(), f, skin, assets, world, table));
                             table.row();
                         } else {
-                            Gdx.app.log("Loop", "button not allowed " + f.parent().name());
+                            //Gdx.app.log("Loop", "button not allowed " + f.parent().name());
 
                         }
 
@@ -225,48 +226,78 @@ public void init(World world, AssetManager assets, FileHandle file){
                 //wait for assets to be loaded
                 assetsSys.processDefinitions();
 
-                init(world, assets, f);
 
-                newGame(world);
-                //load game instead
+                systemDefs(1f, world, assets, f);
 
-                world.process();
-                Array<EntityDefinition> eDefArray = new Array<EntityDefinition>();
-                Json entityJson = new Json();
-                for (Entity e : world.getEntityManager().entities){
-                    Gdx.app.log(TAG, "writing entity"+e);
-                    if (e == null) continue;
-                    EntityDefinition eDef = new EntityDefinition();
-                    eDef.setFrom(e);
-                    eDefArray.add(eDef);
-                }
-                String entities = entityJson.prettyPrint(eDefArray);
-                Gdx.files.external(f.parent().path()+"/entity.dat").writeString(entities, false);
-                Gdx.app.log(TAG, "entities  "+entities);
+                world.initialize();
+                world.initializeDraw();
 
-                //init(timestep, world, assets, file);
-                table.clear();
-                EdgeUI ui = new TestUI();
-                Stage stage = table.getStage();
-                if (stage == null) throw new GdxRuntimeException("null stage");
-                ui.init(skin, stage, world.getSystem(AssetsSystem.class), world);
-                String s = json.prettyPrint(ui);
-                //Gdx.files.external(f.parent().path()+"/ui.ini").writeString(s, false);
-                Gdx.app.log("gamefactory", s);
+                //newGame(world);
+                //world.process();
+                //saveEntities(world, f);
+                loadEntities(world, f);
+
+                saveDefaultUI(table, skin, world, f, new TestUI());
+                //loadUI(table, skin, world, f);
+
+                VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
+
 
             }
+
+
         });
-
-
-
-
         return button;
+    }
+    static final Array<EntityDefinition> entArr = new Array<EntityDefinition>();
+    private void loadEntities(World world, FileHandle f) {
 
+
+
+        EntityDefArray eDefArray = json.fromJson(EntityDefArray.class, f.sibling("entity.dat"));
+        for ( EntityDefinition eDef : eDefArray){
+            Entity e = world.createEntity();
+            eDef.setEntityFromThisOnce(e);
+            world.addEntity(e);
+        }
     }
 
+    private void saveEntities(World world, FileHandle f) {
+        EntityDefArray eDefArray = new EntityDefArray();
+        //Json entityJson = new Json();
+        for (Entity e : world.getEntityManager().entities){
+            Gdx.app.log(TAG, "writing entity"+e);
+            if (e == null) continue;
+            EntityDefinition eDef = new EntityDefinition();
+            if (eDef.setFrom(e))
+                eDefArray.add(eDef);
+        }
 
+        String entities = json.prettyPrint(eDefArray);
+        Gdx.files.external(f.parent().path()+"/entity.dat").writeString(entities, false);
+        Gdx.app.log(TAG, "entities  "+entities);
+    }
 
+    private void loadUI(Table table, Skin skin, World world, FileHandle f) {
+        table.clear();
+        EdgeUI ui =  json.fromJson(TestUI.class, f.sibling("ui.ini"));
+        Stage stage = table.getStage();
+        if (stage == null) throw new GdxRuntimeException("null stage");
+        ui.init(skin, stage, world.getSystem(AssetsSystem.class), world);
 
+       // Gdx.app.log("gamefactory", s);
+    }
+
+    private void saveDefaultUI(Table table, Skin skin, World world, FileHandle f, EdgeUI ui) {
+        table.clear();
+
+        Stage stage = table.getStage();
+        if (stage == null) throw new GdxRuntimeException("null stage");
+        ui.init(skin, stage, world.getSystem(AssetsSystem.class), world);
+        String s = json.prettyPrint(ui);
+        Gdx.files.external(f.parent().path()+"/ui.ini").writeString(s, false);
+        //Gdx.app.log("gamefactory", s);
+    }
 
 
     public void newGame(World world) {

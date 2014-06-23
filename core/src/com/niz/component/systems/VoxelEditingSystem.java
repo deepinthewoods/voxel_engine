@@ -163,12 +163,13 @@ public class VoxelEditingSystem extends EntitySystem {
         vSys = world.getSystemOrSuperClass(VoxelSystem.class);
         vw = vSys.voxelWorld;
         //vSys.mesher.preprocessor = null;
-        vSys.setColoredBatcher();
-        vSys.setPreprocessor(facePre);
-
+        VoxelMeshSystem vMeshSys = world.getSystem(VoxelMeshSystem.class);
+        vMeshSys.setColoredBatcher();
+        vMeshSys.setPreprocessor(facePre);
         camera = world.getSystemOrSuperClass(CameraSystem.class).camera;
         posM = world.getMapper(Position.class);
         upM = world.getMapper(UpVector.class);
+
         highM = world.getMapper(BlockHighlight.class);
         faceM = world.getMapper(Face.class);
         Subjects.get("blockTypeSelected").add(new Observer(){
@@ -365,7 +366,7 @@ public class VoxelEditingSystem extends EntitySystem {
 
         selectionStartMarker = world.createEntity();
         selectionStartMarker.add(Position.class);
-
+        selectionStartMarker.add(Transient.class);
         world.addEntity(selectionStartMarker);
 
         changeViewMode();
@@ -482,6 +483,7 @@ public class VoxelEditingSystem extends EntitySystem {
 
                         world.deleteEntity(selectionHighlighter);
                         selectionHighlighter = null;
+                        setAllDirty();
                         break;
                     }
                 }

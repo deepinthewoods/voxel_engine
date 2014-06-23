@@ -155,7 +155,7 @@ public class GreedyMesher implements Mesher {
 		public void set(BlockDefinition def2, int faceID, int b) {
 			this.def = def2;
 			this.side = faceID;
-			def.setFace(this);
+
 			//corner colors
 
 			if (b == 0){
@@ -1119,7 +1119,7 @@ public class GreedyMesher implements Mesher {
     }
 
     int progress, progressCoarse;
-    VoxelChunk chunk;
+    public VoxelChunk chunk;
     VoxelWorld voxelWorld;
     @Override
     public void begin(VoxelChunk chunk, VoxelWorld voxelWorld) {

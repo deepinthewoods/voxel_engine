@@ -8,9 +8,9 @@ import com.badlogic.gdx.utils.Array;
 public class ActionContainer extends Array<Action> {
     private transient final ArrayIterator<Action> iter;
     protected transient ActionList parentList;
-    public ActionContainer(ActionList actionList) {
+    public ActionContainer() {
         super(true, 8);
-        parentList = actionList;
+
         iter = new ArrayIterator<Action>(this);
     }
 
@@ -18,6 +18,8 @@ public class ActionContainer extends Array<Action> {
         iter.reset();
         return iter;
     }
-
+    public void init(ActionList actionList){
+        parentList = actionList;
+    }
 
 }

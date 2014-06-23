@@ -12,18 +12,22 @@ public class MeshRunnable implements Runnable {
     public PauseableThread thread;
     public MeshBatcher batch;
     public boolean done, idle = true;
+    public VoxelChunk chunk;
+    private VoxelWorld world;
 
     public MeshRunnable(GreedyMesher mesher){
         this.mesher = mesher;
 
     }
 
-    public void start(VoxelChunk chunk, VoxelWorld world){
+    public void begin(VoxelChunk chunk, VoxelWorld world){
         mesher.begin(chunk, world);
         if (thread != null)
             thread.onResume();
         done = false;
         idle = false;
+        this.chunk = chunk;
+        this.world = world;
     }
 
     @Override
@@ -39,5 +43,11 @@ public class MeshRunnable implements Runnable {
     public void end(){
         mesher.end();
         idle = true;
+    }
+
+    public void restart() {
+        mesher.begin(chunk, world);
+        done = false;
+        idle = false;
     }
 }

@@ -1,6 +1,7 @@
 package com.niz.ui.edgeUI;
 
 import com.niz.ui.elements.BackgroundClickDrag;
+import com.niz.ui.elements.ControllerPad;
 import com.niz.ui.elements.UIElement;
 import com.niz.ui.elements.blockEditor.*;
 
@@ -17,9 +18,7 @@ public class TestUI extends EdgeUI {
 
         sides[1] = new UITable();
         sides[1].min = new UIElement[1];
-        sides[1].min[0] = new EditorTools();
-        sides[1].max = new UIElement[1];
-        sides[1].max[0] = new EditorSettings();
+        //sides[1].max = new UIElement[1];
         table.row();
 
         sides[2] = new UITable();
@@ -30,9 +29,9 @@ public class TestUI extends EdgeUI {
         sides[3] = new UITable();
         sides[3].vertical = true;
         sides[3].min = new UIElement[1];
-        sides[3].min[0] = new BlockSelector();
-        sides[3].max = new UIElement[1];
-        sides[3].max[0] = new BlockColorSelector();
+       // sides[3].min[0] = new BlockSelector();
+       // sides[3].max = new UIElement[1];
+        //sides[3].max[0] = new BlockColorSelector();
         table.row();
 
         sides[4] = new UITable();
@@ -47,17 +46,17 @@ public class TestUI extends EdgeUI {
 
         sides[6] = new UITable();
         sides[6].min = new UIElement[1];
-        //sides[6].min[0] = new ControllerPad();
+        sides[6].min[0] = new ControllerPad();
         table.row();
 
         sides[7] = new UITable();
         sides[7].min = new UIElement[1];
-        sides[7].min[0] = new EditorViewModeSelector();
+        //sides[7].min[0] = new EditorViewModeSelector();
         table.row();
 
         sides[8] = new UITable();
         sides[8].min = new UIElement[1];
-       // sides[8].min[0] = new ControllerPad();
+        //sides[8].min[0] = new ControllerPad();
         table.row();
 
         /*for (int y = 0, i = 0; y < 3; y++){

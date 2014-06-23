@@ -17,13 +17,11 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -39,7 +37,8 @@ public class VoxelWorld implements RenderableProvider {
 	public final VoxelChunk[] chunks;
 	//public final Mesh[] meshes;
 	//public final Material[] materials;
-	public final boolean[] dirty;
+	private final boolean[] dirty, valid, modified;
+
 	//public final int[] numVertices;
 	//public float[] vertices;
 	public final int chunksX;
@@ -89,6 +88,10 @@ public class VoxelWorld implements RenderableProvider {
 		//}
 		this.dirty = new boolean[chunksX * chunksY * chunksZ * planes];
 		for(i = 0; i < dirty.length; i++) dirty[i] = true;
+        this.valid = new boolean[chunksX * chunksY * chunksZ * planes];
+        for(i = 0; i < valid.length; i++) valid[i] = true;
+        this.modified = new boolean[chunksX * chunksY * chunksZ * planes];
+        for(i = 0; i < modified.length; i++) modified[i] = true;
 
 		//this.numVertices = new int[chunksX * chunksY * chunksZ];
 		//for(i = 0; i < numVertices.length; i++) numVertices[i] = 0;
@@ -122,7 +125,7 @@ public class VoxelWorld implements RenderableProvider {
         iz %= CHUNK_SIZE_Z;
 		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
 		chunks[index].setFast(ix, iy, iz, voxel);
-        if (ix == CHUNK_SIZE_X-1){
+        /*if (ix == CHUNK_SIZE_X-1){
             dirty[chunkX+1 + chunkZ * chunksX + chunkY * chunksX * chunksZ] = true;
         }
         if (ix == 0 && chunkX != 0){
@@ -143,7 +146,7 @@ public class VoxelWorld implements RenderableProvider {
         }
         if (iz == 0 && chunkZ != 0){
             dirty[chunkX + (chunkZ-1) * chunksX + chunkY * chunksX * chunksZ] = true;
-        }
+        }*/
 
 		dirty[index] = true;
 	}
@@ -295,5 +298,15 @@ public class VoxelWorld implements RenderableProvider {
         chunkZ %= chunksZ;
         int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
         return chunks[index];
+    }
+
+    public VoxelChunk getChunkFromVoxel(Vector3 p, int plane) {
+        return getChunkFromVoxel((int)p.x, (int)p.y, (int)p.z, plane);
+    }
+
+
+    public void setValid(VoxelChunk c) {
+        valid[c.index] = true;
+
     }
 }
