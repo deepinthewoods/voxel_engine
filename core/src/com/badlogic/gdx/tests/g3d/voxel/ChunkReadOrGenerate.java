@@ -106,9 +106,12 @@ public class ChunkReadOrGenerate
             for (int x = 0; x < chunk.width; x++)
                 for (int y = 0; y < chunk.height; y++)
                     for (int z = 0; z < chunk.depth; z++){
-                        chunk.set(x,y,z, (byte) 2);
+                        if (y < 5)
+                            chunk.set(x,y,z, (byte) 1);
+                        else chunk.set(x,y,z, (byte) 0);
                     }
-
+            vw.setDirty(chunk.index, true);
+            progressCoarse++;
         } else {//finished
             thread.ser.finishedRead(chunk);
             if (thread != null)

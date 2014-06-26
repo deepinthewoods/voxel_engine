@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
 
 import java.io.BufferedOutputStream;
@@ -15,7 +16,7 @@ import java.io.RandomAccessFile;
  * Created by niz on 15/06/2014.
  * Reads bytes from a blob file
  */
-public class VoxelBlobReader {
+public class VoxelBlobReader implements Pool.Poolable {
 
     private static final String FILE_EXTENSION = ".blob";
     private static final String FILE_ACCESS_STRING = "rw";
@@ -297,5 +298,8 @@ public class VoxelBlobReader {
         if (sectorOffsets[index] == 0)
             return false;
         return true;
+    }
+
+    public void reset() {
     }
 }

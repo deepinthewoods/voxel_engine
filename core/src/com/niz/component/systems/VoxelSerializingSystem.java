@@ -64,7 +64,8 @@ public class VoxelSerializingSystem extends EntitySystem {
 
         for (int i = 0; i < finishedWrite.size; i++){
             VoxelChunk c = finishedWrite.get(i);
-            vw.setValid(c);
+            //vw.setValid(c);
+
             inProgress.remove(hash((int)c.offset.x, (int)c.offset.y, (int)c.offset.z, c.plane));
         }
         finishedWrite.clear();
@@ -135,7 +136,7 @@ public class VoxelSerializingSystem extends EntitySystem {
             }
 
         }
-        //look on map
+
     }
 
     private VoxelBlobReader getBlob(VoxelChunk chunk) {
@@ -155,6 +156,7 @@ public class VoxelSerializingSystem extends EntitySystem {
         }
         //create blob
         VoxelBlobReader blob = Pools.obtain(VoxelBlobReader.class);
+
         blobs.put(hash, blob);
         return blob;
     }
