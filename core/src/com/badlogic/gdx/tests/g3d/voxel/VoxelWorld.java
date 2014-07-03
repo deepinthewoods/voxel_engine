@@ -17,89 +17,59 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.*;
 import com.niz.component.Position;
 
 public class VoxelWorld implements RenderableProvider {
-	public final int CHUNK_SIZE_X;
+
+    public final int CHUNK_SIZE_X;
 	public final int CHUNK_SIZE_Y;
 	public final int CHUNK_SIZE_Z;
     public final int PLANES;
 	private static final String TAG = "VoxelWorld";
+    private final int maxChunks;
 
-	public final VoxelChunk[] chunks;
-	//public final Mesh[] meshes;
-	//public final Material[] materials;
-	private final boolean[] dirty, valid, modified;
+    private IntMap<VoxelChunk> chunks = new IntMap<VoxelChunk>();
 
-	//public final int[] numVertices;
-	//public float[] vertices;
-	public final int chunksX;
-	public final int chunksY;
-	public final int chunksZ;
-	public final int voxelsX;
-	public final int voxelsY;
-	public final int voxelsZ;
+
 	public int renderedChunks;
-	public final int numChunks;
 	private Material material;
 	public int offsetX, offsetY, offsetZ;
     private Shader shader;
+    private float drawDistance = 1000;
+    private float drawDistance2 = drawDistance * drawDistance;
+    public Vector3 worldCentrePoint = new Vector3();
+    private int chunkTotal;
+    private Pool<VoxelChunk> chunkPool;
 
-    public VoxelWorld(int chunksX, int chunksY, int chunksZ, int sizeX, int sizeY, int planes) {
+    public VoxelWorld(int maxChunks, int sizeX, int sizeY, int planes) {
         PLANES = planes;
-
+        this.maxChunks = maxChunks;
         CHUNK_SIZE_X = sizeX;
         CHUNK_SIZE_Y = sizeY;
         CHUNK_SIZE_Z = sizeX;
-		//if (blockDefs == null) throw new GdxRuntimeException("nill init");
-		this.material = material;
-		this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ * planes];
-		this.chunksX = chunksX;
-		this.chunksY = chunksY;
-		this.chunksZ = chunksZ;
-		this.numChunks = chunksX * chunksY * chunksZ;
-		this.voxelsX = chunksX * CHUNK_SIZE_X;
-		this.voxelsY = chunksY * CHUNK_SIZE_Y;
-		this.voxelsZ = chunksZ * CHUNK_SIZE_Z;
+
+        chunks.ensureCapacity(1000);
+
 		int i = 0;
-        for (int p = 0; p < planes; p++)
-            for(int y = 0; y < chunksY; y++) {
-                for(int z = 0; z < chunksZ; z++) {
-                    for(int x = 0; x < chunksX; x++) {
-                        VoxelChunk chunk = new VoxelChunk(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z, i, p);
-                        chunk.offset.set(x * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, z * CHUNK_SIZE_Z);
-                        chunks[i++] = chunk;
-                    }
-                }
+
+        chunkTotal = 0;
+
+        chunkPool = new Pool<VoxelChunk>(){
+            int index = 0;
+            @Override
+            protected VoxelChunk newObject() {
+                return new VoxelChunk(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z, index++, 0);
             }
-		
-		//this.meshes = new Mesh[chunksX * chunksY * chunksZ];
-		//for(i = 0; i < meshes.length; i++) {
-		//	meshes[i] = mesher.newMesh(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z);
-			
-		//}
-		this.dirty = new boolean[chunksX * chunksY * chunksZ * planes];
-		for(i = 0; i < dirty.length; i++) dirty[i] = true;
-        this.valid = new boolean[chunksX * chunksY * chunksZ * planes];
-        for(i = 0; i < valid.length; i++) valid[i] = true;
-        this.modified = new boolean[chunksX * chunksY * chunksZ * planes];
-        for(i = 0; i < modified.length; i++) modified[i] = true;
-
-		//this.numVertices = new int[chunksX * chunksY * chunksZ];
-		//for(i = 0; i < numVertices.length; i++) numVertices[i] = 0;
-
-		//this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z*2];
-        
-     
-                
+        };
 
 	}
 
@@ -108,47 +78,21 @@ public class VoxelWorld implements RenderableProvider {
     }
 
 	public void set(float x, float y, float z, int p, byte voxel) {
-		int ix = (int)x;
-		int iy = (int)y;
-		int iz = (int)z;
-		int chunkX = ix / CHUNK_SIZE_X;
-		if(chunkX < offsetX || chunkX >= chunksX + offsetX) return;
-		int chunkY = iy / CHUNK_SIZE_Y;
-		if(chunkY < offsetY || chunkY >= chunksY + offsetY) return;
-		int chunkZ = iz / CHUNK_SIZE_Z;
-		if(chunkZ < offsetZ || chunkZ >= chunksZ + offsetZ) return;
-		chunkX %= chunksX;
-		chunkY %= chunksY;
-		chunkZ %= chunksZ;
+		int ix = MathUtils.floor(x);
+		int iy = MathUtils.floor(y);
+		int iz = MathUtils.floor(z);
+        int cx = ix / CHUNK_SIZE_X
+                , cy = iy / CHUNK_SIZE_Y
+                , cz = iz / CHUNK_SIZE_Z;
+
         ix %= CHUNK_SIZE_X;
         iy %= CHUNK_SIZE_Y;
         iz %= CHUNK_SIZE_Z;
-		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
-		chunks[index].setFast(ix, iy, iz, voxel);
-        /*if (ix == CHUNK_SIZE_X-1){
-            dirty[chunkX+1 + chunkZ * chunksX + chunkY * chunksX * chunksZ] = true;
-        }
-        if (ix == 0 && chunkX != 0){
-            dirty[chunkX-1 + chunkZ * chunksX + chunkY * chunksX * chunksZ] = true;
-        }
+		int hash = chunkHash(cx, cy, cz, p);
+		VoxelChunk chunk = getChunk(hash);
+        if (chunk == null) return;
+        chunk.setFast(ix, iy, iz, voxel);
 
-        if (iy == CHUNK_SIZE_Y-1){
-            dirty[chunkX + chunkZ * chunksX + (chunkY+1) * chunksX * chunksZ] = true;
-            //Gdx.app.log(TAG, "dirty y+1)");
-        }
-        if (iy == 0 && chunkY != 0){
-            dirty[chunkX + chunkZ * chunksX + (chunkY-1) * chunksX * chunksZ] = true;
-            //Gdx.app.log(TAG, "dirty y+1)");
-        }
-
-        if (iz == CHUNK_SIZE_Z-1){
-            dirty[chunkX + (chunkZ+1) * chunksX + chunkY * chunksX * chunksZ] = true;
-        }
-        if (iz == 0 && chunkZ != 0){
-            dirty[chunkX + (chunkZ-1) * chunksX + chunkY * chunksX * chunksZ] = true;
-        }*/
-
-		dirty[index] = true;
 	}
 
     public int get(Vector3 p, int plane) {
@@ -157,21 +101,68 @@ public class VoxelWorld implements RenderableProvider {
 
 
     public byte get(float x, float y, float z, int p) {
-		int ix = (int)x;
-		int iy = (int)y;
-		int iz = (int)z;
-		int chunkX = ix / CHUNK_SIZE_X;
-		if(chunkX < offsetX || chunkX >= chunksX + offsetX) return 0;
-		int chunkY = iy / CHUNK_SIZE_Y;
-		if(chunkY < offsetY || chunkY >= chunksY + offsetY) return 0;
-		int chunkZ = iz / CHUNK_SIZE_Z;
-		if(chunkZ < offsetZ || chunkZ >= chunksZ + offsetZ) return 0;
-		chunkX %= chunksX;
-		chunkY %= chunksY;
-		chunkZ %= chunksZ;
-		int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
-		return chunks[index].get(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z);
-	}
+        int ix = MathUtils.floor(x);
+        int iy = MathUtils.floor(y);
+        int iz = MathUtils.floor(z);
+        int cx = ix / CHUNK_SIZE_X
+                , cy = iy / CHUNK_SIZE_Y
+                , cz = iz / CHUNK_SIZE_Z;
+
+        ix = (ix % CHUNK_SIZE_X + CHUNK_SIZE_X) % CHUNK_SIZE_X;
+        iy = (ix % CHUNK_SIZE_Y + CHUNK_SIZE_Y) % CHUNK_SIZE_Y;
+        iz = (ix % CHUNK_SIZE_Z + CHUNK_SIZE_Z) % CHUNK_SIZE_Z;
+
+
+        //(i % n + n) % n;
+        int hash = chunkHash(cx, cy, cz, p);
+        if (!chunks.containsKey(hash)) return 0;
+        VoxelChunk chunk = getChunk(hash);
+        return chunk.getFast(ix, iy, iz);
+
+    }
+
+    private VoxelChunk getChunk(int hash) {
+        VoxelChunk c = chunks.get(hash);
+        return c;
+    }
+    static int p1 = 907, p2 = 6043, p3 = 510287, p4 = 86028157;
+    public static int chunkHash(int ix, int iy, int iz, int p) {
+        /*return
+                ( (ix) & 0xFF ) +
+                ( (iy >>> 8) & 0xFF )<<8 +
+                ( (iz >>> 16) & 0xFF )<<16 +
+                ( (p >>> 24) & 0xFF ) << 24;*/
+
+        return
+        ( (ix % 0xFF + 0x3FF )&0x3FF) |
+        (( (iy  % 0xFF + 0x3FF )&0x3FF)<<10 )|
+        (( (iz  % 0xFF + 0x3FF )&0x3FF)<<20 )|
+        (( (p  % 0xFF + 0xFF )&0xFF) << 30);//*/
+        //int h = ix  ^ iy * p2 ^ iz * p3 ^ p ;
+        //return h;
+    }
+
+    public static int intHash(int a){
+
+        a -= (a<<6);
+        a ^= (a>>17);
+        a -= (a<<9);
+        a ^= (a<<4);
+        a -= (a<<3);
+        a ^= (a<<10);
+        a ^= (a>>15);
+        return a;
+    }
+
+    public int chunkHash(VoxelChunk c) {
+        int x = (int) c.offset.x;
+        int y = (int) c.offset.y;
+        int z = (int) c.offset.z;
+        x /= CHUNK_SIZE_X;
+        y /= CHUNK_SIZE_Y;
+        z /= CHUNK_SIZE_Z;
+        return chunkHash(x,y,z,c.plane);
+    }
 
 
 
@@ -180,10 +171,13 @@ public class VoxelWorld implements RenderableProvider {
 	@Override
 	public void getRenderables (Array<Renderable> renderables, Pool<Renderable> pool) {
 		renderedChunks = 0;
-		for(int i = 0; i < chunks.length; i++) {
-			VoxelChunk chunk = chunks[i];
+        IntMap.Values<VoxelChunk> iter = chunks.values();
+
+		while (iter.hasNext()){
+
+            VoxelChunk chunk = iter.next();
 			//Mesh mesh = meshes[i];
-			if(chunk.mesh == null) {
+			if(chunk.mesh == null || chunk.offset.dst2(worldCentrePoint) > drawDistance2) {
 				
 				continue;
 			}
@@ -204,21 +198,27 @@ public class VoxelWorld implements RenderableProvider {
 
 			renderedChunks++;
 		}
+
+        //Gdx.app.log(TAG, "chunks total:"+renderedChunks);
 	}
 
 	public VoxelChunk getClosestDirtyChunk(Position pos) {
         synchronized (dirtyLock) {
             float dist = 0;
             VoxelChunk closestChunk = null;
-            for (int i = 0; i < chunks.length; i++) {
-                VoxelChunk chunk = chunks[i];
+            IntMap.Values<VoxelChunk> iter = chunks.values();
+            while (iter.hasNext()){
+                //Gdx.app.log("dirsty", "f/////////yuyuuuuuuuuuuuuuuffffffffffffffffffffffffffffffff");
+
+                VoxelChunk chunk = iter.next();
                 //Mesh mesh = meshes[i];
                 if (chunk.plane != pos.plane) continue;
-                if (dirty[i]) {
+                if (chunk.getDirty() && allValidSurrounding(chunk)) {
+                    //Gdx.app.log("dirsty", "fffffffffff"+chunk.offset);
 
                     float d = pos.pos.dst2(chunk.offset);
                     if (d < dist || closestChunk == null) {
-                        //Gdx.app.log("dirsty", "found");
+                        //Gdx.app.log("dirsty", "foundffffffffffffffffffffffffffffffffff");
                         closestChunk = chunk;
                         dist = d;
                     }
@@ -227,6 +227,25 @@ public class VoxelWorld implements RenderableProvider {
             return closestChunk;
         }
 	}
+
+    private boolean allValidSurrounding(VoxelChunk c) {
+        int x = (int) c.offset.x;
+        int y = (int) c.offset.y;
+        int z = (int) c.offset.z;
+        x /= CHUNK_SIZE_X;
+        y /= CHUNK_SIZE_Y;
+        z /= CHUNK_SIZE_Z;
+
+        for (int ix = x-1; ix < x+2; ix++)
+            for (int iy = y-1; iy < y+2; iy++)
+                for (int iz = z - 1; iz < z+2; iz++){
+                    VoxelChunk chunk = getChunk(ix, iy, iz, c.plane);                            ;
+                    //if (chunk == null) return false;
+                    //if (!chunk.isValid()) return false;
+                }
+
+        return true;
+    }
 
 
     public void setMaterial(Material material) {
@@ -244,69 +263,68 @@ public class VoxelWorld implements RenderableProvider {
 
 
 
-    public void setDirty(int chunkX, int chunkY, int chunkZ, int plane) {
-        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*plane;
-        synchronized (dirtyLock) {
-            dirty[index] = true;
-        }
 
+
+    public VoxelChunk getChunk(int x, int y, int z, int plane) {
+        return getChunk(chunkHash(x, y, z, plane));
     }
+
 
     public boolean getDirtyfromVoxel(int x, int y, int z, int p) {
-        int ix = (int)x;
-        int iy = (int)y;
-        int iz = (int)z;
-        int chunkX = ix / CHUNK_SIZE_X;
-        if(chunkX < offsetX || chunkX >= chunksX + offsetX) return false;
-        int chunkY = iy / CHUNK_SIZE_Y;
-        if(chunkY < offsetY || chunkY >= chunksY + offsetY) return false;
-        int chunkZ = iz / CHUNK_SIZE_Z;
-        if(chunkZ < offsetZ || chunkZ >= chunksZ + offsetZ) return false;
-        chunkX %= chunksX;
-        chunkY %= chunksY;
-        chunkZ %= chunksZ;
-        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
-        return dirty[index];
+        return getChunkFromVoxel(x, y, z, p).getDirty();
     }
 
-    public void setDirty(int index, boolean dirt) {
-        synchronized (dirtyLock) {
-            dirty[index] = dirt;
-        }
-    }
 
-    public boolean getDirty(int index) {
-        synchronized (dirtyLock) {
-            return dirty[index];
-        }
-
-    }
     public Object dirtyLock = new Object();
 
     public VoxelChunk getChunkFromVoxel(int x, int y, int z, int p) {
-        int ix = (int)x;
-        int iy = (int)y;
-        int iz = (int)z;
-        int chunkX = ix / CHUNK_SIZE_X;
-        if(chunkX < offsetX || chunkX >= chunksX + offsetX) return null;
-        int chunkY = iy / CHUNK_SIZE_Y;
-        if(chunkY < offsetY || chunkY >= chunksY + offsetY) return null;
-        int chunkZ = iz / CHUNK_SIZE_Z;
-        if(chunkZ < offsetZ || chunkZ >= chunksZ + offsetZ) return null;
-        chunkX %= chunksX;
-        chunkY %= chunksY;
-        chunkZ %= chunksZ;
-        int index = chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ + numChunks*p;
-        return chunks[index];
+        int ix = MathUtils.floor(x);
+        int iy = MathUtils.floor(y);
+        int iz = MathUtils.floor(z);
+        int cx = ix / CHUNK_SIZE_X
+                , cy = iy / CHUNK_SIZE_Y
+                , cz = iz / CHUNK_SIZE_Z;
+
+        ix %= CHUNK_SIZE_X;
+        iy %= CHUNK_SIZE_Y;
+        iz %= CHUNK_SIZE_Z;
+        int hash = chunkHash(cx, cy, cz, p);
+        VoxelChunk chunk = getChunk(hash);
+        return chunk;
     }
 
     public VoxelChunk getChunkFromVoxel(Vector3 p, int plane) {
-        return getChunkFromVoxel((int)p.x, (int)p.y, (int)p.z, plane);
+        return getChunkFromVoxel(MathUtils.floor(p.x), MathUtils.floor(p.y), MathUtils.floor(p.z), plane);
     }
 
 
-    public void setValid(VoxelChunk c) {
-        valid[c.index] = true;
-
+    public VoxelChunk createChunk() {
+        chunkTotal++;
+        return chunkPool.obtain();
     }
+
+
+
+    public void removeChunk(VoxelChunk c){
+        chunkTotal--;
+        chunks.remove(chunkHash(c));
+        chunkPool.free(c);
+    }
+
+    /*private int chunkHash(float x, float y, float z, int plane) {
+        return chunkHash(MathUtils.floor( x), MathUtils.floor(y), MathUtils.floor(z), plane);
+
+    }*/
+
+    public boolean canCreateChunk() {
+        return chunkTotal < maxChunks;
+    }
+
+    public void addChunk(VoxelChunk c) {
+        int hash = chunkHash(c);
+        if (chunks.containsKey(hash)) throw new GdxRuntimeException("hash collision"+c.offset+getChunk(hash).offset);
+        chunks.put(hash, c);
+    }
+
+
 }

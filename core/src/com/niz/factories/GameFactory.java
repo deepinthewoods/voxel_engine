@@ -84,7 +84,7 @@ public abstract class GameFactory {
         systemDef.setSystem(VelocityPredictionSystem.class);
         systemDef.setDrawSystem(VoxelRenderingSystem.class);
         systemDef.setDrawSystem(BlockHighlightRenderingSystem.class);
-
+        systemDef.setSystem(VoxelGenerateAroundPlayerSystem.class);
         systemDef.setDrawSystem(ModelRenderingSystem.class );
         systemDef.setSystem(BrainSystem.class);
         systemDef.setDrawSystem( DebugVectorSystem.class);
@@ -92,6 +92,7 @@ public abstract class GameFactory {
 
 
         systemDef.setSystem(CameraControllerSystem.class);
+        systemDef.setSystem(CameraFirstPersonSystem.class);
         systemDef.setSystem( CameraPositionInfluenceSystem.class);
         systemDef.setSystem(CameraLookAtSystem.class);
         //systemDef.setSystem( CameraRotationInfluenceSystem.class);
@@ -226,21 +227,22 @@ public abstract class GameFactory {
                 //wait for assets to be loaded
                 assetsSys.processDefinitions();
 
+                VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
+
 
                 systemDefs(1f, world, assets, f);
 
                 world.initialize();
                 world.initializeDraw();
 
-                //newGame(world);
-                //world.process();
-                //saveEntities(world, f);
-                loadEntities(world, f);
+                newGame(world);
+                world.process();
+                saveEntities(world, f);
+                //loadEntities(world, f);
 
                 saveDefaultUI(table, skin, world, f, new TestUI());
                 //loadUI(table, skin, world, f);
 
-                VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
 
 
             }
@@ -301,6 +303,43 @@ public abstract class GameFactory {
 
 
     public void newGame(World world) {
+        Entity e = world.createEntity();
+
+        Position pos = e.add(Position.class);
+        pos.pos.set(0f, 45, .5f);
+
+
+
+        world.addEntity(e);
+
+        Entity player = world.createEntity();
+        pos = player.add(Position.class);
+        pos.pos.set(8,38,8);
+        player.add(Player.class);
+        //player.add(Physics.class);
+
+        player.add(AABBBody.class).ys = .75f;
+        player.add(Move.class);
+        player.add(CameraPositionInfluencer.class);
+
+        player.add(PositionRollingAverage.class).size = 1;//rolling average of position
+        player.add(UpVectorRollingAverage.class).size = 1;
+        player.add(UpVector.class).up.set(0,1,0);
+
+
+        world.addEntity(player);
+
+
+        Entity camC = world.createEntity();
+        camC.add(CameraController.class);
+        camC.add(Position.class);
+        camC.add(FPSCamera.class);
+        world.addEntity(camC);
+
+
+    }
+
+    public void newEditor(World world){
         //Gdx.app.log(TAG, "NEW GAME");
 
         VoxelSystem voxel = world.getSystemOrSuperClass(VoxelSystem.class);
@@ -311,7 +350,7 @@ public abstract class GameFactory {
         //playerModel(as);
 
 
-        VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
+        //VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
 
 
         Entity e = world.createEntity();
@@ -337,6 +376,7 @@ public abstract class GameFactory {
         e.add(Player.class);
         e.add(CameraPositionInfluencer.class);
         //e.add(CameraRotationInfluencer.class);
+
 
 
         e.add(PositionRollingAverage.class).size = 60;//rolling average of position

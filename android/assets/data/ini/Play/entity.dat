@@ -13,20 +13,7 @@
 				z: 8
 			}
 		},
-		{
-			class: com.niz.component.CameraPositionInfluencer,
-			values: [
-				{
-					x: 0.13333334,
-					y: 0.53333336,
-					z: 0.13333334
-				}
-			],
-			weights: {
-				items: [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-				size: 1
-			}
-		},
+		
 		{
 			class: com.niz.actions.ActionList,
 			currentTime: 1
@@ -53,22 +40,7 @@
 				z: 0.13333334
 			}
 		},
-		{
-			class: com.niz.component.UpVectorRollingAverage,
-			arr: [
-				{
-					z: -1
-				}
-			],
-			size: 60,
-			total: {
-				z: -1
-			},
-			progress: 1,
-			result: {
-				z: -0.016666668
-			}
-		},
+		
 		{
 			class: com.niz.component.UpVector,
 			up: {

@@ -43,17 +43,17 @@ public class MeshBatcher implements MeshBatch{
 			if (vertexCount < levelMaxSize[i]){
 				Array<Mesh> ar = meshes.get(i);
 				if (ar.size > 0){
-                    Gdx.app.log(TAG,  "recycling mesh"+i);
+                    //Gdx.app.log(TAG,  "recycling mesh"+i);
 
                     return ar.pop();
                 }
-				Gdx.app.log(TAG,  "creating mesh"+i);
+				//Gdx.app.log(TAG,  "creating mesh"+i);
 				return mesher.newMesh(levelMaxSize[i]);
 				
 				
 			}
 		}
-		Gdx.app.log(TAG,  "no mesh"+vertexCount);
+		//Gdx.app.log(TAG,  "no mesh"+vertexCount);
 		return null;
 	}
 
@@ -65,7 +65,7 @@ public class MeshBatcher implements MeshBatch{
                     Array<Mesh> ar = meshes.get(i);
                     ar.add(chunk.mesh);
                     chunk.mesh = null;
-                    Gdx.app.log(TAG,  "freeing mesh"+i);
+                    //Gdx.app.log(TAG,  "freeing mesh"+i);
                     return;
 
 

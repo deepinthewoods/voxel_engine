@@ -19,7 +19,7 @@ public abstract class UIElement {
 
     private static final String TAG = "UI element";
     //protected String[] recieve;//Subjects to listen to, and refresh on onNotify
-    protected String[] send;//Subject to notify
+    public String[] send;//Subject to notify
     protected transient Subject[] subjects;
     protected AutoObserver[] observers;
     protected transient Actor actor;

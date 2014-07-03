@@ -5,6 +5,7 @@ import com.artemis.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.niz.Input;
 import com.niz.component.ButtonInput;
 import com.niz.component.systems.AssetsSystem;
 import com.niz.observer.Subject;
@@ -16,10 +17,10 @@ public class ControllerButton extends UIElement{
     public String text;
     Component c;
 
-    public ControllerButton(){
-        text = "X";
+    public ControllerButton(String text, Input.Code code){
+        this.text = text;
         ButtonInput b = new ButtonInput();
-        b.code = ButtonInput.InputCode.BUTTON_JUMP;
+        b.code = code;
         c = b;
         send = new String[]{"playerControl"};
 

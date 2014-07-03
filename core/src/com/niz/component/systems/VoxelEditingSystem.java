@@ -217,7 +217,7 @@ public class VoxelEditingSystem extends EntitySystem {
             }
         });
 
-        Subjects.get("editorClicked").add(new Observer(){
+        Subjects.get("screenClicked").add(new Observer(){
 
             @Override
             public void onNotify(Entity e, Subject.Event event, Component c) {
@@ -245,7 +245,7 @@ public class VoxelEditingSystem extends EntitySystem {
 
         final Subject freeModeSub = Subjects.get("viewModeFree");
 
-        Subjects.get("editorDragged").add(new Observer(){
+        Subjects.get("screenDragged").add(new Observer(){
 
             @Override
             public void onNotify(Entity e, Subject.Event event, Component c) {
@@ -301,7 +301,7 @@ public class VoxelEditingSystem extends EntitySystem {
             }
         };
         Subjects.get("backgroundScrolled").add(zoomObserver);
-        Subjects.get("editorPinched").add(zoomObserver);
+        Subjects.get("screenPinched").add(zoomObserver);
 
         Subjects.get("editorClear").add(new Observer(){
 
@@ -378,7 +378,7 @@ public class VoxelEditingSystem extends EntitySystem {
             for (int y = 0; y < sizeY/ vw.CHUNK_SIZE_Y; y++)
                 for (int z = 0; z < sizeZ/ vw.CHUNK_SIZE_Z; z++){
                     int plane = 0;
-                    vw.setDirty(x,y,z,plane);
+                    vw.getChunk(x,y,z,plane).setDirty(true);
                 }
 
     }

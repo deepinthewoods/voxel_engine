@@ -3,6 +3,7 @@ package com.niz.ui.elements;
 import com.artemis.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.niz.Input;
 import com.niz.component.ButtonInput;
 import com.niz.component.VectorInput;
 import com.niz.component.systems.AssetsSystem;
@@ -15,7 +16,7 @@ public class ControllerSlider extends UIElement{
     VectorInput inp;
     public ControllerSlider(){
         inp = new VectorInput();
-        inp.code = ButtonInput.InputCode.BUTTON_JUMP;
+        inp.code = Input.Code.BUTTON_JUMP;
 
         send = new String[]{"playerControl"};
     }

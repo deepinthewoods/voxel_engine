@@ -23,7 +23,7 @@ public class BackgroundClickDrag extends UIElement {
     transient VectorInput4 vec4 = new VectorInput4();
     public BackgroundClickDrag(){
 
-        send = new String[]{"editorClicked", "editorDragged", "editorPinched"};
+        send = new String[]{"screenClicked", "screenDragged", "screenPinched"};
 
     }
     @Override

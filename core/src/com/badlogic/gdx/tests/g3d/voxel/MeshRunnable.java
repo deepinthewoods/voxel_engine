@@ -1,6 +1,7 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.PauseableThread;
 
 /**
@@ -9,7 +10,7 @@ import com.badlogic.gdx.utils.PauseableThread;
 public class MeshRunnable implements Runnable {
     private static final String TAG = "mehs runnable";
     public GreedyMesher mesher;
-    public PauseableThread thread;
+    public MeshThread thread;
     public MeshBatcher batch;
     public boolean done, idle = true;
     public VoxelChunk chunk;
@@ -22,28 +23,36 @@ public class MeshRunnable implements Runnable {
 
     public void begin(VoxelChunk chunk, VoxelWorld world){
         mesher.begin(chunk, world);
-        if (thread != null)
-            thread.onResume();
+        chunk.setDirty(false);
+
+
+
         done = false;
         idle = false;
         this.chunk = chunk;
         this.world = world;
+        thread.onResume();
     }
 
     @Override
     public void run() {
-        //Gdx.app.log(TAG, "run");
+            if (done){
+               thread.onPause();
+                //Gdx.app.log(TAG, "PAUSE");
+                return;
+            }
             if (mesher.process()){
                 done = true;
-                if (thread != null)
-                    thread.onPause();
+                //Gdx.app.log(TAG, "DONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONE" +thread.index);
+                thread.onPause();
+
+
+
+                //else throw new GdxRuntimeException("hjksfhadkl");
             }
     }
 
-    public void end(){
-        mesher.end();
-        idle = true;
-    }
+
 
     public void restart() {
         mesher.begin(chunk, world);

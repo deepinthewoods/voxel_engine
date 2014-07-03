@@ -19,7 +19,9 @@ public class JPhysicsEngine{
 	protected int particleTotal = 0;
 	private float fTimeStep, fTimeStep2;//Vector3.fixedMul(fTimeStep, fTimeStep);
 	
-	float xLimit1 = 0f, xLimit2 = 11111512, yLimit1 = 0f, yLimit2 = 512, zLimit1 = .5f, zLimit2 = .5f;
+	float xLimit1 = Float.MIN_VALUE, xLimit2 = Float.MAX_VALUE,
+            yLimit1 = Float.MIN_VALUE, yLimit2 = Float.MAX_VALUE,
+            zLimit1 = Float.MIN_VALUE, zLimit2 = Float.MAX_VALUE;
 	
 	
 	public JPhysicsEngine(int constraintReps, int maxParticle, Vector3[] vectors) {
@@ -43,9 +45,9 @@ public class JPhysicsEngine{
 	public JPhysicsEngine(int constraintReps, int maxParticle, float timeStep, int sizeX,
 			int sizeY, int sizeZ) {
 		this(constraintReps, maxParticle, timeStep);
-		xLimit2 = sizeX-1;
-		yLimit2 = sizeY-1;
-		zLimit2 = sizeZ-1;
+		//xLimit2 = sizeX-1;
+		//yLimit2 = sizeY-1;
+		//zLimit2 = sizeZ-1;
 	}
 	Vector3 tmp2 = new Vector3(), ta = new Vector3();
 	// Verlet integration step
@@ -93,7 +95,7 @@ public class JPhysicsEngine{
 			for(int i=0; i<particleTotal; i++) {
 				Vector3 pos = particles[i*4], prev = particles[1*4+1];
 				//pos.x = Math.min(Math.max(pos.x,  xLimit1), xLimit2);
-				if (pos.x < xLimit1)		
+				/*if (pos.x < xLimit1)
 					pos.x = xLimit1;
 				 else if (pos.x > xLimit2)
 					pos.x = xLimit2;
@@ -106,7 +108,7 @@ public class JPhysicsEngine{
 				if (pos.z < zLimit1)				
 					pos.z = zLimit1;
 				 else if (pos.z > zLimit2)
-					pos.z = zLimit2;
+					pos.z = zLimit2;*/
 				//pos.y = Math.min(Math.max(pos.y,  yLimit1), yLimit2);
 			}
 		}

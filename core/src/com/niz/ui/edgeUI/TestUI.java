@@ -1,6 +1,7 @@
 package com.niz.ui.edgeUI;
 
 import com.niz.ui.elements.BackgroundClickDrag;
+import com.niz.ui.elements.ButtonPad;
 import com.niz.ui.elements.ControllerPad;
 import com.niz.ui.elements.UIElement;
 import com.niz.ui.elements.blockEditor.*;
@@ -56,7 +57,9 @@ public class TestUI extends EdgeUI {
 
         sides[8] = new UITable();
         sides[8].min = new UIElement[1];
-        //sides[8].min[0] = new ControllerPad();
+        ButtonPad btnPad = new ButtonPad();
+        btnPad.send = new String[]{"playerInput"};
+        sides[8].min[0] = btnPad;
         table.row();
 
         /*for (int y = 0, i = 0; y < 3; y++){

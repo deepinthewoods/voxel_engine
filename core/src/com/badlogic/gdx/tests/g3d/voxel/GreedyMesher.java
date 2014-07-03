@@ -160,7 +160,7 @@ public class GreedyMesher implements Mesher {
 
 			if (b == 0){
 				transparent = true;
-
+                //Gdx.app.log(TAG, "transp");
 
 			}else {
 
@@ -251,27 +251,40 @@ public class GreedyMesher implements Mesher {
 
                         if ((maskTop>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][TOP].transparent = true;
+                        } else{
+                            //voxels[x][y][z][TOP].transparent = false;
                         }
 
                         if ((maskBottom>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][BOTTOM].transparent = true;
+                        } else{
+                            //voxels[x][y][z][BOTTOM].transparent = false;
                         }
 
                         if ((maskNorth>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][NORTH].transparent = true;
+                        } else{
+                            //voxels[x][y][z][NORTH].transparent = false;
                         }
 
                         if ((maskSouth>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][SOUTH].transparent = true;
+                        } else{
+                            //voxels[x][y][z][SOUTH].transparent = false;
                         }
 
                         if ((maskEast>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][EAST].transparent = true;
+                        } else{
+                            //voxels[x][y][z][EAST].transparent = false;
                         }
 
                         if ((maskWest>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][WEST].transparent = true;
+                        } else{
+                            //voxels[x][y][z][WEST].transparent = false;
                         }
+
 
                         BlockDefinition ao00 = chunk.getDef(x, y, z);
                         BlockDefinition ao01 = chunk.getDef(x, y, z + 1);
@@ -344,26 +357,38 @@ public class GreedyMesher implements Mesher {
 
                         if ((maskTop>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][TOP].transparent = true;
+                        } else{
+                            //voxels[x][y][z][TOP].transparent = false;
                         }
 
                         if ((maskBottom>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][BOTTOM].transparent = true;
+                        } else{
+                            //voxels[x][y][z][BOTTOM].transparent = false;
                         }
 
                         if ((maskNorth>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][NORTH].transparent = true;
+                        } else{
+                            //voxels[x][y][z][NORTH].transparent = false;
                         }
 
                         if ((maskSouth>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][SOUTH].transparent = true;
+                        } else{
+                            //voxels[x][y][z][SOUTH].transparent = false;
                         }
 
                         if ((maskEast>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][EAST].transparent = true;
+                        } else{
+                           // voxels[x][y][z][EAST].transparent = false;
                         }
 
                         if ((maskWest>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][WEST].transparent = true;
+                        } else{
+                           // voxels[x][y][z][WEST].transparent = false;
                         }
 
                         BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z, chunk.plane));
@@ -437,26 +462,38 @@ public class GreedyMesher implements Mesher {
 
                         if ((maskTop>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][TOP].transparent = true;
+                        } else{
+                            //voxels[x][y][z][TOP].transparent = false;
                         }
 
                         if ((maskBottom>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][BOTTOM].transparent = true;
+                        } else{
+                            //voxels[x][y][z][BOTTOM].transparent = false;
                         }
 
                         if ((maskNorth>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][NORTH].transparent = true;
+                        } else{
+                           // voxels[x][y][z][NORTH].transparent = false;
                         }
 
                         if ((maskSouth>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][SOUTH].transparent = true;
+                        } else{
+                            //voxels[x][y][z][SOUTH].transparent = false;
                         }
 
                         if ((maskEast>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][EAST].transparent = true;
+                        } else{
+                            //voxels[x][y][z][EAST].transparent = false;
                         }
 
                         if ((maskWest>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][WEST].transparent = true;
+                        } else{
+                            //voxels[x][y][z][WEST].transparent = false;
                         }
 
                         BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z, chunk.plane));
@@ -530,26 +567,38 @@ public class GreedyMesher implements Mesher {
 
                         if ((maskTop>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][TOP].transparent = true;
+                        } else{
+                           // voxels[x][y][z][TOP].transparent = false;
                         }
 
                         if ((maskBottom>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][BOTTOM].transparent = true;
+                        } else{
+                            //voxels[x][y][z][BOTTOM].transparent = false;
                         }
 
                         if ((maskNorth>>(x+1)& 1 )> 0 ){
                             voxels[x][y][z][NORTH].transparent = true;
+                        } else{
+                            //voxels[x][y][z][NORTH].transparent = false;
                         }
 
                         if ((maskSouth>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][SOUTH].transparent = true;
+                        } else{
+                            //voxels[x][y][z][SOUTH].transparent = false;
                         }
 
                         if ((maskEast>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][EAST].transparent = true;
+                        } else{
+                            //voxels[x][y][z][EAST].transparent = false;
                         }
 
                         if ((maskWest>>(x+1)& 1) > 0 ){
                             voxels[x][y][z][WEST].transparent = true;
+                        } else{
+                           //voxels[x][y][z][WEST].transparent = false;
                         }
 
                         BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox + x, oy + y, oz + z, chunk.plane));
@@ -1129,11 +1178,18 @@ public class GreedyMesher implements Mesher {
         progress = 0;
         progressCoarse = 0;
         this.voxelWorld = voxelWorld;
+       // Gdx.app.log(TAG, "start"+chunk.offset);
+        //for (int i = 0; i < CHUNK_WIDTH+1; i++) {
+
+        for (int k = 0; k < visibilityMask.length; k++) {
+            visibilityMask[k] = 0;
+        }
 
     }
 
     @Override
     public boolean process() {
+
         switch (progressCoarse){
             case 0:
                 if (!readBlocks(chunk, voxelWorld, progress)){
@@ -1160,8 +1216,9 @@ public class GreedyMesher implements Mesher {
 
     @Override
     public int end() {
-        return meshBatch.flushCache(chunk, this);
+        //Gdx.app.log(TAG, "end"+chunk.offset);
 
+        return meshBatch.flushCache(chunk, this);
     }
 
     public int calculateVertices( VoxelChunk chunk,

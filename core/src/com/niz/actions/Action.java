@@ -11,6 +11,7 @@ public abstract class Action extends BinaryHeap.Node{
     public boolean isBlocking, isFinished;
     public int lanes;
     public transient ActionList parent;
+    public boolean wasBlocked;
 
     public Action() {
         super(0f);

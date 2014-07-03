@@ -40,8 +40,9 @@ public class VoxelChunk {
 	
 	
 	public static BlockDefinition[] defs;
-	
-	public VoxelChunk(int width, int height, int depth, int index, int plane) {
+    private boolean dirty, valid;
+
+    public VoxelChunk(int width, int height, int depth, int index, int plane) {
 		this.voxels = new byte[width * height * depth];
 		this.width = width;
 		this.height = height;
@@ -77,7 +78,10 @@ public class VoxelChunk {
 
 
 	public static BlockDefinition blockDef(int i) {
-		return defs[i];
+        //if (i != 0)
+        //Gdx.app.log(TAG, "block def "+i+"  "+(i&0xff));
+
+        return defs[i&0xff];
 	}
 	
 
@@ -261,5 +265,22 @@ public class VoxelChunk {
 
     public byte getByIndex(int i) {
         return voxels[i];
+    }
+
+    public void setDirty(boolean value) {
+        dirty = value;
+
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    public boolean getDirty() {
+        return dirty;
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 }

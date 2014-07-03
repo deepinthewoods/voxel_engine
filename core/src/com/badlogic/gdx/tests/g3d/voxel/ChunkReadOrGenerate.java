@@ -41,6 +41,8 @@ public class ChunkReadOrGenerate
     int run;
     @Override
     public void run() {
+        //Gdx.app.log(TAG, "run "+progressCoarse);
+
         if (progressCoarse == -1){
             try {
                 wait(10);
@@ -106,11 +108,11 @@ public class ChunkReadOrGenerate
             for (int x = 0; x < chunk.width; x++)
                 for (int y = 0; y < chunk.height; y++)
                     for (int z = 0; z < chunk.depth; z++){
-                        if (y < 5)
+                        if (chunk.offset.y + y < 2)
                             chunk.set(x,y,z, (byte) 1);
                         else chunk.set(x,y,z, (byte) 0);
                     }
-            vw.setDirty(chunk.index, true);
+            chunk.setDirty(true);
             progressCoarse++;
         } else {//finished
             thread.ser.finishedRead(chunk);

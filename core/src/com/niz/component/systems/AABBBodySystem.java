@@ -5,6 +5,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
@@ -72,7 +73,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 	//	body.wasOnWall = body.onWall;
 		body.onGround = false;
 		//body.onWall = false;
-		
+        //Gdx.app.log(TAG, "collisions"+pos.pos);
 		dir.set(position).sub(oldPosition);
 		int xside = BlockDefinition.LEFT, yside = BlockDefinition.BOTTOM, zside = BlockDefinition.BACK;
 		//if (def.collide(voxel, position)){
@@ -117,7 +118,8 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		tmp.set(oldPosition).sub(position);
 		//Gdx.app.log(TAG, "co staart");
 		for (int i = 0; i < vectorCount; i++){
-			//Gdx.app.log(TAG, "ret "+returnVectors[i]+"   ys"+yside);
+
+           // Gdx.app.log(TAG, "ret "+returnVectors[i]+"   ys"+yside);
 			if (returnVectors[i].len2() < dist2){//could be distance to delta
 				smallestIndex = i;//tmp.set(returnVectors[i]);
 				dist2 = returnVectors[i].len2();
@@ -127,8 +129,8 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		}	
 		if (vectorCount > 0){
 			if (smallestIndex >= yCount){
-				//Gdx.app.log(TAG, "c" +
-				//		"wall "+ returnVectors[smallestIndex] +"  count"+vectorCount+ "dist "+dist2);
+				Gdx.app.log(TAG, "c" +
+						"wall "+ returnVectors[smallestIndex] +"  count"+vectorCount+ "dist "+dist2);
 				position.add(returnVectors[smallestIndex]);
 			
 				body.onWall = true;
@@ -138,7 +140,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 				}
 			
 			} else {
-				//Gdx.app.log(TAG, "ground "+ returnVectors[smallestIndex] +"  count"+vectorCount );
+				Gdx.app.log(TAG, "ground "+ returnVectors[smallestIndex] +"  count "+vectorCount );
 				position.add(returnVectors[smallestIndex]);
 				body.onGround = true;
 			}

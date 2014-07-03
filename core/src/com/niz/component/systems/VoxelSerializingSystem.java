@@ -4,10 +4,10 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.tests.g3d.voxel.*;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.LongMap;
 import com.badlogic.gdx.utils.Pools;
 import com.niz.NizMain;
@@ -22,6 +22,7 @@ import java.util.Iterator;
 public class VoxelSerializingSystem extends EntitySystem {
     private static final float READ_INTERVAL = .5f;
     private static final float WRITE_INTERVAL = .5f;
+    private static final String TAG = "voxel serializing system";
     /**
      * Manages blobs and save/load
      *
@@ -40,10 +41,10 @@ public class VoxelSerializingSystem extends EntitySystem {
     private ComponentMapper<Position> posM;
 
     private Object lock = new Object();
-    private LongMap<VoxelChunk> reads = new LongMap<VoxelChunk>();
+    private LongMap<Position> reads = new LongMap<Position>();
     private LongMap<VoxelChunk> writes = new LongMap<VoxelChunk>();
     private LongMap<VoxelChunk> inProgress = new LongMap<VoxelChunk>();
-    private LongMap.Entries<VoxelChunk> readV = new LongMap.Entries<VoxelChunk>(reads);;
+    private LongMap.Entries<Position> readV = new LongMap.Entries<Position>(reads);;
     private LongMap.Entries<VoxelChunk> writeV = new LongMap.Entries<VoxelChunk>(writes);;
     private VoxelWorld vw;
     private Array<VoxelChunk> finishedRead = new Array<VoxelChunk>();
@@ -57,8 +58,10 @@ public class VoxelSerializingSystem extends EntitySystem {
     protected void processEntities(Array<Entity> entities) {
         for (int i = 0; i < finishedRead.size; i++){
             VoxelChunk c = finishedRead.get(i);
-            vw.setValid(c);
-            inProgress.remove(hash((int)c.offset.x, (int)c.offset.y, (int)c.offset.z, c.plane));
+            //Gdx.app.log(TAG, "finished reading"+c.offset);
+            c.setValid(true);
+            vw.addChunk(c);
+            inProgress.remove(hash(c));
         }
         finishedRead.clear();
 
@@ -66,7 +69,7 @@ public class VoxelSerializingSystem extends EntitySystem {
             VoxelChunk c = finishedWrite.get(i);
             //vw.setValid(c);
 
-            inProgress.remove(hash((int)c.offset.x, (int)c.offset.y, (int)c.offset.z, c.plane));
+            inProgress.remove(hash(c));
         }
         finishedWrite.clear();
 
@@ -103,7 +106,7 @@ public class VoxelSerializingSystem extends EntitySystem {
                     if (thread.time > READ_INTERVAL)
                         thread.onResume();
                 } else {//done reading
-                    if (thread.time > READ_INTERVAL)
+                    if (thread.time > READ_INTERVAL && vw.canCreateChunk())
                         findReadTarget(thread, pos);
                 }
             }
@@ -113,24 +116,34 @@ public class VoxelSerializingSystem extends EntitySystem {
 
     }
 
+
+
+
     private void findReadTarget(ReadThread thread, Position pos) {
         //look in queues
         //synchronized (lock) //only run by the main thread
+
         {
-            Iterator<LongMap.Entry<VoxelChunk>> i = readV.iterator();
+            readV.reset();
             float dist = 0;
-            LongMap.Entry<VoxelChunk> select = null;
-            while (i.hasNext()) {
-                LongMap.Entry<VoxelChunk> c = i.next();
-                if ((select == null || dist > pos.pos.dst2(c.value.offset)) && !inProgress.containsKey(c.key)) {
-                    select = c;
-                    dist = pos.pos.dst2(c.value.offset);
-                }
-            }
-            if (select != null) {
-                VoxelBlobReader blob = getBlob(select.value);
-                thread.runn.begin(select.value, vw, blob);
-                inProgress.put(select.key, select.value);
+            if (!readV.hasNext()) return;
+            //Gdx.app.log(TAG, "find read target ");
+            LongMap.Entry<Position> select = readV.next();
+            int
+                    cx = MathUtils.floor(select.value.pos.x) / vw.CHUNK_SIZE_X
+
+                    , cy =   MathUtils.floor(select.value.pos.y) / vw.CHUNK_SIZE_Y
+                    , cz =  MathUtils.floor(select.value.pos.z) / vw.CHUNK_SIZE_Z
+                    , p = select.value.plane;
+            if (!inProgress.containsKey(hash(cx, cy, cz, p))) {
+               // Gdx.app.log(TAG, "find read target valid"+select.value.pos);
+
+                VoxelBlobReader blob = getBlob(cx, cy, cz, p);
+                VoxelChunk chunk = vw.createChunk();
+                chunk.offset.set(select.value.pos);
+                chunk.plane = select.value.plane;
+                thread.runn.begin(chunk, vw, blob);
+                inProgress.put(select.key, chunk);
                 reads.remove(select.key);
                 thread.onResume();
             }
@@ -139,15 +152,15 @@ public class VoxelSerializingSystem extends EntitySystem {
 
     }
 
-    private VoxelBlobReader getBlob(VoxelChunk chunk) {
-        Vector3 offset = chunk.offset;
-        int x = (int) offset.x;
-        int y = (int) offset.y;
-        int z = (int) offset.z;
-        x /= chunk.width;
-        y /= chunk.height;
-        z /= chunk.depth;
-        int p = chunk.plane;
+
+
+
+    private VoxelBlobReader getBlob(int x, int y, int z, int p) {
+
+        x /= vw.CHUNK_SIZE_X;
+        y /= vw.CHUNK_SIZE_Y;
+        z /= vw.CHUNK_SIZE_Z;
+
 
         long hash = hash(x,y,z,p);
 
@@ -174,35 +187,43 @@ public class VoxelSerializingSystem extends EntitySystem {
                 }
             }
             if (select != null) {
-                VoxelBlobReader blob = getBlob(select.value);
+                VoxelBlobReader blob = getBlob(select.value.offset.x, select.value.offset.y, select.value.offset.z, select.value.plane);
                 thread.runn.begin(select.value, vw, blob);
                 inProgress.put(select.key, select.value);
-                reads.remove(select.key);
+                Pools.free(reads.remove(select.key));
+
                 thread.onResume();
             }
 
         }
     }
 
+    private VoxelBlobReader getBlob(float x, float y, float z, int plane) {
+        return getBlob(MathUtils.floor(x), MathUtils.floor(y), MathUtils.floor(z), plane);
+    }
+
 
     public void addSave(VoxelChunk chunk){
-        int x = (int) chunk.offset.x;
-        int y = (int) chunk.offset.y;
-        int z = (int) chunk.offset.z;
-        int p = (int) chunk.plane;
+        int x = MathUtils.floor( chunk.offset.x);
+        int y = MathUtils.floor( chunk.offset.y);
+        int z = MathUtils.floor( chunk.offset.z);
+        int p =  chunk.plane;
        // synchronized (lock){
             writes.put(hash(x,y,z,p), chunk);
 
         //}
     }
 
-    public void addRead(VoxelChunk chunk){
-        int x = (int) chunk.offset.x;
-        int y = (int) chunk.offset.y;
-        int z = (int) chunk.offset.z;
-        int p = (int) chunk.plane;
+    public void addRead(int x, int y, int z, int p){
+        long hash = hash(x,y,z,p);
+        if (reads.containsKey(hash) || inProgress.containsKey(hash)) return;
         //synchronized (lock){
-            reads.put(hash(x,y,z,p), chunk);
+        Position posit = Pools.obtain(Position.class);
+        posit.pos.set(x*vw.CHUNK_SIZE_X,y*vw.CHUNK_SIZE_Y,z*vw.CHUNK_SIZE_Z);
+        //Gdx.app.log(TAG, "add read "+posit.pos);
+
+        posit.plane = p;
+            reads.put(hash, posit);
 
         //}
     }
@@ -210,10 +231,17 @@ public class VoxelSerializingSystem extends EntitySystem {
 
 
     public long hash(int x, int y, int z, int p){
-        return x | (y<<16) | (z << 32) | (p<<48);
+        return vw.chunkHash(x,y,z,p);
+        //return x | (y<<16) | (z << 32) | (p<<48);
 
     }
-
+    private long hash(VoxelChunk c) {
+        return vw.chunkHash(c);
+       /* int x = (int) c.offset.x / vw.CHUNK_SIZE_X;
+        int y = (int) c.offset.y / vw.CHUNK_SIZE_Y;
+        int z = (int) c.offset.z / vw.CHUNK_SIZE_Z;
+        return hash(x,y,z,c.plane);*/
+    }
 
     @Override
     public void initialize() {
@@ -225,7 +253,7 @@ public class VoxelSerializingSystem extends EntitySystem {
         for (int i = 0; i < num; i++){
             ChunkReadOrGenerate rRun = new ChunkReadOrGenerate();
             ReadThread r;
-            if (hasThreads){
+            if (!hasThreads){
                 r = new ReadThread(rRun){
                     boolean p;
                     @Override
@@ -262,7 +290,7 @@ public class VoxelSerializingSystem extends EntitySystem {
 
             ChunkWrite wRun = new ChunkWrite();
             WriteThread w;
-            if (hasThreads){
+            if (!hasThreads){
                 w = new WriteThread(wRun){
                     boolean p;
                     @Override
@@ -309,6 +337,8 @@ public class VoxelSerializingSystem extends EntitySystem {
 
     public void finishedRead(VoxelChunk chunk) {
         synchronized (lock){
+            //Gdx.app.log(TAG, "finished read");
+
             finishedRead.add(chunk);
         }
     }

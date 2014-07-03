@@ -168,39 +168,9 @@ public class GeneralFactory extends GameFactory{
 	}
 
 	public static  BlockDefinition[] getBlockDefs(World world) {
-        AssetsSystem assets = world.getSystem(AssetsSystem.class);
-        TextureAtlas tiles = assets.getTextureAtlas("tiles");
 
+        BlockDefinition[] defs = new BlockDefinition[256];
 
-        Gdx.app.log(TAG, "BLOCK DEFS");
-		BlockDefinition[] defs = new BlockDefinition[256];
-		defs[0] = new BlockDefinition( 0)
-		{
-
-			@Override
-			public void onUpdate(int x, int y, int z, VoxelWorld world) {
-			}
-			
-		};
-		defs[0].lightValue = 15;
-		//defs[0].dayLightLoss = 0;
-		defs[0].isSolid = false;
-		defs[0].isEmpty = true;
-		//for (int i = 1; i < 32; i++){
-		//	defs[i] = new BlockDefinition(tiles, i);
-			//BlockDefinition.add(i, defs[i]);
-		//}
-		
-		defs[1] = new BlockDefinition( 1){
-
-			@Override
-			public void onUpdate(int x, int y, int z, VoxelWorld world) {
-			}
-			
-		};
-		
-		//defs[10] = new TopBottomBlock(tiles, 8, 1, 10);
-		
 
         for (int i = 0; i < 256; i++){
             if (defs[i] == null){
@@ -208,7 +178,15 @@ public class GeneralFactory extends GameFactory{
             }
         }
 
-		return defs;
+		defs[0].lightValue = 15;
+		//defs[0].dayLightLoss = 0;
+		defs[0].isSolid = false;
+		defs[0].isEmpty = true;
+
+
+        return defs;
+
+
 	}
 
 
