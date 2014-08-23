@@ -6,8 +6,11 @@ import com.artemis.managers.Manager;
 import com.artemis.systems.EntitySystem;
 import com.artemis.systems.event.EventDeliverySystem;
 import com.artemis.systems.event.SystemEvent;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BinaryHeap;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectSet;
 
@@ -22,6 +25,10 @@ import com.badlogic.gdx.utils.ObjectSet;
  * 
  */
 public class World implements Disposable {
+
+
+    private static final String TAG = "world";
+    private Array<Entity> smallest = new Array<Entity>();
 
     /**
      * Only used internally to maintain clean code.
@@ -164,22 +171,7 @@ public class World implements Disposable {
         return manager;
     }
 
-    /**
-     * Returns a manager of the specified type.
-     * 
-     * @param <T> Manager type
-     * @param managerType class type of the manager
-     * @return the manager
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Manager> T getManager(Class<T> managerType) {
-        for (Manager manager : managers) {
-            if (manager.getClass().equals(managerType)) {
-                return (T) manager;
-            }
-        }
-        return null;
-    }
+
 
     /**
      * Deletes the manager from this world.
@@ -470,6 +462,9 @@ public class World implements Disposable {
      * Process all non-passive systems.
      */
     public void process() {
+
+
+
         check(added, addedPerformer);
         check(changed, changedPerformer);
         check(disable, disablePerformer);
@@ -579,5 +574,53 @@ public class World implements Disposable {
         }
         return null;
     }
+
+    public void processRecursed(long targetTick){
+        boolean done = false;
+        while (!done){
+            if (processSmallestIteration(targetTick)) done = true;
+        };
+
+    }
+
+    public boolean processSmallestIteration(long targetTick){
+        Array<Entity> a = getEntityManager().entities;
+        long smallestTick = targetTick+1;
+
+        for (int i = 0; i < a.size; i++){
+            Entity e = a.get(i);
+            if (e.tick < smallestTick){
+                //if (e.tick < e.targetTick)
+                {
+                    smallestTick = e.tick;
+                    smallest.clear();
+                    smallest.add(e);
+                }
+            } else if (e.tick == smallestTick){
+                smallest.add(e);
+            } else {
+
+            }
+            e.disable();
+        }
+        for (int i = 0; i < smallest.size; i++) {
+            Entity e = smallest.get(i);
+            e.enable();
+            e.tick++;
+
+        }
+        process();
+        if (smallestTick >= targetTick){
+            //Gdx.app.log(TAG, "done"+smallestTick+"  target "+targetTick);
+
+        }
+        else {
+            //Gdx.app.log(TAG, "amllest tick" + smallestTick + "  size" + smallest.size + "  target:"+targetTick);
+            return false;
+        }
+
+        return true;
+    }
+
 
 }

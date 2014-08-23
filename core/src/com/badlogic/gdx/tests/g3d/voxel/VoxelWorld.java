@@ -85,9 +85,10 @@ public class VoxelWorld implements RenderableProvider {
                 , cy = iy / CHUNK_SIZE_Y
                 , cz = iz / CHUNK_SIZE_Z;
 
-        ix %= CHUNK_SIZE_X;
-        iy %= CHUNK_SIZE_Y;
-        iz %= CHUNK_SIZE_Z;
+        ix = (ix % CHUNK_SIZE_X + CHUNK_SIZE_X) % CHUNK_SIZE_X;
+        iy = (iy % CHUNK_SIZE_Y + CHUNK_SIZE_Y) % CHUNK_SIZE_Y;
+        iz = (iz % CHUNK_SIZE_Z + CHUNK_SIZE_Z) % CHUNK_SIZE_Z;
+
 		int hash = chunkHash(cx, cy, cz, p);
 		VoxelChunk chunk = getChunk(hash);
         if (chunk == null) return;
@@ -109,8 +110,8 @@ public class VoxelWorld implements RenderableProvider {
                 , cz = iz / CHUNK_SIZE_Z;
 
         ix = (ix % CHUNK_SIZE_X + CHUNK_SIZE_X) % CHUNK_SIZE_X;
-        iy = (ix % CHUNK_SIZE_Y + CHUNK_SIZE_Y) % CHUNK_SIZE_Y;
-        iz = (ix % CHUNK_SIZE_Z + CHUNK_SIZE_Z) % CHUNK_SIZE_Z;
+        iy = (iy % CHUNK_SIZE_Y + CHUNK_SIZE_Y) % CHUNK_SIZE_Y;
+        iz = (iz % CHUNK_SIZE_Z + CHUNK_SIZE_Z) % CHUNK_SIZE_Z;
 
 
         //(i % n + n) % n;
@@ -134,11 +135,11 @@ public class VoxelWorld implements RenderableProvider {
                 ( (p >>> 24) & 0xFF ) << 24;*/
 
         return
-        ( (ix % 0xFF + 0x3FF )&0x3FF) |
-        (( (iy  % 0xFF + 0x3FF )&0x3FF)<<10 )|
-        (( (iz  % 0xFF + 0x3FF )&0x3FF)<<20 )|
-        (( (p  % 0xFF + 0xFF )&0xFF) << 30);//*/
-        //int h = ix  ^ iy * p2 ^ iz * p3 ^ p ;
+        ( (ix % 0xFF + 0x3FF )&0x3FF) ^
+        (( (iy  % 0xFF + 0x3FF )&0x3FF)<<10 )^
+        (( (iz  % 0xFF + 0x3FF )&0x3FF)<<20 );//^
+        //jjjjjjjjjjjjjjj(( (p  % 0xFF + 0xFF )&0xFF) << 30);//
+        //int h = (ix * p1)  ^ (iy * p2) ^ (iz * p3) ^ (p*p4) ;
         //return h;
     }
 
@@ -155,9 +156,9 @@ public class VoxelWorld implements RenderableProvider {
     }
 
     public int chunkHash(VoxelChunk c) {
-        int x = (int) c.offset.x;
-        int y = (int) c.offset.y;
-        int z = (int) c.offset.z;
+        int x = MathUtils.floor(c.offset.x);
+        int y = MathUtils.floor( c.offset.y);
+        int z = MathUtils.floor( c.offset.z);
         x /= CHUNK_SIZE_X;
         y /= CHUNK_SIZE_Y;
         z /= CHUNK_SIZE_Z;
@@ -285,9 +286,10 @@ public class VoxelWorld implements RenderableProvider {
                 , cy = iy / CHUNK_SIZE_Y
                 , cz = iz / CHUNK_SIZE_Z;
 
-        ix %= CHUNK_SIZE_X;
-        iy %= CHUNK_SIZE_Y;
-        iz %= CHUNK_SIZE_Z;
+        ix = (ix % CHUNK_SIZE_X + CHUNK_SIZE_X) % CHUNK_SIZE_X;
+        iy = (iy % CHUNK_SIZE_Y + CHUNK_SIZE_Y) % CHUNK_SIZE_Y;
+        iz = (iz % CHUNK_SIZE_Z + CHUNK_SIZE_Z) % CHUNK_SIZE_Z;
+
         int hash = chunkHash(cx, cy, cz, p);
         VoxelChunk chunk = getChunk(hash);
         return chunk;
@@ -327,4 +329,17 @@ public class VoxelWorld implements RenderableProvider {
     }
 
 
+    public void clearAllMeshes() {
+        IntMap.Values<VoxelChunk> iter = chunks.values();
+
+        while (iter.hasNext()){
+            VoxelChunk c = iter.next();
+            if (c.mesh != null){
+                //Pools.free(c.mesh);
+                c.mesh = null;
+                c.setDirty(true);
+            }
+
+        }
+    }
 }

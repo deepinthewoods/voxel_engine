@@ -1,5 +1,7 @@
 package com.niz;
 
+import com.artemis.Component;
+import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -17,18 +19,20 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.niz.actions.Action;
+import com.niz.actions.ActionList;
+import com.niz.component.AABBBody;
+import com.niz.component.Move;
 import com.niz.factories.GameFactory;
 import com.niz.factories.GeneralFactory;
 import com.niz.ui.SlideColorPicker;
 
 public class EngineScreen implements Screen{
 
-	
-	
 
-	
+    public static Entity player;
 
-	@Override
+    @Override
 	public void show() {
 	}
 
@@ -49,7 +53,7 @@ public class EngineScreen implements Screen{
 		world.dispose();
 		assets.dispose();
 	}
-	
+
 	private static final String TAG = "main engine";
 	//private OrthographicCamera uiCamera;
 	//private Camera  worldCamera;
@@ -68,9 +72,9 @@ public class EngineScreen implements Screen{
 	private BitmapFont font;
 	//private Environment env;
 	//public static Entity player;
-	public static int tick;
+	//public static int tick;
 	public NizMain game;
-	
+
 	public EngineScreen(NizMain nizEngine) {
 		game = nizEngine;
 		float w = Gdx.graphics.getWidth();
@@ -94,7 +98,7 @@ public class EngineScreen implements Screen{
         makeSkin(skin, assets.get("data/tiles.pack", TextureAtlas.class));
 
         //assetsLoaded = false;
-		
+
 		factory = new GeneralFactory();
 
 		//factory.assets(world, assets);
@@ -187,9 +191,9 @@ public class EngineScreen implements Screen{
         draw.setBottomHeight(border); draw.setTopHeight(border);
         draw.setLeftWidth(border); draw.setRightWidth(border);
     }
-
+    int tick = 0;
     @Override
-	public void render(float delta) {		
+	public void render(float delta) {
 		if(!assets.update()) {
 			//factory.init(timeStep, world, assets);
 
@@ -204,8 +208,8 @@ public class EngineScreen implements Screen{
 		accumulator += delta;
 		while (accumulator > timeStep){
 			accumulator -= timeStep;
-			world.process();
-			tick++;
+			world.processRecursed(tick++);
+			//tick++;
 		}
 		stage.act(delta);
 		//DRAW
@@ -221,33 +225,42 @@ public class EngineScreen implements Screen{
         stage.draw();
 
 		spriteBatch.begin();
-		/*Array<Component> array = new Array<Component>();
-		player.getComponents(array );
-		for (int i = 0; i < array.size; i++)
-		font.draw(spriteBatch, array.get(i).getClass().getSimpleName()
-				, 10, 40+i*20);
-		
-		if (player.getComponent(AABBBody.class) != null)
-		font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond() + ",   "+
-		//player.getComponentBits()
-		//.get(ActionComponent.class)
-		//.action.actions.getRoot().getNext()
-		(player.get(AABBBody.class).onGround?"onGround  ":"")+
-		//+(player.get(AABBBody.class).wasOnGround?"wasOnGround  ":"")
-		(player.get(AABBBody.class).onWall?"onWall  ":"")
-		+(player.get(Move.class).moving?"moving":"")
-	//			+(player.get(AABBBody.class).wasOnWall?"wasOnWall":"")
+        if (player != null){
+            Array<Component> array = new Array<Component>();
+            player.getComponents(array);
+            for (int i = 0; i < array.size; i++)
+                font.draw(spriteBatch, array.get(i).getClass().getSimpleName()
+                        , 10, 40 + i * 20);
 
-		, 0, 20);
-		
-		if (player.getComponent(AABBBody.class) != null)
-			font.draw(spriteBatch, " "+
-			player//.getComponentBits()
-			.get(ActionComponent.class)
-			.action.actions.getRoot().getNext().getClass().getSimpleName()
-			//player.get(AABBBody.class).onWall
-			, 280, 20);
-	*/
+            if (player.getComponent(AABBBody.class) != null)
+                font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond() + ",   " +
+                        //player.getComponentBits()
+                        //.get(ActionComponent.class)
+                        //.action.actions.getRoot().getNext()
+                        (player.get(AABBBody.class).onGround ? "onGround  " : "") +
+                        //+(player.get(AABBBody.class).wasOnGround?"wasOnGround  ":"")
+                        (player.get(AABBBody.class).onWall ? "onWall  " : "")
+                        + (player.get(Move.class).moving ? "moving" : "")
+                        + (player.get(Move.class).jumping ? "jumping" : "")
+                        //			+(player.get(AABBBody.class).wasOnWall?"wasOnWall":"")
+
+                        , 0, 20);
+
+            if (player.getComponent(AABBBody.class) != null) {
+                String actionString = "";
+                Array.ArrayIterator<Action> iter = player.get(ActionList.class).actions.iter();
+
+                if (iter.hasNext())
+                   actionString = iter.next().getClass().getSimpleName();
+                ;
+
+                font.draw(spriteBatch, actionString
+
+                        //player.get(AABBBody.class).onWall
+                        , 380, 20);
+            }
+        }
+	//*/
 		spriteBatch.end();
 
 	}

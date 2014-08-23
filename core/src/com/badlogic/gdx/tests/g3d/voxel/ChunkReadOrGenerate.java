@@ -105,11 +105,14 @@ public class ChunkReadOrGenerate
 
 
         } else if (progressCoarse == 3){//generate chunk
+            //Gdx.app.log(TAG, "generate"+chunk.offset);
             for (int x = 0; x < chunk.width; x++)
                 for (int y = 0; y < chunk.height; y++)
                     for (int z = 0; z < chunk.depth; z++){
-                        if (chunk.offset.y + y < 2)
-                            chunk.set(x,y,z, (byte) 1);
+                        if (chunk.offset.y + y == 2) {
+                            chunk.set(x, y, z, (byte) 1);
+                            //Gdx.app.log(TAG, "solid block "+x+","+y+","+z);
+                        }
                         else chunk.set(x,y,z, (byte) 0);
                     }
             chunk.setDirty(true);

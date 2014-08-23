@@ -25,4 +25,14 @@ public class Vec3i {
 		set((int)x2,(int)y2,(int)z2);
 		
 	}
+
+    public int manhattanDist(int ix, int iy, int iz) {
+        int d = 0;
+        d += Math.abs(ix-x);
+        d += Math.abs(iy-y);
+        d += Math.abs(iz-z);
+
+
+        return d;
+    }
 }

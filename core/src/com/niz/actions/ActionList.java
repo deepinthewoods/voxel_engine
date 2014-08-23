@@ -3,10 +3,10 @@ package com.niz.actions;
 import com.artemis.Component;
 import com.artemis.Entity;
 import com.artemis.World;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BinaryHeap;
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pools;
 
 
 public class ActionList implements Component{
@@ -125,5 +125,28 @@ public class ActionList implements Component{
 
     public void addPre(Action a) {
         actions.insert(0, a);
+    }
+
+
+    public boolean containsAction(Class<? extends Action> clas) {
+        Array.ArrayIterator<Action> iter = actions.iter();
+        while (iter.hasNext()) {
+            Action a = iter.next();
+            if (a.getClass().isAssignableFrom(clas)) return true;
+        }
+        return false;
+    }
+
+    public Action getAction(Class<? extends Action> clas) {
+        Array.ArrayIterator<Action> iter = actions.iter();
+        while (iter.hasNext()) {
+            Action a = iter.next();
+            if (a.getClass().isAssignableFrom(clas)) return a;
+        }
+        return null;
+    }
+
+    public void addToStart(Class<? extends Action> clas) {
+        addToStart(Pools.obtain(clas));
     }
 }

@@ -57,7 +57,12 @@ public class VoxelSystem extends EntitySystem {
 	protected void processEntities(Array<Entity> entities) {
         if (entities.size == 0) return;
         //voxelWorld.makeMesh(), mesher, batch);
+        VoxelChunk c = voxelWorld.getChunkFromVoxel(1, 1, 1, 0);
+        //Gdx.app.log(TAG, "voxelHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
 
+        //if (c != null)
+            //for (int p = -20; p < 20; p++)
+            //Gdx.app.log(TAG, "v" + VoxelChunk.blockDef(voxelWorld.get(p,2,2,0)).isSolid+p);
 
 	}
 

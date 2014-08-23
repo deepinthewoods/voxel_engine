@@ -186,20 +186,36 @@ public abstract class EntitySystem implements EntityObserver {
     public final void deleted(Entity e) {
         if(e.getSystemBits().get(systemIndex)) {
             removeFromSystem(e);
+            onDeleted(e);
         }
+    }
+
+    protected void onDeleted(Entity e) {
+
     }
 
     @Override
     public final void disabled(Entity e) {
+
         if(e.getSystemBits().get(systemIndex)) {
+            onDisabled(e);
             removeFromSystem(e);
+
         }
+
+    }
+
+    public void onEnabled(Entity e) {
+
     }
 
     @Override
     public final void enabled(Entity e) {
         check(e);
+        onEnabled(e);
     }
+
+    protected void onDisabled(Entity e){};
 
 
     public final void setWorld(World world) {

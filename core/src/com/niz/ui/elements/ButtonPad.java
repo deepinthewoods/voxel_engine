@@ -1,13 +1,11 @@
 package com.niz.ui.elements;
 
-import com.artemis.Component;
 import com.artemis.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.niz.Input;
 import com.niz.component.ButtonInput;
 import com.niz.component.systems.AssetsSystem;
 import com.niz.observer.Subject;
@@ -33,7 +31,7 @@ public class ButtonPad extends UIElement {
         fwd_btn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                subjects[0].notify(null, Subject.Event.BUTTON_PRESSED, input_fwd);
+                subjects[0].notify(null, Subject.Event.BUTTON_IS_PRESSED, input_fwd);
             }
         });
         table.add(fwd_btn);
@@ -43,7 +41,7 @@ public class ButtonPad extends UIElement {
         l_btn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                subjects[0].notify(null, Subject.Event.BUTTON_PRESSED, input_l);
+                subjects[0].notify(null, Subject.Event.BUTTON_IS_PRESSED, input_l);
             }
         });;
         table.add(l_btn);
@@ -51,7 +49,7 @@ public class ButtonPad extends UIElement {
         middle_btn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                subjects[0].notify(null, Subject.Event.BUTTON_PRESSED, input_jump);
+                subjects[0].notify(null, Subject.Event.BUTTON_IS_PRESSED, input_jump);
             }
         });;
         table.add(middle_btn);
@@ -59,7 +57,7 @@ public class ButtonPad extends UIElement {
         r_btn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                subjects[0].notify(null, Subject.Event.BUTTON_PRESSED, input_r);
+                subjects[0].notify(null, Subject.Event.BUTTON_IS_PRESSED, input_r);
             }
         });;
         table.add(r_btn);
@@ -69,7 +67,7 @@ public class ButtonPad extends UIElement {
         back_btn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                subjects[0].notify(null, Subject.Event.BUTTON_PRESSED, input_back);
+                subjects[0].notify(null, Subject.Event.BUTTON_IS_PRESSED, input_back);
             }
         });;
         table.add(back_btn);

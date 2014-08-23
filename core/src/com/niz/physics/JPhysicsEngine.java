@@ -1,21 +1,24 @@
 package com.niz.physics;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.IntMap.Values;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
+import com.niz.component.Physics;
 
 public class JPhysicsEngine{
 	private static int maxParticles;
 	private static final String TAG = "JPhysicsEngine";
 	public static final int COLLISION_GRANULARITY = 16;
-	public Vector3[] particles;// = new Vector3[MAX_PARTICLES*3];
+    private final boolean[] enabled;
+    public Vector3[] particles;// = new Vector3[MAX_PARTICLES*3];
 	public int[] ids;
 	public IntMap<Constraint> constraints;
 	protected int constraintRepetitions;
-	private Vector3 temp = new Vector3(), gravity = new Vector3(0f,-60f, 0f);;
+	private Vector3 temp = new Vector3(), gravity = new Vector3(0f,-30f, 0f);;
 	protected int particleTotal = 0;
 	private float fTimeStep, fTimeStep2;//Vector3.fixedMul(fTimeStep, fTimeStep);
 	
@@ -24,14 +27,7 @@ public class JPhysicsEngine{
             zLimit1 = Float.MIN_VALUE, zLimit2 = Float.MAX_VALUE;
 	
 	
-	public JPhysicsEngine(int constraintReps, int maxParticle, Vector3[] vectors) {
-		maxParticles = maxParticle;
-		constraintRepetitions = constraintReps;
-		particles = vectors;
-		ids = new int[maxParticles];
-		constraints = new IntMap<Constraint>();
-		
-	}
+
 	
 	public JPhysicsEngine(int constraintReps, int maxParticle, float timeStep) {
 		maxParticles = maxParticle;
@@ -41,19 +37,16 @@ public class JPhysicsEngine{
 		constraints = new IntMap<Constraint>();
 		fTimeStep = timeStep;
 		fTimeStep2 = fTimeStep*fTimeStep;
-	}
-	public JPhysicsEngine(int constraintReps, int maxParticle, float timeStep, int sizeX,
-			int sizeY, int sizeZ) {
-		this(constraintReps, maxParticle, timeStep);
-		//xLimit2 = sizeX-1;
-		//yLimit2 = sizeY-1;
-		//zLimit2 = sizeZ-1;
-	}
+        enabled = new boolean[maxParticles];
+    }
+
 	Vector3 tmp2 = new Vector3(), ta = new Vector3();
 	// Verlet integration step
 	private void verlet(){
 		for(int i=0; i<particleTotal; i++) {
+            if (!enabled[i*4]) continue;
 			Vector3 x = particles[i*4];
+
 			temp.set(x);
 			Vector3 oldx = particles[i*4+1];
 			Vector3 a = particles[i*4+2];
@@ -63,7 +56,7 @@ public class JPhysicsEngine{
 			ta.set(a);
 			ta.scl(fTimeStep);
 			ta.scl(fTimeStep);
-			//Gdx.app.log("physics", "ta  "+ta + "tmp2  "+temp);
+			//Gdx.app.log("physics", "ta  "+ta );
 			tmp2.add(ta);
 			x.add(tmp2);
 			//x.sub(oldx);
@@ -152,8 +145,9 @@ public class JPhysicsEngine{
 		particles[id*4+1] = Vector3Pool.obtain().set(x,y,z);
 		particles[id*4+2] = Vector3Pool.obtain();
 		particles[id*4+3] = Vector3Pool.obtain();
-		
-		particleTotal++;
+        enabled[id] = true;
+
+        particleTotal++;
 		ids[id] = id;
 		return id;///getPositionVector(id);
 	}
@@ -163,7 +157,7 @@ public class JPhysicsEngine{
 		particles[id*4+1] = Vector3Pool.obtain().set(x,y,z);
 		particles[id*4+2] = Vector3Pool.obtain();
 		particles[id*4+3] = Vector3Pool.obtain();
-		
+		enabled[id] = true;
 		particleTotal++;
 		ids[id] = id;
 		return id;
@@ -204,4 +198,12 @@ public class JPhysicsEngine{
 		particles[id*4].add(x,y,z);		
 		
 	}
+
+    public void disable(Physics physics) {
+        enabled[physics.id] = false;
+    }
+
+    public void enable(Physics physics) {
+        enabled[physics.id] = true;
+    }
 }

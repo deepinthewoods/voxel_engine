@@ -22,7 +22,7 @@ public transient Camera camera;
 protected void processEntities(Array<Entity> entities) {
 
     camera.update();
-    //Gdx.app.log(TAG, "camera"+camera.position + "  rot"+camera.direction);
+    //Gdx.app.log(TAG, "camera"+camera.position.y );
 }
 @Override
 public void initialize(){

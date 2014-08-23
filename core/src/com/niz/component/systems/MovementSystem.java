@@ -8,7 +8,6 @@ import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
-import com.niz.EngineScreen;
 import com.niz.component.AABBBody;
 import com.niz.component.Move;
 import com.niz.component.Physics;
@@ -47,38 +46,33 @@ public class MovementSystem extends EntityProcessingSystem {
 		tmp.rotate(-rotation, 0,1,0);
 		position.x += tmp.x;
 		position.z += tmp.z;
-		
-		/*tmp.add(oldPosition);
-		//Gdx.app.log(TAG, "move"+tmp.dst2(position));
-		if (tmp.dst2(position) > speedLimit2){
-			tmp.sub(position);
-			tmp.nor().scl(-speedLimit).add(oldPosition);
-			position.set(tmp);
-			tmp.set(speed/20f, 0, 0);
-			tmp.rotate(-rotation, 0,1,0);
-			position.add(tmp);
-			//Gdx.app.log(TAG, "limit");
-		}*/
-		tmp.set(oldPosition).sub(position);
-		float 
-		vx = Math.abs(tmp.x)
-		, vy = Math.abs(tmp.y)
-		, vz = Math.abs(tmp.z);
-		
-		float dx = speedLimit/vx
-				, dy = (speedLimit*jumpSpeed)/vy
-				, dz = speedLimit / vz;
-		//if (vy < 0) 
-			//dy = 2f;
 
-		float alpha = Math.min(Math.min(dx, dy), dz);
-		if (alpha < 1f){
-			tmp.scl(-alpha);
-		//	position.set(oldPosition).add(tmp.x, tmp.y, 0);
-			//Gdx.app.log(TAG, "move"+alpha);
-		}
-		if (dx < 1f)
-			position.x = oldPosition.x + tmp.x;
+		tmp.set(position.x, 0, position.z).sub(oldPosition.x, 0, oldPosition.z);
+
+        {
+            {
+
+                if (tmp.len2() > speedLimit*speedLimit){
+                    //tmp.set(position.x, position.y, position.z).sub(oldPosition.x, oldPosition.y, oldPosition.z);
+
+                    position.set(oldPosition.x, position.y, oldPosition.z).add(tmp.nor().scl(speedLimit));
+
+                }
+
+            }
+        }
+
+        /*if (move.jumping){
+            //tmp.set(position.x, position.y, position.z).sub(oldPosition.x, oldPosition.y, oldPosition.z);
+            if (tmp.len2() > jumpSpeed*jumpSpeed){
+                position.set(oldPosition.x, position.y, oldPosition.z).add(tmp.nor().scl(jumpSpeed));
+            }
+
+        }*/
+
+
+
+
 	
 	}
 	
@@ -89,76 +83,73 @@ public class MovementSystem extends EntityProcessingSystem {
 		Vector3 oldPosition = physMap.get(e).oldPosition;
 		Move c = moveMap.get(e);
 		AABBBody body = bodyMap.get(e);
-		
-		if (c.jumpQueued){
-			//Vector3 position = entity.get(Position.class).pos;
-			//if (body.onGround)
+
+        if (c.jumping)
+            if (  !c.jumpQueued){
+                c.jumping = false;
+                //Gdx.app.log(TAG, "jump"+c.jumpQueued + body.onGround);
+            }
+        boolean startOfJump = false;
+		if (c.jumpQueued && body.onGround && !c.jumping){
 			boolean left = c.rotation > 90 && c.rotation < 270;
-			position.set((left?-c.speedLimit:c.speedLimit), c.speedLimit*c.jumpStrength, 0).add(oldPosition);
-			c.jumpQueued = false;
-			
-		} else 
-		
-		if (c.moving){
-			move(c.rotation, c.speed, c.speedLimit, c.speedLimit * c.speedLimit, c.jumpStrength, position, oldPosition, c);
-		} else if (!c.moving && body.onGround){//apply friction
+			position.y = c.moving?c.jumpStrengthMoving:c.jumpStrength
+            + oldPosition.y;
+            tmp.set(position).sub(oldPosition);
+            tmp.nor().scl(c.moving?c.jumpStrengthMoving:c.jumpStrength);
+            position.set(oldPosition).add(tmp);
+            c.jumpEndTick = e.tick + (int)(c.jumpTime / e.getWorld().getDelta());
+			c.jumping = true;
+            body.onGround = false;
+            //Gdx.app.log(TAG, "start jump"+c.jumpQueued + body.onGround);
+            startOfJump = true;
+        }
+
+        if (c.moving){
+            move(c.rotation, c.moveAcceleration, c.moveSpeed, c.moveSpeed * c.moveSpeed, c.jumpStrength, position, oldPosition, c);
+        }
+        if (c.jumping){
+            continuousJump(position, c);
+            //Gdx.app.log(TAG, "force");
+        }
+        if (!c.moving && body.onGround){//apply friction
 			//Gdx.app.log(TAG, "friction");
 			tmp.set(position).sub(oldPosition);
 			tmp.scl(.5f);
-			//position.sub(tmp);
+			position.sub(tmp);
 		}
-		
-		if (c.jumping){
-			continuousJump(position, oldPosition, c.speedLimit, c.jumpStrength);
-			if (c.jumpEndTick <= EngineScreen.tick){
-				c.jumping = false;
-				Gdx.app.log(TAG, "jump false");
-			}
-		}
-		if (c.jumpEndTick > EngineScreen.tick){
+
+
+        /*if (c.jumping)
+            if ((!c.jumpQueued )){
+                c.jumping = false;
+
+                Gdx.app.log(TAG, "jump"+c.jumpQueued + body.onGround);
+
+            }*/
+        if (c.jumping && body.onGround && body.wasOnGround){
+
+            c.jumping = false;
+        }
+		/*if (c.jumpEndTick > e.tick && !c.jumping){
 			c.jumping = true;
-		}
-		
-		/*if (c.jumping){
-			if (c.jumpEndTick <= EngineScreen.tick){
-				c.jumping = false;
-				Gdx.app.log(TAG, "reset");
-			}
-			else 
-				forceJump(position, oldPosition, c.jumpForce);
-		} else if (c.jumpEndTick > EngineScreen.tick){
-			continuousJump(position, oldPosition, c.speedLimit, c.jumpStrength);
-			Gdx.app.log(TAG, "continuous");
-			c.jumping = true;
-		}*/
-		
+            Gdx.app.log(TAG, "force on");
+
+        }*/
+
+
+
 		
 	}
 
 
-	private void continuousJump(Vector3 position, Vector3 oldPosition, float speedLimit, float jumpSpeed) {
-		position.y = oldPosition.y + speedLimit*jumpSpeed;
-		tmp.set(oldPosition).sub(position);
-		//tmp.set(oldPosition).sub(position);
-		float 
-		vx = Math.abs(tmp.x)
-		, vy = Math.abs(tmp.y)
-		, vz = Math.abs(tmp.z);
-		
-		float dx = speedLimit/vx
-				, dy = (speedLimit*jumpSpeed)/vy
-				, dz = speedLimit / vz;
-		//if (vy < 0) 
-			//dy = 2f;
+	private void continuousJump(Vector3 position, Move m) {
+        //if (oldPosition.y - position.y < speedLimit * jumpSpeed)
+        if (m.moving)
+            position.y += m.jumpForceMoving;
+		else
+            position.y += m.jumpForce;
+        //Gdx.app.log(TAG, "continuious jkumpj");
 
-		float alpha = Math.min(Math.min(dx, dy), dz);
-		if (alpha < 1f){
-			tmp.scl(-alpha);
-		//	position.set(oldPosition).add(tmp.x, tmp.y, 0);
-			//Gdx.app.log(TAG, "move"+alpha);
-		}
-		if (dx < 1f)
-			position.x = oldPosition.x + tmp.x;
 	}
 	
 

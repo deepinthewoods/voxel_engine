@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Array;
 public class Subject {
     private static final String TAG = "subject";
     private Array<Observer> observers = new Array<Observer>();
-	public enum Event {TEST, POSITION_CHANGE, BUTTON_PRESSED, SLIDER_PRESSED, ROTATION_CHANGE, ACCUMULATE_INFLUENCE};
+	public enum Event {TEST, POSITION_CHANGE, BUTTON_IS_PRESSED, SLIDER_PRESSED, ROTATION_CHANGE, BUTTON_RELEASE, ACCUMULATE_INFLUENCE};
 	public void add(Observer obs){
 		observers.add(obs);
 	}

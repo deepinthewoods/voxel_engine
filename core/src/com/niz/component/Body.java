@@ -8,7 +8,9 @@ public class Body implements Component {
 
 	
 	public boolean onGround = false, onGroundBuffer0, onGroundBuffer1;//, wasOnGround = false;
-	@Override
+    public boolean wasOnGround;
+
+    @Override
 	public void reset() {
 		// TODO Auto-generated method stub
 		

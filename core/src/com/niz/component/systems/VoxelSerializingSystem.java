@@ -56,23 +56,24 @@ public class VoxelSerializingSystem extends EntitySystem {
 
     @Override
     protected void processEntities(Array<Entity> entities) {
-        for (int i = 0; i < finishedRead.size; i++){
-            VoxelChunk c = finishedRead.get(i);
-            //Gdx.app.log(TAG, "finished reading"+c.offset);
-            c.setValid(true);
-            vw.addChunk(c);
-            inProgress.remove(hash(c));
+        synchronized (lock) {
+            for (int i = 0; i < finishedRead.size; i++) {
+                VoxelChunk c = finishedRead.get(i);
+                //Gdx.app.log(TAG, "finished reading"+c.offset);
+                c.setValid(true);
+                vw.addChunk(c);
+                inProgress.remove(hash(c));
+            }
+            finishedRead.clear();
+
+            for (int i = 0; i < finishedWrite.size; i++) {
+                VoxelChunk c = finishedWrite.get(i);
+                //vw.setValid(c);
+
+                inProgress.remove(hash(c));
+            }
+            finishedWrite.clear();
         }
-        finishedRead.clear();
-
-        for (int i = 0; i < finishedWrite.size; i++){
-            VoxelChunk c = finishedWrite.get(i);
-            //vw.setValid(c);
-
-            inProgress.remove(hash(c));
-        }
-        finishedWrite.clear();
-
 
 
 

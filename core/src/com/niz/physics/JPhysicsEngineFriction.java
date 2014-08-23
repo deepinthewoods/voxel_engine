@@ -6,14 +6,12 @@ public class JPhysicsEngineFriction extends JPhysicsEngine {
 
 	private static final String TAG = "jphysics";
 
+    public JPhysicsEngineFriction(int constraintReps, int maxParticle, float timeStep) {
+        super(constraintReps, maxParticle, timeStep);
+    }
 
-	public JPhysicsEngineFriction(int constraintReps, int maxParticle,
-			Vector3[] vectors) {
-		super(constraintReps, maxParticle, vectors);
-	}
 
-	
-	@Override
+    @Override
 		public void satisfyConstraints() {
 			for (int r = 0; r < constraintRepetitions; r++){
 				for(int i=0; i<particleTotal; i++) {

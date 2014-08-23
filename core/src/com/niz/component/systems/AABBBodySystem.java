@@ -41,11 +41,10 @@ public class AABBBodySystem extends EntityProcessingSystem {
 	private ComponentMapper<Position> posMap;
 	private ComponentMapper<Physics> physMap;
 	private ComponentMapper<AABBBody> bodyMap;
-	
+    private int smallestYIndex;
 
-	
-	
-	public AABBBodySystem(){
+
+    public AABBBodySystem(){
 		super(Aspect.getAspectForAll(Position.class, Physics.class, AABBBody.class));
 		
 		
@@ -61,15 +60,17 @@ public class AABBBodySystem extends EntityProcessingSystem {
         Vector3 position = pos.pos;
         int plane = pos.plane;
 		//if (oldPosition.dst2(position) > .25f)
-		//	Gdx.app.log(TAG, "TUNNELLL");
-		//if (!VoxelChunk.blockDef(voxelWorld.get(position)).isSolid){
+			//Gdx.app.log(TAG, "position "+position + "  "+ voxelWorld.get(position, plane));
+		//if (voxelWorld.get(position, plane) != 0)
+            //Gdx.app.log(TAG, "solid");
+
 		//	body.onGround = false;
 			//return false;
 		//} else {
 		//	body.onGround = true;
 		//	Gdx.app.log(TAG, "on ground");
 		//}
-	//	body.wasOnGround = body.onGround;
+		body.wasOnGround = body.onGround;
 	//	body.wasOnWall = body.onWall;
 		body.onGround = false;
 		//body.onWall = false;
@@ -90,6 +91,7 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		if (tmp.y < 0){
 			yo = -body.ys;
 			yside = BlockDefinition.TOP;
+            //Gdx.app.log(TAG, "T");
 		}
 			
 		if (tmp.z < 0){
@@ -102,7 +104,13 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		vectorCount += getAdjustedPosition(pos, yside, xside, zside,  returnVectors[vectorCount], body, voxelWorld);
 		vectorCount += getAdjustedPosition(pos, yside, zside, xside,  returnVectors[vectorCount], body, voxelWorld);
 		//boolean hitGround = ;
+
 		int yCount = vectorCount;
+        if (yCount > 0){
+            if (yCount == 1) smallestYIndex = 0;
+            else smallestYIndex = returnVectors[0].dst2(position) < returnVectors[1].dst2(position)?0:1;
+            position.add(returnVectors[smallestYIndex]);
+        }
 		//if (vectorCount != 0) body.onGround = true;
 		//int vectorProgressAfterYStep = vectorCount;
 		vectorCount += getAdjustedPosition(pos, xside, yside, zside,  returnVectors[vectorCount], body, voxelWorld);
@@ -120,13 +128,16 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		for (int i = 0; i < vectorCount; i++){
 
            // Gdx.app.log(TAG, "ret "+returnVectors[i]+"   ys"+yside);
-			if (returnVectors[i].len2() < dist2){//could be distance to delta
+			if (returnVectors[i].dst2(position) < dist2){//could be distance to delta
 				smallestIndex = i;//tmp.set(returnVectors[i]);
-				dist2 = returnVectors[i].len2();
-				
-				
+                if (i < yCount) smallestYIndex = i;
+				dist2 = returnVectors[i].dst2(position);
+                //Gdx.app.log(TAG, "ret "+smallestIndex);
+
 			}
-		}	
+		}
+
+
 		if (vectorCount > 0){
 			if (smallestIndex >= yCount){
 				Gdx.app.log(TAG, "c" +
@@ -138,10 +149,12 @@ public class AABBBodySystem extends EntityProcessingSystem {
 				if (onGroundBlock){
 					body.onGround = true;
 				}
+
 			
 			} else {
-				Gdx.app.log(TAG, "ground "+ returnVectors[smallestIndex] +"  count "+vectorCount );
-				position.add(returnVectors[smallestIndex]);
+				//Gdx.app.log(TAG, "ground "+ returnVectors[smallestIndex] +"  count "+vectorCount + " index "+smallestIndex
+                //+ " position "+position);
+				//position.add(returnVectors[smallestIndex]);
 				body.onGround = true;
 			}
 		}
@@ -183,15 +196,24 @@ public class AABBBodySystem extends EntityProcessingSystem {
 				, fz = MathUtils.floor( start.z) - MathUtils.floor(position.z);
 				;
 		int cx = fx, cy = fy, cz = fz;;
-		for (int x = (int) start.x; x <= end.x; x++, cx++){
-			cy = fy;
-			cz = fz;
-			//Gdx.app.log(TAG, "x"+x);
-			for (int y = (int) start.y; y <= end.y; y++, cy++){
+        int
+                ex = MathUtils.floor(end.x)
+                , ey = MathUtils.floor(end.y)
+                , ez = MathUtils.floor(end.z)
+                , sx = MathUtils.floor(start.x)
+                , sy = MathUtils.floor(start.y)
+                , sz = MathUtils.floor(start.z);
+        //if (side == BlockDefinition.TOP)Gdx.app.log(TAG, "start "+start + "   end "+end);
+        for (int x = sx; x <= ex; x++, cx++){
+            cy = fy;
+            cz = fz;
+			for (int y = sy; y <= ey; y++, cy++){
 				cz = fz;
 				//Gdx.app.log(TAG, "y"+y);
-				for (int z = (int) start.z; z <= end.z; z++, cz++){
-					//cx = 0;cy = 0;cz = 0;
+				for (int z = sz; z <= ez; z++, cz++){
+                    //if (side == BlockDefinition.TOP)Gdx.app.log(TAG, "x"+x+"y"+y+"z"+z);
+
+                    //cx = 0;cy = 0;cz = 0;
 					tStart.set(start);
 					tStart.add(v);
 					tStart.sub(x,y,z)

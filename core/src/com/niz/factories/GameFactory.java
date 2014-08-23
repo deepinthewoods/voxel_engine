@@ -20,11 +20,11 @@ import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
+import com.niz.EngineScreen;
 import com.niz.actions.ActionList;
 import com.niz.component.*;
 import com.niz.component.systems.*;
 import com.niz.ui.edgeUI.EdgeUI;
-import com.niz.ui.edgeUI.EditorUI;
 import com.niz.ui.edgeUI.TestUI;
 import com.artemis.EntityDefArray;
 
@@ -58,6 +58,7 @@ public abstract class GameFactory {
 
         systemDef = json.fromJson(SystemDefinition.class, file);
         systemDef.setJson(json);
+        systemDef.setSystem(FPSInputSystem.class);
         systemDef.setSystem(CameraSystem.class);
         systemDef.setSystem(CameraUpVectorSystem.class);
         systemDef.setSystem(GraphicsSystem.class);
@@ -68,11 +69,12 @@ public abstract class GameFactory {
         systemDef.setSystem( ActionSystem.class);
         systemDef.setSystem( MovementSystem.class);
 
+        systemDef.setSystem(PositionSystem.class);
 
         systemDef.setSystem(VoxelSystem.class);
         systemDef.setSystem(VoxelEditingSystem.class);
 
-        systemDef.setSystem(VoxelMeshSystem.class);
+        systemDef.setDrawSystem(VoxelMeshSystem.class);
         systemDef.setSystem(VoxelSerializingSystem.class);
 
 
@@ -84,7 +86,7 @@ public abstract class GameFactory {
         systemDef.setSystem(VelocityPredictionSystem.class);
         systemDef.setDrawSystem(VoxelRenderingSystem.class);
         systemDef.setDrawSystem(BlockHighlightRenderingSystem.class);
-        systemDef.setSystem(VoxelGenerateAroundPlayerSystem.class);
+        systemDef.setDrawSystem(VoxelGenerateAroundPlayerSystem.class);
         systemDef.setDrawSystem(ModelRenderingSystem.class );
         systemDef.setSystem(BrainSystem.class);
         systemDef.setDrawSystem( DebugVectorSystem.class);
@@ -313,10 +315,12 @@ public abstract class GameFactory {
         world.addEntity(e);
 
         Entity player = world.createEntity();
+        EngineScreen.player = player;
+        //if (true)throw new GdxRuntimeException("sdfjk");
         pos = player.add(Position.class);
         pos.pos.set(8,38,8);
         player.add(Player.class);
-        //player.add(Physics.class);
+        player.add(Physics.class);
 
         player.add(AABBBody.class).ys = .75f;
         player.add(Move.class);
@@ -325,8 +329,8 @@ public abstract class GameFactory {
         player.add(PositionRollingAverage.class).size = 1;//rolling average of position
         player.add(UpVectorRollingAverage.class).size = 1;
         player.add(UpVector.class).up.set(0,1,0);
-
-
+        player.add(ActionList.class);
+        player.add(Move.class);
         world.addEntity(player);
 
 

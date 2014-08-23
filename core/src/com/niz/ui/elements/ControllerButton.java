@@ -33,7 +33,7 @@ public class ControllerButton extends UIElement{
             public void act(float delta){
                 super.act(delta);
                 if (this.isPressed()){
-                    subjects[0].notify(null, Subject.Event.BUTTON_PRESSED, c);
+                    subjects[0].notify(null, Subject.Event.BUTTON_IS_PRESSED, c);
                 }
             }
         };

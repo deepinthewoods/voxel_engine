@@ -3,6 +3,7 @@ package com.artemis;
 import com.artemis.managers.ComponentManager;
 import com.artemis.managers.EntityManager;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BinaryHeap;
 import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
@@ -13,7 +14,7 @@ import com.badlogic.gdx.utils.Pool.Poolable;
  * @author Arni Arent
  * 
  */
-public final class Entity implements Poolable {
+public final class Entity  implements Poolable {
 
     /**
      * The internal id for this entity within the framework. No other entity
@@ -28,6 +29,12 @@ public final class Entity implements Poolable {
     protected EntityManager entityManager;
     protected ComponentManager componentManager;
 
+    public long tick;
+
+    public void setTick(int t){
+        if (tick == t) return;
+        tick = t;
+    }
     /**
      * Create an entity for the specified world with the specified id.
      * @param world World this entity belongs to.
@@ -42,6 +49,7 @@ public final class Entity implements Poolable {
      * @param world World this entity belongs to.
      */
     public Entity(World world) {
+
         this.world = world;
         this.entityManager = world.getEntityManager();
         this.componentManager = world.getComponentManager();
@@ -83,8 +91,7 @@ public final class Entity implements Poolable {
     /**
      * Add a component to this entity.
      * 
-     * @param component to add to this entity
-     * 
+     *
      * @return this entity for chaining.
      */
     public Entity addComponent(Component component) {
@@ -253,4 +260,6 @@ public final class Entity implements Poolable {
     public <T extends Component> T get(Class<T> clas) {
         return getComponent(clas);
     }
+
+
 }

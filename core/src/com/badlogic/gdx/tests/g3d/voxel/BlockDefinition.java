@@ -1,5 +1,6 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher.VoxelFace;
@@ -57,40 +58,63 @@ public class BlockDefinition {
 	}
 	
 	private boolean collide(int side, float x, float y, float z, Vector3 v) {
-		switch (side){
-		
-			case BOTTOM:if (isSolid){
-				v.add(0,-y,0).add(normals[side]);//0
-				return true;
-			}
-			
-			case LEFT:if (isSolid){
-				v.add(-x,0,0).add(normals[side]);
-				return true;
-			}
-			
-			case BACK:if (isSolid){
-				v.add(0,0,-z).add(normals[side]);
-				return true;//z-1;//0;//-z;
-			}
-			
-			case TOP:if (isSolid){
-				v.add(0,1-y,0).add(normals[side]);
-				return true;
-			}
-			
-			case RIGHT:if (isSolid){
-				v.add(1-x,0,0).add(normals[side]);
-				return true;
-			}
-			case FRONT:if (isSolid){
-				v.add(0,0,1-z).add(normals[side]);
-				return true;
-			}
-		
-		}
-		return false;
-		
+        switch (side){
+
+            case BOTTOM:
+
+                //Gdx.app.log(TAG, "collide bottom "+v);
+                if (isSolid){
+                    v.add(0,-y,0).add(normals[side]);//0
+
+                    return true;
+                }
+                break;
+
+            case LEFT:
+                if (isSolid){
+                    v.add(-x,0,0).add(normals[side]);
+                    //Gdx.app.log(TAG, "collide left "+v);
+                    return true;
+                }
+                break;
+
+            case BACK:
+
+                if (isSolid){
+                    v.add(0,0,-z).add(normals[side]);
+                    //Gdx.app.log(TAG, "collide baqc "+v);
+                    return true;//z-1;//0;//-z;
+                }
+                break;
+
+            case TOP:
+                //Gdx.app.log(TAG, "collide top notsolid "+v);
+                if (isSolid){
+                    v.add(0,1-y,0).add(normals[side]);
+                    //Gdx.app.log(TAG, "collide top"+v);
+                    return true;
+                }
+                break;
+
+            case RIGHT:
+                if (isSolid){
+                    v.add(1-x,0,0).add(normals[side]);
+                    //Gdx.app.log(TAG, "collide r "+v);
+                    return true;
+                }
+                break;
+
+            case FRONT:
+                if (isSolid){
+                    v.add(0,0,1-z).add(normals[side]);
+                    //Gdx.app.log(TAG, "collide fr "+v);
+                    return true;
+                }
+                break;
+
+        }
+        return false;
+
 	}
 	public boolean collideLineSegment(Vector3 tStart, Vector3 tEnd, int side,
 			Vector3 v) {
@@ -121,7 +145,7 @@ public class BlockDefinition {
 
         for (int i = 0; i < 6; i++){
             reflectedNormals[i] = new Vector3(normals[i]);
-            normals[i].scl(.00001f);
+            normals[i].scl(.0001f);
             normals[i+6] = new Vector3(normals[i]).scl(-1);
         }
 

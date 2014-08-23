@@ -44,7 +44,7 @@ public class SetSpeedMovementSystem extends EntityProcessingSystem {
 		position.x = tmp.x;
 		position.z = tmp.z;
 		
-		//Gdx.app.log(TAG, "move"+move.speed);
+		//Gdx.app.log(TAG, "move"+move.moveAcceleration);
 	}
 	
 	
@@ -57,7 +57,7 @@ public class SetSpeedMovementSystem extends EntityProcessingSystem {
 		Move c = moveMap.get(e);
 		AABBBody body = bodyMap.get(e);
 		if (c.moving){
-			move(c.rotation, c.speed, position, oldPosition, c);
+			move(c.rotation, c.moveAcceleration, position, oldPosition, c);
 		} else if (!c.moving && body.onGround){//apply friction
 			//Gdx.app.log(TAG, "friction");
 			tmp.set(position).sub(oldPosition);
