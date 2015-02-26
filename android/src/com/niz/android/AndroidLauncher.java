@@ -9,13 +9,15 @@ import com.niz.DeviceCameraControl;
 import com.niz.NizMain;
 
 public class AndroidLauncher extends AndroidApplication {
+    private int origWidth;
+    private int origHeight;
     @Override
     protected void onCreate (Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
-        cfg.useGL20 = false;
+        //cfg.useGL20 = false;
         // we need to change the default pixel format - since it does not include an alpha channel
         // we need the alpha channel so the camera preview will be seen behind the GL scene
         cfg.r = 8;
@@ -24,7 +26,7 @@ public class AndroidLauncher extends AndroidApplication {
         cfg.a = 8;
 
         DeviceCameraControl cameraControl = new AndroidDeviceCameraController(this);
-        initialize(new NizMain(cameraControl), cfg);
+        initialize(new NizMain(new AndroidCoreInfo(), cameraControl), cfg);
 
         if (graphics.getView() instanceof SurfaceView) {
             SurfaceView glView = (SurfaceView) graphics.getView();
@@ -36,6 +38,26 @@ public class AndroidLauncher extends AndroidApplication {
         // keep the original screen size
         origWidth = graphics.getWidth();
         origHeight = graphics.getHeight();
+    }
+
+    public void post(Runnable r) {
+        handler.post(r);
+    }
+
+    public void setFixedSize(int width, int height) {
+        if (graphics.getView() instanceof SurfaceView) {
+            SurfaceView glView = (SurfaceView) graphics.getView();
+            glView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+            glView.getHolder().setFixedSize(width, height);
+        }
+    }
+
+    public void restoreFixedSize() {
+        if (graphics.getView() instanceof SurfaceView) {
+            SurfaceView glView = (SurfaceView) graphics.getView();
+            glView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+            glView.getHolder().setFixedSize(origWidth, origHeight);
+        }
     }
 }
 

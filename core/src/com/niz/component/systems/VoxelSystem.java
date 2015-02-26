@@ -39,7 +39,7 @@ public class VoxelSystem extends EntitySystem {
         //mesher = new GreedyMesher(batch);
 
         voxelWorld = new VoxelWorld(1000
-                , 16, 16, 4
+                , 8, 8, 4
 				);
        // Gdx.app.log(TAG, "material"+voxelWorld.m);
 
@@ -58,7 +58,9 @@ public class VoxelSystem extends EntitySystem {
         if (entities.size == 0) return;
         //voxelWorld.makeMesh(), mesher, batch);
         VoxelChunk c = voxelWorld.getChunkFromVoxel(1, 1, 1, 0);
-        //Gdx.app.log(TAG, "voxelHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+        for (int i = 0; i < 100; i++) {
+            //Gdx.app.log(TAG, "voxelH"+voxelWorld.get(0, i, 0, 0));
+        }
 
         //if (c != null)
             //for (int p = -20; p < 20; p++)

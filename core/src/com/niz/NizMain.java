@@ -37,7 +37,11 @@ public class NizMain extends Game {
         getScreen().dispose();
     }
 
-    public NizMain(CoreInfo coreInfo){
+    public NizMain(CoreInfo coreInfo, DeviceCameraControl cameraControl){
         this.coreInfo = coreInfo;
+
     }
+
+
+
 }

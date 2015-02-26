@@ -21,7 +21,7 @@ allprojects {
     version = "1.0"
     ext {
         appName = "NizEngine"
-        gdxVersion = "1.2.1-SNAPSHOT"
+        gdxVersion = "1.4.1"
         roboVMVersion = "0.0.11"
     }
     

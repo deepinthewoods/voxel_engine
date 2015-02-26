@@ -37,13 +37,17 @@ public class ButtonPad extends UIElement {
         table.add(fwd_btn);
         table.add(new Actor());
         table.row();
-        Actor l_btn = new TextButton("F", skin);
+        Actor l_btn = new TextButton("F", skin){
+
+
+        };
         l_btn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
                 subjects[0].notify(null, Subject.Event.BUTTON_IS_PRESSED, input_l);
             }
         });;
+
         table.add(l_btn);
         Actor middle_btn = new TextButton("F", skin);
         middle_btn.addListener(new ChangeListener() {

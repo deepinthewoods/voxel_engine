@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.tests.g3d.voxel.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
@@ -73,7 +74,7 @@ public class VoxelMeshSystem extends EntitySystem
 
                         if (inProgress.containsKey(chunk.index)){
                             inProgress.get(chunk.index).runn.restart();
-                            //Gdx.app.log(TAG, "MESH RESTART!!!!!!!!!!!!!!");
+                            Gdx.app.log(TAG, "MESH RESTART!!!!!!!!!!!!!!");
                             continue;
                         }
                         thread.runn.begin(chunk, voxelWorld);
@@ -101,7 +102,10 @@ public class VoxelMeshSystem extends EntitySystem
         }
     }
 
-    @Override
+    
+    
+
+	@Override
     public void initialize() {
         voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
         posM = world.getMapper(Position.class);

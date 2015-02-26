@@ -2,9 +2,7 @@ package com.badlogic.gdx.tests.g3d.voxel;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntIntMap;
@@ -62,6 +60,20 @@ public class TextureCreationBatcher implements IVoxelPreprocessor, MeshBatch {
         pixmaps.clear();
 
         return 0;
+    }
+    @Override
+    public Mesh newMesh(int size) {
+        Mesh mesh = new Mesh(true,
+                size,
+                size / 4 * 6,
+                VertexAttribute.Position(),
+                VertexAttribute.Color(),
+                VertexAttribute.TexCoords(0),
+                new VertexAttribute(VertexAttributes.Usage.Generic, 2, "a_texStart")
+        );
+
+
+        return mesh;
     }
 
     @Override

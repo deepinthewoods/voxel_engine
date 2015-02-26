@@ -488,4 +488,59 @@ public class ColorPicker extends Table {
         return new float[] { h / 360.0f, s, l };
     }
 
+    public static void RGBtoHSL(Color color, float[] hsl) {
+        float r = color.r;
+        float g = color.g;
+        float b = color.b;
+
+        // Minimum and Maximum RGB values are used in the HSL calculations
+        float min = Math.min(r, Math.min(g, b));
+        float max = Math.max(r, Math.max(g, b));
+
+        // Calculate the Hue
+        float h = 0;
+
+        if (max == min)
+            h = 0;
+        else if (max == r)
+            h = ((60 * (g - b) / (max - min)) + 360) % 360;
+        else if (max == g)
+            h = (60 * (b - r) / (max - min)) + 120;
+        else if (max == b)
+            h = (60 * (r - g) / (max - min)) + 240;
+
+        // Calculate the Luminance
+        float l = (max + min) / 2;
+
+        // Calculate the Saturation
+        float s = 0;
+
+        if (max == min)
+            s = 0;
+        else if (l <= .5f)
+            s = (max - min) / (max + min);
+        else
+            s = (max - min) / (2 - max - min);
+
+        hsl[0] = h / 360.0f;
+        hsl[1] =  s;
+        hsl[2] = l;
+    }
+
+    public static void HSLtoRGB(float h, float s, float l, Color color) {
+        float q = 0;
+
+        if (l < 0.5)
+            q = l * (1 + s);
+        else
+            q = (l + s) - (s * l);
+
+        float p = 2 * l - q;
+
+        float r = Math.max(0, HueToRGB(p, q, h + (1.0f / 3.0f)));
+        float g = Math.max(0, HueToRGB(p, q, h));
+        float b = Math.max(0, HueToRGB(p, q, h - (1.0f / 3.0f)));
+
+        color.set(r,g,b,1f);
+    }
 }

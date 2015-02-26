@@ -5,8 +5,6 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
@@ -20,8 +18,10 @@ public class AABBBodySystem extends EntityProcessingSystem {
 	private static final String TAG = "aabb body";
 
 	private static final float THRESHOLD = 0.00005f;;
-	
-	private static Vector3 tmp = new Vector3(), tmpV = new Vector3();;	
+    private static final float ONE =    1.00000001f;
+    private static final float NOUGHT = 0.00000001f;
+
+    private static Vector3 tmp = new Vector3();
 	//private VoxelWorld voxelWorld;
 
 	int normalCount;
@@ -56,228 +56,345 @@ public class AABBBodySystem extends EntityProcessingSystem {
 		bodyMap = world.getMapper(AABBBody.class);
 	}
 	
-	public boolean onTick(Position pos, Vector3 oldPosition, AABBBody body, VoxelWorld voxelWorld) {
-        Vector3 position = pos.pos;
-        int plane = pos.plane;
-		//if (oldPosition.dst2(position) > .25f)
-			//Gdx.app.log(TAG, "position "+position + "  "+ voxelWorld.get(position, plane));
-		//if (voxelWorld.get(position, plane) != 0)
-            //Gdx.app.log(TAG, "solid");
 
-		//	body.onGround = false;
-			//return false;
-		//} else {
-		//	body.onGround = true;
-		//	Gdx.app.log(TAG, "on ground");
-		//}
-		body.wasOnGround = body.onGround;
-	//	body.wasOnWall = body.onWall;
-		body.onGround = false;
-		//body.onWall = false;
-        //Gdx.app.log(TAG, "collisions"+pos.pos);
-		dir.set(position).sub(oldPosition);
-		int xside = BlockDefinition.LEFT, yside = BlockDefinition.BOTTOM, zside = BlockDefinition.BACK;
-		//if (def.collide(voxel, position)){
-		tmp.set(position);
-		tmp.sub(oldPosition);
-			//boolean r = false, t = false, f = false;
-		float xo = body.xs, yo = body.ys, zo = body.zs;
-		
-		if (tmp.x < 0){
-			xo = -body.xs;
-			xside = BlockDefinition.RIGHT;
-		} 
-		
-		if (tmp.y < 0){
-			yo = -body.ys;
-			yside = BlockDefinition.TOP;
-            //Gdx.app.log(TAG, "T");
-		}
-			
-		if (tmp.z < 0){
-			zo = -body.zs;
-			zside = BlockDefinition.FRONT;
-		}
-		int vectorCount = 0;
-	
-
-		vectorCount += getAdjustedPosition(pos, yside, xside, zside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(pos, yside, zside, xside,  returnVectors[vectorCount], body, voxelWorld);
-		//boolean hitGround = ;
-
-		int yCount = vectorCount;
-        if (yCount > 0){
-            if (yCount == 1) smallestYIndex = 0;
-            else smallestYIndex = returnVectors[0].dst2(position) < returnVectors[1].dst2(position)?0:1;
-            position.add(returnVectors[smallestYIndex]);
-        }
-		//if (vectorCount != 0) body.onGround = true;
-		//int vectorProgressAfterYStep = vectorCount;
-		vectorCount += getAdjustedPosition(pos, xside, yside, zside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(pos, xside, zside, yside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(pos, zside, yside, xside,  returnVectors[vectorCount], body, voxelWorld);
-		vectorCount += getAdjustedPosition(pos, zside, xside, yside,  returnVectors[vectorCount], body, voxelWorld);
-		//if (vectorProgressAfterYStep != vectorCount) body.onWall = true;
-	
-		
-		float dist2 = 1000000000;
-		int smallestIndex = 0;
-		//tmp.set(position);
-		tmp.set(oldPosition).sub(position);
-		//Gdx.app.log(TAG, "co staart");
-		for (int i = 0; i < vectorCount; i++){
-
-           // Gdx.app.log(TAG, "ret "+returnVectors[i]+"   ys"+yside);
-			if (returnVectors[i].dst2(position) < dist2){//could be distance to delta
-				smallestIndex = i;//tmp.set(returnVectors[i]);
-                if (i < yCount) smallestYIndex = i;
-				dist2 = returnVectors[i].dst2(position);
-                //Gdx.app.log(TAG, "ret "+smallestIndex);
-
-			}
-		}
+	Vector3[] normals = {new Vector3(), new Vector3(), new Vector3()};
 
 
-		if (vectorCount > 0){
-			if (smallestIndex >= yCount){
-				Gdx.app.log(TAG, "c" +
-						"wall "+ returnVectors[smallestIndex] +"  count"+vectorCount+ "dist "+dist2);
-				position.add(returnVectors[smallestIndex]);
-			
-				body.onWall = true;
-				boolean onGroundBlock = VoxelChunk.blockDef(voxelWorld.get(position.x, position.y - body.ys-.1f, position.z, plane)).isSolid;
-				if (onGroundBlock){
-					body.onGround = true;
-				}
-
-			
-			} else {
-				//Gdx.app.log(TAG, "ground "+ returnVectors[smallestIndex] +"  count "+vectorCount + " index "+smallestIndex
-                //+ " position "+position);
-				//position.add(returnVectors[smallestIndex]);
-				body.onGround = true;
-			}
-		}
-		if (body.offWall){
-			body.onWall = false;
-			body.offWall = false;
-		}
-		//Gdx.app.log(TAG, "gr"+body.onGround+"  ,  "+body.onWall);// + "  pos "+position + "  oldPos "+oldPosition);
-		return false;
-		
-		
-		
-		
-	}
-	private int getAdjustedPosition(Position position, int sidea, int sideb,
-			int sidec, Vector3 v, AABBBody body, VoxelWorld voxelWorld) {
-		//Vector3 v = vectors[vIndex];
-		v.set(0,0,0);
-		boolean done = false;
-		int vadd = collideLine(position, sidea, v, body, voxelWorld);
-		if (vadd != 0){
-			done = true;
-			
-		}
-		vadd = collideLine(position, sideb, v, body, voxelWorld);
-		if (vadd != 0) done = true;
-		vadd = collideLine(position, sidec, v, body, voxelWorld);
-		if (vadd != 0) done = true;
-			return done?1:0;
-	}
-	private int collideLine(Position pos, int side, Vector3 v, AABBBody body, VoxelWorld voxelWorld) {
-        Vector3 position = pos.pos;
-        int plane = pos.plane;
-		
-		bounds(position, side, start, end, v, body);
-		int vectorsAdded = 0;
-		int fx = MathUtils.floor( start.x) - MathUtils.floor(position.x)
-				, fy = MathUtils.floor( start.y) - MathUtils.floor(position.y)
-				, fz = MathUtils.floor( start.z) - MathUtils.floor(position.z);
-				;
-		int cx = fx, cy = fy, cz = fz;;
-        int
-                ex = MathUtils.floor(end.x)
-                , ey = MathUtils.floor(end.y)
-                , ez = MathUtils.floor(end.z)
-                , sx = MathUtils.floor(start.x)
-                , sy = MathUtils.floor(start.y)
-                , sz = MathUtils.floor(start.z);
-        //if (side == BlockDefinition.TOP)Gdx.app.log(TAG, "start "+start + "   end "+end);
-        for (int x = sx; x <= ex; x++, cx++){
-            cy = fy;
-            cz = fz;
-			for (int y = sy; y <= ey; y++, cy++){
-				cz = fz;
-				//Gdx.app.log(TAG, "y"+y);
-				for (int z = sz; z <= ez; z++, cz++){
-                    //if (side == BlockDefinition.TOP)Gdx.app.log(TAG, "x"+x+"y"+y+"z"+z);
-
-                    //cx = 0;cy = 0;cz = 0;
-					tStart.set(start);
-					tStart.add(v);
-					tStart.sub(x,y,z)
-					//.sub(cx,cy,cz)
-					;
-					tEnd.set(end)
-					.sub(x,y,z)
-					.add(v)
-					//.sub(cx,cy,cz)
-					;
-					int voxel = voxelWorld.get(x,y,z, plane);
-					
-					//
-					if (VoxelChunk.blockDef(voxel).collideLineSegment(tStart, tEnd, side, v)){
-						vectorsAdded = 1;
-					}
-					
-				}
-			}
-		}
-		return vectorsAdded;
-	}
-	
-	private void bounds(Vector3 position, int side, Vector3 start, Vector3 end, Vector3 offset, AABBBody c) {
-		switch (side){
-
-			case BlockDefinition.BOTTOM:
-				start.set(position).add(offset).add(-c.xs, c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, c.zs);
-				break;
-			case BlockDefinition.TOP:
-				start.set(position).add(offset).add(-c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, -c.ys, c.zs);
-				break;
-			case BlockDefinition.RIGHT:
-				start.set(position).add(offset).add(-c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(-c.xs, c.ys, c.zs);
-				break;
-			case BlockDefinition.LEFT:
-				start.set(position).add(offset).add(c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, c.zs);
-				break;
-			case BlockDefinition.FRONT:
-				start.set(position).add(offset).add(-c.xs, -c.ys, -c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, -c.zs);
-				break;
-			case BlockDefinition.BACK:
-				start.set(position).add(offset).add(-c.xs, -c.ys, c.zs);
-				end.set(position).add(offset).add(c.xs, c.ys, c.zs);
-				break;
-		}
-	}
-	
-
-
-	
+    private Vector3 tmpV = new Vector3(), tmpW = new Vector3(), tmpD = new Vector3();
 	@Override
 	protected void process(Entity e) {
 		Physics phys = physMap.get(e);
 		Position pos = posMap.get(e);
 		AABBBody body = bodyMap.get(e);
 		VoxelWorld voxelWorld = world.getSystem(VoxelSystem.class).voxelWorld;
-		onTick(pos, phys.oldPosition, body, voxelWorld);
+        tmpD.set(pos.pos);
+        tmpD.sub(phys.oldPosition);
+
+
+        /*tmpW.set(pos.pos).add(body.xs,-body.ys,body.zs);
+        tickY(tmpW, pos.pos, voxelWorld);
+        tmpW.set(pos.pos).add(body.xs,-body.ys,-body.zs);
+        tickY(tmpW, pos.pos, voxelWorld);
+        tmpW.set(pos.pos).add(-body.xs,-body.ys,body.zs);
+        tickY(tmpW, pos.pos, voxelWorld);
+        tmpW.set(pos.pos).add(-body.xs,-body.ys,-body.zs);
+        tickY(tmpW, pos.pos, voxelWorld);*/
+
+        float xs = body.xs;
+        float ys = body.ys;
+        float zs = body.zs;
+        if (tmpD.x < 0f) {
+            xs *= -1;
+        }
+        if (tmpD.y < 0f) {
+            ys *= -1;
+        }
+        if (tmpD.z < 0f) {
+            zs *= -1;
+        }
+        //tmpV.set(phys.oldPosition).add(ys);
+
+        body.onGround = false;
+
+        if (
+        tickY(tmpW.set(pos.pos).add(xs,ys,zs), pos.pos, phys.oldPosition, voxelWorld, body)||
+        tickY(tmpW.set(pos.pos).add(-xs,ys,zs), pos.pos, phys.oldPosition, voxelWorld, body)||
+        tickY(tmpW.set(pos.pos).add(xs,ys,-zs), pos.pos, phys.oldPosition, voxelWorld, body)||
+        tickY(tmpW.set(pos.pos).add(-xs,ys,-zs), pos.pos, phys.oldPosition, voxelWorld, body)
+        ){
+            phys.oldPosition.y = pos.pos.y;
+        }
+
+        tickXZ(tmpW.set(pos.pos).add(xs,ys,zs), pos.pos, voxelWorld);
+        tickXZ(tmpW.set(pos.pos).add(xs,-ys,zs), pos.pos, voxelWorld);
+        tickXZ(tmpW.set(pos.pos).add(xs,ys,-zs), pos.pos, voxelWorld);
+        tickXZ(tmpW.set(pos.pos).add(xs,-ys,-zs), pos.pos, voxelWorld);
+
+        tickXZ(tmpW.set(pos.pos).add(-xs,ys,zs), pos.pos, voxelWorld);
+        tickXZ(tmpW.set(pos.pos).add(-xs,-ys,zs), pos.pos, voxelWorld);//*/
+
+        /*tickSmallest(tmpW.set(pos.pos).add(xs,ys,zs), pos.pos, voxelWorld);
+        tickSmallest(tmpW.set(pos.pos).add(xs,-ys,zs), pos.pos, voxelWorld);
+        tickSmallest(tmpW.set(pos.pos).add(xs,ys,-zs), pos.pos, voxelWorld);
+        tickSmallest(tmpW.set(pos.pos).add(xs,-ys,-zs), pos.pos, voxelWorld);
+
+        tickSmallest(tmpW.set(pos.pos).add(-xs,ys,zs), pos.pos, voxelWorld);
+        tickSmallest(tmpW.set(pos.pos).add(-xs,-ys,zs), pos.pos, voxelWorld);
+
+*/
+
+
+
+
+
+
+        /*
+        if (body.onGround) {
+            tickY(pos.pos, voxelWorld);
+            tickXZ(pos.pos, voxelWorld);
+            tickXZLargest(pos.pos, voxelWorld);
+        } else {
+            tickSmallest(pos.pos, voxelWorld);
+            tickMiddle(pos.pos, voxelWorld);
+            tickLargest(pos.pos, voxelWorld);
+        }
+        */
+        //tickSmallest(pos, voxelWorld);
+
 		
 	}
+
+    private void tickXZLargest(Vector3 pnt, Vector3 pos, VoxelWorld voxelWorld) {
+        float x = pnt.x;
+        float y = pnt.y;
+        float z = pnt.z;
+
+        int plane = 0;
+        BlockDefinition b;
+        b = VoxelChunk.blockDef(voxelWorld.get(x,y,z, plane));
+        if (b.isSolid){
+            //closest normal
+            x = ((x % 1f)+1f) %1f;
+            z = ((z % 1f)+1f) %1f;
+
+            /*x = Math.abs(x);
+            z = Math.abs(z);
+            x %= 1f;
+            z %= 1f;*/
+
+            if (x > .5f)normals[0].set(ONE - x, 0, 0);
+            else normals[0].set( - x - NOUGHT, 0, 0);
+
+
+            if (z > .5f) normals[2].set(0, 0,ONE -z );
+            else normals[2].set(0, 0,  - z - NOUGHT);
+
+            if (normals[0].len2() < normals[2].len2()) {
+                pos.add(normals[2]);
+                //Gdx.app.log(TAG, "solid xz "+normals[2]);
+
+            }
+            else {
+                pos.add(normals[0]);
+                //Gdx.app.log(TAG, "solid xz "+normals[0]);
+
+            }
+
+        }
+    }
+
+    private void tickSmallest(Vector3 pnt, Vector3 pos, VoxelWorld voxelWorld) {
+        float x = pnt.x;
+        float y = pnt.y;
+        float z = pnt.z;
+
+        int plane = 0;
+        BlockDefinition b;
+        b = VoxelChunk.blockDef(voxelWorld.get(x,y,z, plane));
+        if (b.isSolid){
+            //closest normal
+            x = ((x % 1f)+1f) %1f;
+            y = ((y % 1f)+1f) %1f;
+            z = ((z % 1f)+1f) %1f;
+
+
+            if (y > .5f) normals[1].set(0, ONE-y , 0);
+            else normals[1].set(0,  - y -NOUGHT, 0);
+
+            if (x > .5f)normals[0].set(ONE - x, 0, 0);
+            else normals[0].set( - x - NOUGHT, 0, 0);
+
+            if (y > .5f) normals[1].set(0, ONE-y , 0);
+            else normals[1].set(0,  - y -NOUGHT, 0);
+
+            if (z > .5f) normals[2].set(0, 0,ONE -z );
+            else normals[2].set(0, 0,  - z - NOUGHT);
+
+            if (normals[0].len2() < normals[1].len2()) {
+                if (normals[0].len2() < normals[2].len2()){//0
+                    pos.add(normals[0]);
+                } else {//2
+                    pos.add(normals[2]);
+
+                }
+            }
+            else {//1 smaller
+                if (normals[1].len2() < normals[2].len2()){//1
+
+                    pos.add(normals[1]);
+                } else {//2
+                    pos.add(normals[2]);
+                }
+            }
+
+        }
+    }
+
+    private void tickLargest(Vector3 pnt, Vector3 pos, VoxelWorld voxelWorld) {
+        float x = pnt.x;
+        float y = pnt.y;
+        float z = pnt.z;
+
+        int plane = 0;
+        BlockDefinition b;
+        b = VoxelChunk.blockDef(voxelWorld.get(x,y,z, plane));
+        if (b.isSolid){
+            //closest normal
+            x = ((x % 1f)+1f) %1f;
+            y = ((y % 1f)+1f) %1f;
+            z = ((z % 1f)+1f) %1f;
+
+
+            if (y > .5f) normals[1].set(0, ONE-y , 0);
+            else normals[1].set(0,  - y -NOUGHT, 0);
+
+            if (x > .5f)normals[0].set(ONE - x, 0, 0);
+            else normals[0].set( - x - NOUGHT, 0, 0);
+
+            if (y > .5f) normals[1].set(0, ONE-y , 0);
+            else normals[1].set(0,  - y -NOUGHT, 0);
+
+            if (z > .5f) normals[2].set(0, 0,ONE -z );
+            else normals[2].set(0, 0,  - z - NOUGHT);
+
+            if (normals[0].len2() > normals[1].len2()) {
+                if (normals[0].len2() > normals[2].len2()){//0
+                    pos.add(normals[0]);
+                } else {//2
+                    pos.add(normals[2]);
+
+                }
+            }
+            else {//1 smaller
+                if (normals[1].len2() > normals[2].len2()){//1
+
+                    pos.add(normals[1]);
+                } else {//2
+                    pos.add(normals[2]);
+                }
+            }
+
+        }
+    }
+
+    private void tickMiddle(Vector3 pnt, Vector3 pos, VoxelWorld voxelWorld) {
+        float x = pnt.x;
+        float y = pnt.y;
+        float z = pnt.z;
+
+        int plane = 0;
+        BlockDefinition b;
+        b = VoxelChunk.blockDef(voxelWorld.get(x,y,z, plane));
+        if (b.isSolid){
+            //closest normal
+            x = ((x % 1f)+1f) %1f;
+            y = ((y % 1f)+1f) %1f;
+            z = ((z % 1f)+1f) %1f;
+
+
+            if (y > .5f) normals[1].set(0, ONE-y , 0);
+            else normals[1].set(0,  - y -NOUGHT, 0);
+
+            if (x > .5f)normals[0].set(ONE - x, 0, 0);
+            else normals[0].set( - x - NOUGHT, 0, 0);
+
+            if (y > .5f) normals[1].set(0, ONE-y , 0);
+            else normals[1].set(0,  - y -NOUGHT, 0);
+
+            if (z > .5f) normals[2].set(0, 0,ONE -z );
+            else normals[2].set(0, 0,  - z - NOUGHT);
+
+            if (normals[0].len2() < normals[1].len2()) {
+                if (normals[0].len2() < normals[2].len2()){//0
+                    pos.add(normals[2]);
+                } else {//2
+                    pos.add(normals[0]);
+
+                }
+            }
+            else {//1 smaller
+                if (normals[1].len2() < normals[2].len2()){//1
+
+                    pos.add(normals[2]);
+                } else {//2
+                    pos.add(normals[1]);
+                }
+            }
+
+        }
+    }
+    private void tickXZ(Vector3 pnt, Vector3 pos, VoxelWorld voxelWorld) {
+        float x = pnt.x;
+        float y = pnt.y;
+        float z = pnt.z;
+
+        int plane = 0;
+        BlockDefinition b;
+        b = VoxelChunk.blockDef(voxelWorld.get(x,y,z, plane));
+        if (b.isSolid){
+            //closest normal
+            x = ((x % 1f)+1f) %1f;
+            z = ((z % 1f)+1f) %1f;
+
+            /*x = Math.abs(x);
+            z = Math.abs(z);
+            x %= 1f;
+            z %= 1f;*/
+
+            if (x > .5f)normals[0].set(ONE - x, 0, 0);
+            else normals[0].set( - x - NOUGHT, 0, 0);
+
+
+            if (z > .5f) normals[2].set(0, 0,ONE -z );
+            else normals[2].set(0, 0,  - z - NOUGHT);
+
+            if (normals[0].len2() > normals[2].len2()) {
+                pos.add(normals[2]);
+                //Gdx.app.log(TAG, "solid xz "+normals[2]);
+
+            }
+            else {
+                pos.add(normals[0]);
+                //Gdx.app.log(TAG, "solid xz "+normals[0]);
+
+            }
+
+        }
+    }
+
+    private boolean tickY(Vector3 pnt, Vector3 pos, Vector3 oldPos, VoxelWorld voxelWorld, AABBBody body) {
+        float x = pnt.x;
+        float y = pnt.y;
+        float z = pnt.z;
+
+        int plane = 0;
+        BlockDefinition b;
+        b = VoxelChunk.blockDef(voxelWorld.get(x,y,z, plane));
+        if (b.isSolid){
+            //closest normal
+            body.onGround = true;
+            //y = Math.abs(y);
+            //y %= 1f;
+            y = ((y % 1f)+1f) %1f;
+
+            if (y > .5f) normals[1].set(0, ONE-y , 0);
+            else normals[1].set(0,  - y -NOUGHT, 0);
+
+
+
+            if (normals[1].y > 0) {
+                pos.add(normals[1]);
+
+                //Gdx.app.log(TAG, "solid y " + normals[1]);
+            } else {
+                pos.add(0, normals[1].y, 0);
+                //Gdx.app.log(TAG, "solid yyy " + normals[1]);
+            }
+            return true;
+        }
+        return false;
+    }
+
+
 
 }

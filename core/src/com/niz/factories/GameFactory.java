@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.tests.g3d.voxel.BlockDefinition;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelChunk;
 import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
@@ -120,7 +122,8 @@ public abstract class GameFactory {
 		//final Button newGame = new Button(new Label("New", skin), skin);
 
         FileHandle dirHandle;
-        dirHandle = Gdx.files.internal("data/ini");
+        dirHandle = Gdx.files.internal("data/ini/Play").parent();
+        Gdx.app.log(TAG, ""+dirHandle.list().length + "  "  + dirHandle.exists() );
         Array<String> handles = new Array<String>();
         handles.add("Play");
         handles.add("Mods");
@@ -167,55 +170,50 @@ public abstract class GameFactory {
     {
 
         FileHandle[] newHandles = begin.list();
-        //Gdx.app.log("Loop", "running!"+newHandles.length);
+        Gdx.app.log("Loop", "running!"+newHandles.length);
 
-        for (FileHandle f : newHandles)
+        for (String s : allowedButtons)
         {
-            //Gdx.app.log("Loop", "f!");
-
-            if (f.isDirectory())
-            {
-                //Gdx.app.log("Loop", "isFolder!");
-
-
-
-                getHandles(f, allowedButtons, recursions+1, table, skin, assets, world);
-
-
-
-
-
-
-            }
-            else
-            {
-               // Gdx.app.log("Loop", "isFile!");
+           
+           
+                Gdx.app.log("Loop", "isFile!");
                 //check if systems
                 //check if .ini
-
-                if (f.name().equals("systems.ini")){
-                    Gdx.app.log("Loop", "is systems.ini!");
-                    if (recursions > 1){
-                        //Gdx.app.log("Loop", "is mod!");
-
-                    } else {
-                        //Gdx.app.log("Loop", "is button!"+f.name());
-                        if (allowedButtons.contains(f.parent().name(), false)){
-                            Gdx.app.log("Loop", "button allowed "+f.parent().name());
-                            table.add(createMenuButton(f.parent().name(), f, skin, assets, world, table));
-                            table.row();
-                        } else {
-                            //Gdx.app.log("Loop", "button not allowed " + f.parent().name());
-
-                        }
-
-                    }
+                FileHandle f = Gdx.files.internal("data/ini/"+s+"/systems.ini");
+                if (f.exists()){
+                	 Gdx.app.log("Loop", "button allowed "+s);
+                     table.add(createMenuButton(s, f, skin, assets, world, table));
+                     table.row();
 
                 }
-            }
+            
         }
     }
+    public static  BlockDefinition[] getBlockDefs(World world, TextureAtlas atlas) {
 
+        BlockDefinition[] defs = new BlockDefinition[256];
+
+
+        for (int i = 2; i < 256; i++){
+            if (defs[i] == null){
+                defs[i] = new BlockDefinition(i);
+            }
+        }
+
+        defs[0] = new BlockDefinition(0);
+        defs[1] = new BlockDefinition(1, "stone", atlas);
+
+
+        defs[0].lightValue = 15;
+        //defs[0].dayLightLoss = 0;
+        defs[0].isSolid = false;
+        defs[0].isEmpty = true;
+
+
+        return defs;
+
+
+    }
     private Button createMenuButton(String name, final FileHandle f, final Skin skin, final AssetManager assets, final World world, final Table table) {
         if (skin == null) throw new GdxRuntimeException("null");
         final Button button  = new Button(new Label(name, skin), skin);
@@ -229,7 +227,7 @@ public abstract class GameFactory {
                 //wait for assets to be loaded
                 assetsSys.processDefinitions();
 
-                VoxelChunk.defs = GeneralFactory.getBlockDefs(world);
+                VoxelChunk.defs = getBlockDefs(world, assetsSys.getTextureAtlas("tiles"));
 
 
                 systemDefs(1f, world, assets, f);
@@ -305,20 +303,16 @@ public abstract class GameFactory {
 
 
     public void newGame(World world) {
-        Entity e = world.createEntity();
-
+       /* Entity e = world.createEntity();
         Position pos = e.add(Position.class);
         pos.pos.set(0f, 45, .5f);
-
-
-
-        world.addEntity(e);
+        world.addEntity(e);*/
 
         Entity player = world.createEntity();
         EngineScreen.player = player;
         //if (true)throw new GdxRuntimeException("sdfjk");
-        pos = player.add(Position.class);
-        pos.pos.set(8,38,8);
+        Position pos = player.add(Position.class);
+        pos.pos.set(300,38,800);
         player.add(Player.class);
         player.add(Physics.class);
 

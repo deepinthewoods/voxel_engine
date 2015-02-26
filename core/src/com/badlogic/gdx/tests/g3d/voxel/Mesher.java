@@ -10,7 +10,6 @@ public interface Mesher {
     int end();
 
 
-	Mesh newMesh(int vertexCount);
 
 
 

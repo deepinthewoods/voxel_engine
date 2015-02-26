@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.tests.g3d.voxel.VoxelWorld;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -23,6 +24,9 @@ import com.niz.actions.Action;
 import com.niz.actions.ActionList;
 import com.niz.component.AABBBody;
 import com.niz.component.Move;
+import com.niz.component.Position;
+import com.niz.component.systems.VoxelSerializingSystem;
+import com.niz.component.systems.VoxelSystem;
 import com.niz.factories.GameFactory;
 import com.niz.factories.GeneralFactory;
 import com.niz.ui.SlideColorPicker;
@@ -93,6 +97,7 @@ public class EngineScreen implements Screen{
 
         assets = new AssetManager();
         assets.load("data/tiles.pack", TextureAtlas.class);
+        
         while (!assets.update());
 
         makeSkin(skin, assets.get("data/tiles.pack", TextureAtlas.class));
@@ -110,6 +115,7 @@ public class EngineScreen implements Screen{
 
     private void makeSkin(Skin skin, TextureAtlas atlas) {
         BitmapFont font = new BitmapFont(Gdx.files.internal("data/font/dpcomic-16.fnt"), atlas.findRegion("fonts"));//, Gdx.files.internal("data/font/fonts.png"));
+        //Gdx.app.log(TAG,  "bleh"+Gdx.files.internal("data/ini/Play/assets.ini").exists());;
         font.setScale(2f);
         TextureRegion reg = atlas.findRegion("button");
         NinePatchDrawable patch = new NinePatchDrawable(new NinePatch(reg));
@@ -231,7 +237,8 @@ public class EngineScreen implements Screen{
             for (int i = 0; i < array.size; i++)
                 font.draw(spriteBatch, array.get(i).getClass().getSimpleName()
                         , 10, 40 + i * 20);
-
+            VoxelWorld voxelWorld = player.getWorld().getSystem(VoxelSystem.class).voxelWorld;
+            Position pos = player.getComponent(Position.class);
             if (player.getComponent(AABBBody.class) != null)
                 font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond() + ",   " +
                         //player.getComponentBits()
@@ -242,8 +249,12 @@ public class EngineScreen implements Screen{
                         (player.get(AABBBody.class).onWall ? "onWall  " : "")
                         + (player.get(Move.class).moving ? "moving" : "")
                         + (player.get(Move.class).jumping ? "jumping" : "")
+                        + "  ->  "
+                        + (voxelWorld.get(pos.pos.x, pos.pos.y, pos.pos.z, 0))
+                        + "  "
+                        + pos.pos
                         //			+(player.get(AABBBody.class).wasOnWall?"wasOnWall":"")
-
+                        +".nload:"+world.getSystem(VoxelSerializingSystem.class).getTotalInQueue()
                         , 0, 20);
 
             if (player.getComponent(AABBBody.class) != null) {

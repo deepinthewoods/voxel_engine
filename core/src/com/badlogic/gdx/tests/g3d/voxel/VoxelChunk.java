@@ -118,6 +118,9 @@ public class VoxelChunk {
 
                                 face.set(def, faceID, b);
                             }
+                        else {
+                        	
+                        }
                         //light totals for verts
 
                         light[x + 1 + 1][y + 1][z + 1 + 1] += def.lightValue;

@@ -1,9 +1,12 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Pools;
+import com.niz.FastNoise;
+import com.niz.SimplexNoise;
 
 /**
  * Created by niz on 15/06/2014.
@@ -39,9 +42,10 @@ public class ChunkReadOrGenerate
     }
     byte value;
     int run;
+    SimplexNoise noise = new SimplexNoise();
     @Override
     public void run() {
-        //Gdx.app.log(TAG, "run "+progressCoarse);
+        //Gdx.app.log(TAG, "run thread:"+thread.getId()+"  progress "+progressCoarse);
 
         if (progressCoarse == -1){
             try {
@@ -57,6 +61,7 @@ public class ChunkReadOrGenerate
                 idle = true;
                 if (thread != null)
                     thread.onPause();
+                
             }
         }
         else if (progressCoarse == 1){//read
@@ -109,7 +114,21 @@ public class ChunkReadOrGenerate
             for (int x = 0; x < chunk.width; x++)
                 for (int y = 0; y < chunk.height; y++)
                     for (int z = 0; z < chunk.depth; z++){
-                        if (chunk.offset.y + y == 2) {
+
+
+                        long nx = MathUtils.floor(x + chunk.offset.x);
+                        int nz = MathUtils.floor(z + chunk.offset.z);
+
+                        float noiseV = noise.get2d(nx,nz,0,100f);
+                        noiseV += 1f;
+
+                        float height = 7f;
+                        noiseV *= height;
+
+                        float heightOffset = 2;
+                        noiseV += heightOffset;
+
+                        if (chunk.offset.y + y < noiseV) {
                             chunk.set(x, y, z, (byte) 1);
                             //Gdx.app.log(TAG, "solid block "+x+","+y+","+z);
                         }

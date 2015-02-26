@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package com.johnny.camerademo;
+package com.niz.android;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewGroup.LayoutParams;
 import com.niz.CameraSurface;
+import com.niz.DeviceCameraControl;
 import com.niz.android.AndroidLauncher;
 
 public class AndroidDeviceCameraController implements DeviceCameraControl, Camera.PictureCallback, Camera.AutoFocusCallback {

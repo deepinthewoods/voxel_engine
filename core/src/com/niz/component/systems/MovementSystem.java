@@ -37,17 +37,19 @@ public class MovementSystem extends EntityProcessingSystem {
 	}
 	
 	
-	static Vector3 tmp = new Vector3();
+	static Vector3 tmp = new Vector3(), oldV = new Vector3();
 	
 	
 	private static void move(float rotation, float speed, float speedLimit, float speedLimit2, float jumpSpeed, Vector3 position, Vector3 oldPosition, Move move) {
 		//move.moving = true;
 		tmp.set(speed/20f, 0, 0);
 		tmp.rotate(-rotation, 0,1,0);
+        oldV.set(oldPosition);
 		position.x += tmp.x;
 		position.z += tmp.z;
+        //Vector3 oldV = null;
 
-		tmp.set(position.x, 0, position.z).sub(oldPosition.x, 0, oldPosition.z);
+		tmp.set(position.x, 0, position.z).sub(oldV.x, 0, oldV.z);
 
         {
             {
@@ -55,7 +57,7 @@ public class MovementSystem extends EntityProcessingSystem {
                 if (tmp.len2() > speedLimit*speedLimit){
                     //tmp.set(position.x, position.y, position.z).sub(oldPosition.x, oldPosition.y, oldPosition.z);
 
-                    position.set(oldPosition.x, position.y, oldPosition.z).add(tmp.nor().scl(speedLimit));
+                    position.set(oldV.x, position.y, oldV.z).add(tmp.nor().scl(speedLimit));
 
                 }
 
@@ -90,27 +92,33 @@ public class MovementSystem extends EntityProcessingSystem {
                 //Gdx.app.log(TAG, "jump"+c.jumpQueued + body.onGround);
             }
         boolean startOfJump = false;
+
 		if (c.jumpQueued && body.onGround && !c.jumping){
 			boolean left = c.rotation > 90 && c.rotation < 270;
-			position.y = c.moving?c.jumpStrengthMoving:c.jumpStrength
-            + oldPosition.y;
-            tmp.set(position).sub(oldPosition);
-            tmp.nor().scl(c.moving?c.jumpStrengthMoving:c.jumpStrength);
-            position.set(oldPosition).add(tmp);
+			position.y = c.moving?c.jumpStrengthMoving+ position.y:c.jumpStrength
+            + position.y;
+            //tmp.set(position).sub(oldPosition);
+           //tmp.nor().scl(c.moving?c.jumpStrengthMoving:c.jumpStrength);
+            //position.set(oldPosition).add(tmp);
             c.jumpEndTick = e.tick + (int)(c.jumpTime / e.getWorld().getDelta());
 			c.jumping = true;
             body.onGround = false;
             //Gdx.app.log(TAG, "start jump"+c.jumpQueued + body.onGround);
             startOfJump = true;
         }
+        /*if (startOfJump){
+            body.onGround = false;
+            startOfJump = false;
+        }*/
 
-        if (c.moving){
-            move(c.rotation, c.moveAcceleration, c.moveSpeed, c.moveSpeed * c.moveSpeed, c.jumpStrength, position, oldPosition, c);
-        }
         if (c.jumping){
             continuousJump(position, c);
             //Gdx.app.log(TAG, "force");
         }
+        if (c.moving){
+            move(c.rotation, c.moveAcceleration, c.moveSpeed, c.moveSpeed * c.moveSpeed, c.jumpStrength, position, oldPosition, c);
+        }
+
         if (!c.moving && body.onGround){//apply friction
 			//Gdx.app.log(TAG, "friction");
 			tmp.set(position).sub(oldPosition);
@@ -127,6 +135,7 @@ public class MovementSystem extends EntityProcessingSystem {
 
             }*/
         if (c.jumping && body.onGround && body.wasOnGround){
+            //Gdx.app.log(TAG, "reset");
 
             c.jumping = false;
         }

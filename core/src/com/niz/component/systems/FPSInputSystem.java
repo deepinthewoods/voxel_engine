@@ -49,9 +49,18 @@ public class FPSInputSystem extends InputSystem {
                     Position pos = posM.get(e);
                     if (pos == null) break;
                     pos.pos.set(phys.oldPosition);
-                    pos.pos.y = 10f;
+                    pos.pos.y = 60f;
 
                     break;
+                case BURROW : 
+                	 Physics physs = physM.get(e);
+                     if (physs == null) break;
+                     Position poss = posM.get(e);
+                     if (poss == null) break;
+                     physs.oldPosition.y -= .6f;
+                     poss.pos.set(physs.oldPosition);
+                     
+                	break;
                 case CLEAR_MESHES:
                     world.getSystem(VoxelSystem.class).voxelWorld.clearAllMeshes();
                     break;

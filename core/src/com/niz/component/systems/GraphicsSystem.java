@@ -45,7 +45,7 @@ public class GraphicsSystem extends EntitySystem {
     public void initialize(){
         shapeBatch = new ShapeBatch();
         env = new Environment();
-        env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
+        //env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
         modelBatch = new ModelBatch();
     }
 }

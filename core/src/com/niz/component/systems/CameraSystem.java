@@ -28,7 +28,7 @@ protected void processEntities(Array<Entity> entities) {
 public void initialize(){
 	camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	//camera = new OrthographicCamera(20f,15f);
-	camera.near = 0.5f;
+	camera.near = 0.05f;
 	camera.far = 1000f;
 
 	camera.update();

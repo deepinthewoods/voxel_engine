@@ -6,7 +6,7 @@ import com.badlogic.gdx.Input.*;
  * Created by niz on 29/06/2014.
  */
 public class Input {
-    public enum Code  {BUTTON_JUMP, WALK_FORWARDS, WALK_BACKWARDS, STRAFE_LEFT, STRAFE_RIGHT, WALK, TOGGLE_JETPACK, CLEAR_MESHES};
+    public enum Code  {BUTTON_JUMP, WALK_FORWARDS, WALK_BACKWARDS, STRAFE_LEFT, STRAFE_RIGHT, WALK, TOGGLE_JETPACK, CLEAR_MESHES, BURROW};
     public static IntMap<Code> keys = new IntMap<Code>();
     static IntMap<Code> padButtons = new IntMap<Code>();
 
@@ -22,5 +22,6 @@ public class Input {
         keys.put(Keys.A, Code.STRAFE_LEFT);
         keys.put(Keys.S, Code.WALK_BACKWARDS);
         keys.put(Keys.D, Code.STRAFE_RIGHT);
+        keys.put(Keys.M, Code.BURROW);
 }
 }

@@ -55,7 +55,7 @@ public class GreedyMesher implements Mesher {
      * each voxel has a type, temperature, humidity, etc � which are constant across all faces, and
      * then attributes like sunlight, artificial light which face per face or even per vertex.
      */
-    private final VoxelFace [][][][] voxels = new VoxelFace [CHUNK_WIDTH+1][CHUNK_HEIGHT+1][CHUNK_WIDTH+1][6];
+    private final VoxelFace [][][][] voxels = new VoxelFace [CHUNK_WIDTH+2][CHUNK_HEIGHT+2][CHUNK_WIDTH+2][6];
     protected static Color[] lightColors;
 
     public MeshBatch meshBatch;
@@ -131,7 +131,7 @@ public class GreedyMesher implements Mesher {
         public boolean transparent;
         public int type;
         public int side;
-		public float u, v;
+		//public float u, v;
 		float[] c = new float[4];
 		protected int[] vertex = new int[4];
 
@@ -184,9 +184,9 @@ public class GreedyMesher implements Mesher {
 		}
 
         public void vertex(int index, int side1, int side2, int corner, int x){
-            side1 = side1>>(x+1)& 1;
-            side2 = side2>>(x+1)& 1;
-            corner = corner>>(x+1)& 1;
+            //side1 = side1>>(x+1)& 1;
+            //side2 = side2>>(x+1)& 1;
+            //corner = corner>>(x+1)& 1;
             if((side1 & side2) == 1) {
                 vertex(index, 0);
             }
@@ -201,7 +201,26 @@ public class GreedyMesher implements Mesher {
 
 
         public void vertex(int index, BlockDefinition a, BlockDefinition b, BlockDefinition c, BlockDefinition x) {
+        	vertex(index
+        			, a.lightValue > 1?0:1
+        					, b.lightValue > 1?0:1
+        							, c.lightValue > 1?0:1
+        									, x.lightValue > 1?0:1
+        			);
             vertex[index] = (a.lightValue + b.lightValue + c.lightValue + x.lightValue)/4;
+        }
+
+        public float u() {
+            if (def.faceU != null){
+                return def.faceU[side];
+            };
+            return 0f;
+        }
+        public float v() {
+            if (def.faceV != null){
+                return def.faceV[side];
+            };
+            return 0f;
         }
     }
 
@@ -294,7 +313,20 @@ public class GreedyMesher implements Mesher {
                         BlockDefinition ao00T = chunk.getDef(x, y + 1, z);
                         BlockDefinition ao01T = chunk.getDef(x, y + 1, z + 1);
                         BlockDefinition ao10T = chunk.getDef(x + 1, y + 1, z);
-                        BlockDefinition ao11T = chunk.getDef(x + 1, y + 1, z + 1);
+                        BlockDefinition ao11T = chunk.getDef(x + 1, y + 1, z + 1);//*/
+                        
+                        
+
+                        /*int ao11 = visibilityMask[(y+1)*my+(z+2)] >>1;
+                        int ao01 = visibilityMask[(y+1)*my+(z+2)];
+                        int ao10 = visibilityMask[(y+1)*my+(z+1)]>>1;
+                        int ao00 = visibilityMask[(y+1)*my+(z+1)];
+
+                        int ao11T = visibilityMask[(y+2)*my+(z+2)] >>1;
+                        int ao01T = visibilityMask[(y+2)*my+(z+2)];
+                        int ao10T = visibilityMask[(y+2)*my+(z+1)]>>1;
+                        int ao00T = visibilityMask[(y+2)*my+(z+1)];*/
+                        
 
                         voxels[x][y][z][TOP].vertex(3,ao01T, ao10T, ao11T, ao00T);
                         voxels[x][y][z][EAST].vertex(3,ao10T, ao11, ao11T, ao10);
@@ -341,10 +373,6 @@ public class GreedyMesher implements Mesher {
                     int maskBottom = visibilityMask[(y)*my+(z+1)];
                     int maskEast = mask >> 1;
                     int maskWest = mask << 1;
-
-
-
-
 
                     maskNorth &= mask;
                     maskSouth &= mask;
@@ -457,6 +485,8 @@ public class GreedyMesher implements Mesher {
                     maskBottom &= mask;
                     maskEast &= mask;
                     maskWest &= mask;
+                    
+                    
 
                     for(int x = 0; x < CHUNK_WIDTH; x++) {
 
@@ -541,7 +571,7 @@ public class GreedyMesher implements Mesher {
 
                     }}}//}
         } else if (prog < FACE_SUBDIVISIONS+3){
-            //norths with visibility
+            //e? with visibility
             for(int y = 0; y < CHUNK_HEIGHT-1; y++) {
                 for(int z = 0; z < CHUNK_WIDTH-1; z++) {
                     int mask = visibilityMask[(y+1)*my+(z+1)];
@@ -652,9 +682,11 @@ public class GreedyMesher implements Mesher {
 //BOTTOMS
             for(int y = -1; y < 0; y++) {
                 for(int z = 0; z < CHUNK_WIDTH; z++) {
-
+                	
+                    
                     for(int x = 0; x < CHUNK_WIDTH; x++) {
 
+                    	
 
                         BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
                         BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
@@ -688,8 +720,13 @@ public class GreedyMesher implements Mesher {
         } else if (prog < FACE_SUBDIVISIONS+5 ){
             for(int y = 0; y < CHUNK_HEIGHT; y++) {
                 for(int z = 0; z < CHUNK_WIDTH; z++) {
-
+//w?
+       
+                    
                     for(int x = -1; x < 0; x++) {
+                    	
+                    	
+                    	
                         BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
                         BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
                         BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
@@ -727,10 +764,15 @@ public class GreedyMesher implements Mesher {
 //SOUTHS
             for(int y = 0; y < CHUNK_HEIGHT; y++) {
                 for(int z = -1; z < 0; z++) {
+                	
+                	
 
-
+                	
                     for(int x = 0; x < CHUNK_WIDTH; x++) {
 
+                    	
+                    	
+                    	
                         BlockDefinition ao00 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z, chunk.plane));
                         BlockDefinition ao01 = VoxelChunk.blockDef(voxelWorld.get(ox+x, oy+y, oz+z + 1, chunk.plane));
                         BlockDefinition ao10 = VoxelChunk.blockDef(voxelWorld.get(ox+x + 1, oy+y, oz+z, chunk.plane));
@@ -1239,20 +1281,7 @@ public class GreedyMesher implements Mesher {
 
 	}
 
-	@Override
-	public Mesh newMesh(int size) {
-		Mesh mesh = new Mesh(true,
-				size,
-				size / 4 * 6,
-                VertexAttribute.Position(),
-				VertexAttribute.Color(),
-                VertexAttribute.TexCoords(0),
-                new VertexAttribute(VertexAttributes.Usage.Generic, 2, "a_texStart")
-        );
 
-
-		return mesh;
-	}
 
 
     public boolean readBlocksAO(VoxelChunk chunk, VoxelWorld voxelWorld, int progress){

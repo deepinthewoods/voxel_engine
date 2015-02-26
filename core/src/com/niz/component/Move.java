@@ -17,7 +17,7 @@ public class Move implements Component {
     public float jumpTime = 1000000.5f;
     public long jumpEndTick;
     public float jumpForce =        0.0012f;
-    public float jumpForceMoving =  0.0011f;
+    public float jumpForceMoving =  0.0012f;
 
     public int jumpForceEndTick;
     public float moveSpeed = .04f;

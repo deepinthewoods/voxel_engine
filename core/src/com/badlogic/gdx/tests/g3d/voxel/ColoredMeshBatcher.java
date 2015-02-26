@@ -26,7 +26,7 @@ public class ColoredMeshBatcher extends MeshBatcher {
 
 
 
-    @Override
+
     public void addVertices(Vector3[] vertices, int[] colorArray, short[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height) {
         //Gdx.app.log(TAG, "add verts");
         for (int i = 0; i < 4; i++){

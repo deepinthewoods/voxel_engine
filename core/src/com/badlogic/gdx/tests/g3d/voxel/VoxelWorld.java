@@ -17,6 +17,8 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 
+import com.artemis.Component;
+import com.artemis.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -25,8 +27,14 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pools;
 import com.niz.component.Position;
+import com.niz.observer.Observer;
+import com.niz.observer.Subject.Event;
 
 public class VoxelWorld implements RenderableProvider {
 
@@ -114,9 +122,13 @@ public class VoxelWorld implements RenderableProvider {
         iz = (iz % CHUNK_SIZE_Z + CHUNK_SIZE_Z) % CHUNK_SIZE_Z;
 
 
+
         //(i % n + n) % n;
         int hash = chunkHash(cx, cy, cz, p);
-        if (!chunks.containsKey(hash)) return 0;
+        if (!chunks.containsKey(hash)) {
+            //Gdx.app.log(TAG, "get invalid "+x+" , "+y+"  ,  "+z);
+            return 0;
+        }
         VoxelChunk chunk = getChunk(hash);
         return chunk.getFast(ix, iy, iz);
 
@@ -132,15 +144,22 @@ public class VoxelWorld implements RenderableProvider {
                 ( (ix) & 0xFF ) +
                 ( (iy >>> 8) & 0xFF )<<8 +
                 ( (iz >>> 16) & 0xFF )<<16 +
-                ( (p >>> 24) & 0xFF ) << 24;*/
+                ( (p >>> 24) & 0xFF ) << 24;//*/
 
-        return
-        ( (ix % 0xFF + 0x3FF )&0x3FF) ^
-        (( (iy  % 0xFF + 0x3FF )&0x3FF)<<10 )^
-        (( (iz  % 0xFF + 0x3FF )&0x3FF)<<20 );//^
+        /*return
+        ( (ix % 0x3FF + 0x3FF )%0x3FF) ^
+        (( (iy  % 0x3FF + 0x3FF )%0x3FF)<<10 )^
+        (( (iz  % 0x3FF + 0x3FF )%0x3FF)<<20 );//^*/
         //jjjjjjjjjjjjjjj(( (p  % 0xFF + 0xFF )&0xFF) << 30);//
         //int h = (ix * p1)  ^ (iy * p2) ^ (iz * p3) ^ (p*p4) ;
         //return h;
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ix;
+        result = prime * result + iy;
+        result = prime * result + iz;
+        return result;
     }
 
     public static int intHash(int a){
@@ -193,7 +212,8 @@ public class VoxelWorld implements RenderableProvider {
 			renderable.meshPartSize = chunk.numVerts/4*6;
 			renderable.shader = shader;
 			renderable.primitiveType = GL20.GL_TRIANGLES;
-			renderable.worldTransform.idt().translate(chunk.offset);
+			//renderable.worldTransform.idt().translate(chunk.offset);
+            renderable.worldTransform.setTranslation(chunk.offset);
 			renderables.add(renderable);
           //  Gdx.app.log(TAG,  "verts"+new DefaultShaderProvider().getShader(renderable).toString());
 
@@ -240,8 +260,9 @@ public class VoxelWorld implements RenderableProvider {
         for (int ix = x-1; ix < x+2; ix++)
             for (int iy = y-1; iy < y+2; iy++)
                 for (int iz = z - 1; iz < z+2; iz++){
-                    VoxelChunk chunk = getChunk(ix, iy, iz, c.plane);                            ;
-                    //if (chunk == null) return false;
+                	//Gdx.app.log(TAG, "get ch "+ x + " , "+y+" , "+z + "  result "+ ix + " , "+iy+" , "+iz);
+                    VoxelChunk chunk = getChunk(ix, iy, iz, c.plane);                           ;
+                    if (chunk == null) return false;
                     //if (!chunk.isValid()) return false;
                 }
 
@@ -277,6 +298,7 @@ public class VoxelWorld implements RenderableProvider {
 
 
     public Object dirtyLock = new Object();
+	
 
     public VoxelChunk getChunkFromVoxel(int x, int y, int z, int p) {
         int ix = MathUtils.floor(x);
@@ -341,5 +363,30 @@ public class VoxelWorld implements RenderableProvider {
             }
 
         }
+    }
+    
+    public int removeChunksBasedOnDistanceTo(Vector3 point, float maxDist){
+    	int total = 0;
+    	 float maxDist2 = maxDist * maxDist;
+    	 while (total < 2 && maxDist2 > 8){
+        	 IntMap.Values<VoxelChunk> iter = chunks.values();
+
+    		 while (iter.hasNext()){
+                 VoxelChunk c = iter.next();
+                 if (c.offset.dst2(point) > maxDist2){
+                	 iter.remove();
+                	 chunkTotal--;
+                	 Pools.free(c);
+                	 total++;
+                	 Gdx.app.log(TAG, "freed chunk");
+                	 if (total > 8) return total;
+                 }
+
+             }
+    		 maxDist2 *= 0.7f;
+
+    	 }
+    	 
+             	return total;
     }
 }

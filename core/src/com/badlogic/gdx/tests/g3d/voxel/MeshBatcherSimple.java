@@ -6,12 +6,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
-public class MeshBatcher implements MeshBatch{
+public class MeshBatcherSimple implements MeshBatch{
     private static final int VERTEX_SIZE = 8;
     public Array<Array<Mesh>> meshes;
 	private int levels;
@@ -22,7 +21,7 @@ public class MeshBatcher implements MeshBatch{
 	public static final float[] highlightColors = {Color.RED.toFloatBits(), Color.GREEN.toFloatBits(), Color.BLUE.toFloatBits(), Color.CYAN.toFloatBits()};
     public static float whiteTextureU, whiteTextureV;
 
-    public MeshBatcher(int vertexSize, int indexSize, int levels) {
+    public MeshBatcherSimple(int vertexSize, int indexSize, int levels) {
 
 		cachedVerts = new float[vertexSize];
 		cachedIndexes = new short[indexSize];
@@ -53,6 +52,7 @@ public class MeshBatcher implements MeshBatch{
 
         return mesh;
     }
+	
 	public Mesh getMesh(int vertexCount, Mesher mesher){
 		for (int i = levels-1; i >=0; i--){
 			if (vertexCount < levelMaxSize[i]){
@@ -97,7 +97,13 @@ public class MeshBatcher implements MeshBatch{
 	protected short[] cachedIndexes;
 	protected int indexProgress;
 	protected int vertexTotal;
-
+	/*public void addVertices(float[] vertices, int length) {
+		
+		for (int i = 0; i < length; i++)
+			cachedVerts[cacheProgress++] = vertices[i];
+	}*/
+	
+	
 
 	@Override
 	public int flushCache(VoxelChunk chunk, GreedyMesher mesher) {
@@ -121,11 +127,99 @@ public class MeshBatcher implements MeshBatch{
 		return 0;
 	}
 
+	/** adds verts from a quad
+	 * @param vertices position vectors
+	 * @param colorArray 4-digit float values
+	 * @param indexes
+	 */
+	public void addVerticesRGBA(Vector3[] vertices, float[] colorArray,
+			int[] indexes) {
+		for (int i = 0; i < 4; i++){
+			Vector3 v = vertices[i];
+			float c = Color.toFloatBits(colorArray[i*4], colorArray[i*4+1], colorArray[i*4+2], colorArray[i*4+3]);
+			//Color.WHITE.toFloatBits();//
+			cachedVerts[cacheProgress++] = v.x;
+			cachedVerts[cacheProgress++] = v.y;
+			cachedVerts[cacheProgress++] = v.z;
+			cachedVerts[cacheProgress++] = c;
+		}
+		
+		for (int i = 0; i < 6; i++){
+			cachedIndexes[indexProgress++] = (short) (indexes[i]+vertexTotal);
+			//Gdx.app.log(TAG, "index  "+cachedIndexes[indexProgress-1]);
+
+		}
+		//Gdx.app.log(TAG, "index length "+vertexTotal);
+		vertexTotal += 4;
+
+	}
+	
+	/**
+	 * @param vertices positions
+	 * @param colorArray 1-digit colors
+	 * @param indexes
+	 */
+	public void addVertices(Vector3[] vertices, float[] colorArray,
+			int[] indexes) {
+		for (int i = 0; i < 4; i++){
+			Vector3 v = vertices[i];
+			float c = colorArray[i];//highlightColors[i];//
+			//Gdx.app.log(TAG, "color array"+colorArray[i]);
+			cachedVerts[cacheProgress++] = v.x;
+			cachedVerts[cacheProgress++] = v.y;
+			cachedVerts[cacheProgress++] = v.z;
+			cachedVerts[cacheProgress++] = c;
+		}
+		
+		for (int i = 0; i < 6; i++){
+			cachedIndexes[indexProgress++] = (short) (indexes[i]+vertexTotal);
+			//Gdx.app.log(TAG, "index  "+cachedIndexes[indexProgress-1]);
+
+		}
+		//Gdx.app.log(TAG, "index length "+vertexTotal);
+		vertexTotal += 4;
+
+	}
 
 
 
+	public void flushSimpleMesh(VoxelChunk chunk, float[] vertices, int count,
+                                short[] indices, Mesher mesher) {
 
-    public void addVertices(Vector3[] vertices, int[] colorArray, short[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height) {
+		chunk.mesh = getMesh(count, mesher);
+		chunk.mesh.setVertices(vertices, 0, count);
+		chunk.mesh.setIndices(indices, 0, (count*6)/4);
+		chunk.numVerts = count/4*6;
+
+	}
+
+	public void addVertices(Vector3[] vertices, int[] colorArray, int[] indexes,
+			boolean shouldFlipTriangles) {
+		
+		
+		for (int i = 0; i < 4; i++){
+			Vector3 v = vertices[i];
+			float c = GreedyMesher.lightValues[colorArray[i]];//highlightColors[i];//
+			//Gdx.app.log(TAG, "color array"+colorArray[i]);
+			cachedVerts[cacheProgress++] = v.x;
+			cachedVerts[cacheProgress++] = v.y;
+			cachedVerts[cacheProgress++] = v.z;
+			cachedVerts[cacheProgress++] = c;
+		}
+		for (int i = 0; i < 6; i++){
+			cachedIndexes[indexProgress++] = (short) (indexes[i]+vertexTotal);	
+			
+		}
+		
+		
+		
+		//Gdx.app.log(TAG, "index length "+vertexTotal);
+		vertexTotal += 4;
+
+	
+	}
+
+    public void addVertices(Vector3[] vertices, int[] colorArray, short[] indexes, boolean flip, GreedyMesher.VoxelFace voxel, int width, int height, float texu, float texv) {
         //if (true)throw new GdxRuntimeException("wrong");
         for (int i = 0; i < 4; i++){
             Vector3 v = vertices[i];
@@ -180,8 +274,8 @@ public class MeshBatcher implements MeshBatch{
             }
 
 
-            cachedVerts[cacheProgress++] = voxel.u();
-            cachedVerts[cacheProgress++] = voxel.v();
+            cachedVerts[cacheProgress++] = texu;
+            cachedVerts[cacheProgress++] = texv;
 
         }
 
@@ -247,7 +341,7 @@ public class MeshBatcher implements MeshBatch{
                 : flip?flipBackIndices:flipFwdIndices;
 
 
-        addVertices(vertices, voxel.vertex, indexes, flip, voxel, width, height);
+        addVertices(vertices, voxel.vertex, indexes, flip, voxel, width, height, 0, 0);
 
 
 

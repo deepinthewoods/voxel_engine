@@ -1,6 +1,7 @@
 package com.badlogic.gdx.tests.g3d.voxel;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.voxel.GreedyMesher.VoxelFace;
@@ -23,10 +24,11 @@ public class BlockDefinition {
 	//public int dayLightLoss = 15;
 	//public byte lightLoss = 15;
 	public boolean isSolid = true;
-	public int lightValue;
+	public int lightValue = 0;
 	public boolean isEmpty = false;;
 	private static BlockDefinition[] defs = new BlockDefinition[256];
-   //public int id;
+    public float[] faceU = new float[6], faceV = new float[6];
+    //public int id;
 
 
 	public BlockDefinition(int id){
@@ -38,6 +40,38 @@ public class BlockDefinition {
 		//v2 = region.getV2();
 		
 	}
+    public BlockDefinition(int id, String all, TextureAtlas atlas){
+        for (int i = 0; i < 6; i++){
+            TextureAtlas.AtlasRegion region = atlas.findRegion(all);
+            faceU[i] = region.getU();
+            faceV[i] = region.getV();
+        }
+        this.id = id;
+    }
+
+    public BlockDefinition(int id, String top, String side, String bottom, TextureAtlas atlas){
+
+        TextureAtlas.AtlasRegion region = atlas.findRegion(top);
+        faceU[TOP] = region.getU();
+        faceV[TOP] = region.getV();
+
+        region = atlas.findRegion(side);
+        faceU[RIGHT] = region.getU();
+        faceV[RIGHT] = region.getV();
+        faceU[LEFT] = region.getU();
+        faceV[LEFT] = region.getV();
+        faceU[BACK] = region.getU();
+        faceV[BACK] = region.getV();
+        faceU[FRONT] = region.getU();
+        faceV[FRONT] = region.getV();
+
+        region = atlas.findRegion(bottom);
+        faceU[BOTTOM] = region.getU();
+        faceV[BOTTOM] = region.getV();
+
+
+        this.id = id;
+    }
 
 	
 	public void onUpdate(int x, int y, int z, VoxelWorld world){};
