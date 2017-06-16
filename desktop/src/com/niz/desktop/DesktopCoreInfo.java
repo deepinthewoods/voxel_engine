@@ -13,6 +13,7 @@ public class DesktopCoreInfo implements CoreInfo {
 
     @Override
     public int getNumberOfCores() {
+    	
         return Runtime.getRuntime().availableProcessors();
     }
 }

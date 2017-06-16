@@ -2,6 +2,8 @@ package com.niz.actions;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.niz.component.Move;
 import com.niz.component.Physics;
 import com.niz.component.Position;
@@ -16,7 +18,9 @@ public class AStand extends Action{
 
     @Override
     public void update(float dt) {
-
+    	if (Gdx.input.isKeyJustPressed(Keys.H)){
+    		posM.get(parent.e).pos.set(10, 10, 300);
+    	}
         //posM.get(parent.e).pos.set(physM.get(parent.e).oldPosition);
     }
 

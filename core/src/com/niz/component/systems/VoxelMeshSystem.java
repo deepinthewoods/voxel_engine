@@ -45,11 +45,12 @@ public class VoxelMeshSystem extends EntitySystem
     @Override
     protected void processEntities(Array<Entity> entities) {
         if (entities.size == 0) return;
+        //Gdx.app.log(TAG, "process mesh entities" + threads.size);
         if (hasThreads){
             for (int i = 0; i < threads.size; i++){
                 MeshThread thread = threads.get(i);
                 if (thread.isPaused()){
-                    //Gdx.app.log(TAG, "paused thread"+thread.index);
+                   // Gdx.app.log(TAG, "paused thread"+thread.index + "/" + threads.size);
                     if (thread.runn.done){
                         //Gdx.app.log(TAG, "MESH END "+thread.runn.chunk.offset.cpy().scl(1f/16f) + "  "+thread.index);
 
@@ -65,16 +66,16 @@ public class VoxelMeshSystem extends EntitySystem
                         //try to start on a new mesh
                         VoxelChunk chunk = voxelWorld.getClosestDirtyChunk(posM.get(entities.get(0)));
                         if (chunk == null){
-                            //Gdx.app.log(TAG, "MNO MeshT");
+                           // Gdx.app.log(TAG, "MNO MeshT");
 
                             continue;
                         }
-                        //Gdx.app.log(TAG, "MESH START MESH START MESH START "+chunk.offset + "  "+thread.index);
+                       // Gdx.app.log(TAG, "MESH START MESH START MESH START "+chunk.offset + "  "+thread.index);
 
 
                         if (inProgress.containsKey(chunk.index)){
                             inProgress.get(chunk.index).runn.restart();
-                            Gdx.app.log(TAG, "MESH RESTART!!!!!!!!!!!!!!");
+                            //Gdx.app.log(TAG, "MESH RESTART!!!!!!!!!!!!!!");
                             continue;
                         }
                         thread.runn.begin(chunk, voxelWorld);
@@ -93,9 +94,10 @@ public class VoxelMeshSystem extends EntitySystem
             if (runnable.idle){
                 //try to start on a new mesh
                 VoxelChunk chunk = voxelWorld.getClosestDirtyChunk(posM.get(entities.get(0)));
-                chunk.setDirty(false);                runnable.begin(chunk, voxelWorld);
+                chunk.setDirty(false);                
+                runnable.begin(chunk, voxelWorld);
             } else if (runnable.done){
-                runnable.mesher. chunk.setDirty(false);
+                runnable.mesher.chunk.setDirty(false);
 
             }
             runnable.run();

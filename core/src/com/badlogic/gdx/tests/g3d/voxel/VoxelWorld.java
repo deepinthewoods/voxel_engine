@@ -154,7 +154,7 @@ public class VoxelWorld implements RenderableProvider {
         //int h = (ix * p1)  ^ (iy * p2) ^ (iz * p3) ^ (p*p4) ;
         //return h;
 
-        final int prime = 31;
+        final int prime = 15667;
         int result = 1;
         result = prime * result + ix;
         result = prime * result + iy;
@@ -192,13 +192,17 @@ public class VoxelWorld implements RenderableProvider {
 	public void getRenderables (Array<Renderable> renderables, Pool<Renderable> pool) {
 		renderedChunks = 0;
         IntMap.Values<VoxelChunk> iter = chunks.values();
-
+        //Gdx.app.log(TAG,  "Renderable provided" + iter.hasNext());
 		while (iter.hasNext()){
 
             VoxelChunk chunk = iter.next();
 			//Mesh mesh = meshes[i];
-			if(chunk.mesh == null || chunk.offset.dst2(worldCentrePoint) > drawDistance2) {
-				
+			if(chunk.mesh == null 
+					//|| chunk.offset.dst2(worldCentrePoint) > drawDistance2
+					) 
+			{
+				//Gdx.app.log(TAG,  "Renderable SKIPPED" + chunk.offset);
+
 				continue;
 			}
 
@@ -215,7 +219,7 @@ public class VoxelWorld implements RenderableProvider {
 			//renderable.worldTransform.idt().translate(chunk.offset);
             renderable.worldTransform.setTranslation(chunk.offset);
 			renderables.add(renderable);
-          //  Gdx.app.log(TAG,  "verts"+new DefaultShaderProvider().getShader(renderable).toString());
+           //Gdx.app.log(TAG,  "Renderable provided" + chunk.offset);
 
 			renderedChunks++;
 		}
@@ -234,8 +238,8 @@ public class VoxelWorld implements RenderableProvider {
                 VoxelChunk chunk = iter.next();
                 //Mesh mesh = meshes[i];
                 if (chunk.plane != pos.plane) continue;
+                //Gdx.app.log("dirsty", "f "+chunk.getDirty() + allValidSurrounding(chunk));
                 if (chunk.getDirty() && allValidSurrounding(chunk)) {
-                    //Gdx.app.log("dirsty", "fffffffffff"+chunk.offset);
 
                     float d = pos.pos.dst2(chunk.offset);
                     if (d < dist || closestChunk == null) {
@@ -250,19 +254,43 @@ public class VoxelWorld implements RenderableProvider {
 	}
 
     private boolean allValidSurrounding(VoxelChunk c) {
+    	//if (true) return true;
+    	
         int x = (int) c.offset.x;
         int y = (int) c.offset.y;
         int z = (int) c.offset.z;
         x /= CHUNK_SIZE_X;
         y /= CHUNK_SIZE_Y;
         z /= CHUNK_SIZE_Z;
+        
+        if (false){
+        	return 
+        			getChunk(x-1, y-1, z+1, 0) == null ||
+        			getChunk(x-1, y+1, z-1, 0) == null ||
+        			getChunk(x+1, y-1, z-1, 0) == null ||
+        			getChunk(x+1, y+1, z-1, 0) == null ||
+        			getChunk(x+1, y-1, z+1, 0) == null ||
+        			getChunk(x-1, y+1, z+1, 0) == null ||
+        			getChunk(x, y-1, z-1, 0) == null ||
+        			getChunk(x-1, y, z-1, 0) == null ||
+        			getChunk(x-1, y-1, z, 0) == null || 
+        			getChunk(x, y+1, z-1, 0) == null ||
+        			getChunk(x+1, y, z-1, 0) == null ||
+        			getChunk(x+1, y-1, z, 0) == null || 
+        			getChunk(x, y-1, z+1, 0) == null ||
+        			getChunk(x-1, y, z+1, 0) == null ||
+        			getChunk(x-1, y+1, z, 0) == null ;
+        }
 
-        for (int ix = x-1; ix < x+2; ix++)
-            for (int iy = y-1; iy < y+2; iy++)
-                for (int iz = z - 1; iz < z+2; iz++){
+        for (int ix = -1; ix < +2; ix++)
+            for (int iy = -1; iy < +2; iy++)
+                for (int iz =  - 1; iz < +2; iz++){
                 	//Gdx.app.log(TAG, "get ch "+ x + " , "+y+" , "+z + "  result "+ ix + " , "+iy+" , "+iz);
-                    VoxelChunk chunk = getChunk(ix, iy, iz, c.plane);                           ;
-                    if (chunk == null) return false;
+                    VoxelChunk chunk = getChunk(ix + x, iy + y, iz + z, c.plane);                           ;
+                    if (chunk == null && 
+                    		(ix != 0 || iy != 0)
+                    		&& ix != iy
+                    		) return false;
                     //if (!chunk.isValid()) return false;
                 }
 
@@ -345,6 +373,7 @@ public class VoxelWorld implements RenderableProvider {
     }
 
     public void addChunk(VoxelChunk c) {
+    	Gdx.app.log(TAG, "add Chunk" + c.mesh);
         int hash = chunkHash(c);
         if (chunks.containsKey(hash)) throw new GdxRuntimeException("hash collision"+c.offset+getChunk(hash).offset);
         chunks.put(hash, c);

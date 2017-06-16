@@ -3,10 +3,8 @@ package com.badlogic.gdx.tests.g3d.voxel;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 /**
  * This is a Java greedy meshing implementation based on the javascript implementation
@@ -995,6 +993,7 @@ public class GreedyMesher implements Mesher {
     final int[] dv = new int[]{0,0,0};
     Vector3 cornerA = new Vector3(), cornerB = new Vector3(), cornerC = new Vector3(), cornerD = new Vector3();
     void greedy(int progress) {
+    	Gdx.app.log(TAG,  "GREEDY MESH PROCESS");
 
         /*
          * These are just working variables for the algorithm � almost all taken
@@ -1231,7 +1230,7 @@ public class GreedyMesher implements Mesher {
 
     @Override
     public boolean process() {
-
+    	Gdx.app.log(TAG, "process");
         switch (progressCoarse){
             case 0:
                 if (!readBlocks(chunk, voxelWorld, progress)){
@@ -1259,7 +1258,7 @@ public class GreedyMesher implements Mesher {
     @Override
     public int end() {
         //Gdx.app.log(TAG, "end"+chunk.offset);
-
+    	//if (true) throw new GdxRuntimeException("hjsdjl");
         return meshBatch.flushCache(chunk, this);
     }
 

@@ -72,7 +72,7 @@ public class VoxelSerializingSystem extends EntitySystem {
         synchronized (lock) {
             for (int i = 0; i < finishedRead.size; i++) {
                 VoxelChunk c = finishedRead.get(i);
-                //Gdx.app.log(TAG, "finished reading"+c.offset);
+                //Gdx.app.log(TAG, "on list finished reading"+c.offset);
                 c.setValid(true);
                 vw.addChunk(c);
                 inProgress.remove(hash(c));
@@ -112,7 +112,7 @@ public class VoxelSerializingSystem extends EntitySystem {
         
         for (int i = 0; i < readThreads.size; i++){
         	ReadThread thread = readThreads.get(i);
-        	if (!hasThreads)
+        	if (!hasThreads && !thread.isPaused())
         		thread.runn.run();
         	if (thread.isPaused()){
         		thread.time += dt;
@@ -286,7 +286,7 @@ public class VoxelSerializingSystem extends EntitySystem {
             ReadThread r;
             if (!hasThreads){
                 r = new ReadThread(rRun){
-                    boolean p;
+                    boolean p = true;
                     @Override
                     public void onPause() {
                         p = true;
@@ -368,7 +368,7 @@ public class VoxelSerializingSystem extends EntitySystem {
 
     public void finishedRead(VoxelChunk chunk) {
         synchronized (lock){
-            //Gdx.app.log(TAG, "finished read");
+           // Gdx.app.log(TAG, "finished read");
 
             finishedRead.add(chunk);
         }

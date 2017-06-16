@@ -19,6 +19,7 @@ package com.niz.component.systems;
 import com.artemis.Aspect;
 import com.artemis.Entity;
 import com.artemis.systems.EntitySystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -56,6 +57,7 @@ public class VoxelRenderingSystem extends EntitySystem {
 	protected void processEntities(Array<Entity> entities) {
         //if (shaderProgram.isCompiled())
        // Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		//Gdx.app.log(TAG, "REND");
         Shader shader = voxelWorld.getShader();
         modelBatch.begin(camera);
         modelBatch.render(voxelWorld);

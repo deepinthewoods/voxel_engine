@@ -39,7 +39,7 @@ public class VoxelSystem extends EntitySystem {
         //mesher = new GreedyMesher(batch);
 
         voxelWorld = new VoxelWorld(1000
-                , 8, 8, 4
+                , 16, 16, 1
 				);
        // Gdx.app.log(TAG, "material"+voxelWorld.m);
 

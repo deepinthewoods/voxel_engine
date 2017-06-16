@@ -54,7 +54,7 @@ public class ChunkReadOrGenerate
                 throw new GdxRuntimeException("error" +e.getCause());
                 //e.printStackTrace();
             }
-            Gdx.app.log(TAG, "waiting");
+            //Gdx.app.log(TAG, "waiting");
         }
         else if (progressCoarse == 0){
             if (!reader.beginRead(chunk)){
@@ -137,6 +137,7 @@ public class ChunkReadOrGenerate
             chunk.setDirty(true);
             progressCoarse++;
         } else {//finished
+        	//Gdx.app.log(TAG, "finished read" + (thread == null) + chunk.mesh);
             thread.ser.finishedRead(chunk);
             if (thread != null)
                 thread.onPause();

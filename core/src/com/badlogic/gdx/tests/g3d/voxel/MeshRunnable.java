@@ -45,14 +45,9 @@ public class MeshRunnable implements Runnable {
                 done = true;
                 //Gdx.app.log(TAG, "DONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONEDONE" +thread.index);
                 thread.onPause();
-
-
-
                 //else throw new GdxRuntimeException("hjksfhadkl");
             }
     }
-
-
 
     public void restart() {
         mesher.begin(chunk, world);
